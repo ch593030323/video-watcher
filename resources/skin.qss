@@ -1,0 +1,123 @@
+#lds{
+qproperty-highlightColor:#ff506b;
+qproperty-textColor:#f6f5fb;
+qproperty-subwindowColor:#282828;
+}
+
+#Window{
+background:#3a3a3a;
+}
+QMenu{
+        border-style:outset; /*边框风格*/
+        border-width:1px;/*边框宽度*/
+        border-color:#282828; /*边框颜色*/
+        color:#f6f5fb;
+        background:#282828;
+}
+
+QMenu::item {
+    background-color: transparent;
+}
+
+QMenu::item:selected {
+    background: #ff506b;
+    color:#f6f5fb;
+}
+
+QLabel{
+       color:#f6f5fb;
+}
+QPushButton{
+        border-style:outset; /*边框风格*/
+        border-width:2px;/*边框宽度*/
+        border-color:#282828; /*边框颜色*/
+        border-radius:10px; /*边框倒角*/
+        background:#464646;
+        color:#f6f5fb;     
+        min-width: 80px; 
+        min-height: 30px;
+}
+QPushButton:pressed{
+       background: #ff506b;
+       color:#f6f5fb;
+       border-radius:10px; 
+       border-width:0px;
+}
+
+
+#buttonIcon{
+       background:transparent;
+       border-width:0px;
+       min-width: 40px; 
+       min-height: 40px;
+}
+#buttonIcon:pressed{
+       background: #ff506b;
+       color:#f6f5fb;
+       border-radius:10px; 
+       border-width:0px;
+}
+
+/*======================================视频播放顶部菜单栏begin====================================*/
+#controlPanel{
+       background:rgba(32, 35, 37, 100);
+}
+/*======================================视频播放顶部菜单栏end====================================*/
+
+/*======================================树状图 样式begin====================================*/
+ QTreeView,
+ QListView{
+        border-style:outset; /*边框风格*/
+        border-width:2px;/*边框宽度*/
+        border-color:#282828; /*边框颜色*/
+        border-radius:10px; /*边框倒角*/
+        background:#464646;
+        color:#f6f5fb;
+ }
+ QTreeView {
+        show-decoration-selected: 1;
+ }
+
+ QTreeView::item {
+        border-top-color: transparent;
+        border-bottom-color: transparent;
+ }
+
+ QTreeView::item:selected,
+ QTreeView::branch:selected,
+ QListView::item:!selecte{
+       background: #ff506b;
+       color:#f6f5fb;
+ }
+
+ QTreeView::item:!selected ,
+ QTreeView::branch:!selected,
+ QListView::item:!selected{
+        background: transparent;
+ }
+
+ QTreeView::branch:has-siblings:!adjoins-item {
+         border-image: url(:/skin_image/dark/vline.png) 0;
+ }
+
+ QTreeView::branch:has-siblings:adjoins-item {
+         border-image: url(:/skin_image/dark/branch-more.png) 0;
+ }
+
+ QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+         border-image: url(:/skin_image/dark/branch-end.png) 0;
+ }
+
+ QTreeView::branch:has-children:!has-siblings:closed,
+ QTreeView::branch:closed:has-children:has-siblings {
+         border-image: none;
+         image: url(:/skin_image/dark/branch-closed.png);
+ }
+
+ QTreeView::branch:open:has-children:!has-siblings,
+ QTreeView::branch:open:has-children:has-siblings  {
+         border-image: none;
+         image: url(:/skin_image/dark/branch-open.png);
+ }
+
+/*======================================树状图 样式end====================================*/

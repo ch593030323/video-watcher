@@ -1,0 +1,54 @@
+#ifndef PLAYFORMNEWDIALOG_H
+#define PLAYFORMNEWDIALOG_H
+
+#include <QDialog>
+#include <QMap>
+#include "lds.h"
+
+class VideoWidget;
+class QStandardItemModel;
+namespace Ui {
+class playformnewdialog;
+}
+
+class playformnewdialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit playformnewdialog(QWidget *parent = 0);
+    ~playformnewdialog();
+
+    void resizeEvent(QResizeEvent *event);
+
+    void updateLayout(bool isRemovePlayer = false);
+
+    void setTreeModel(QStandardItemModel *model);
+
+    QList<VideoWidget *> selectedWidgetList();
+
+protected:
+    void contextMenuEvent(QContextMenuEvent * event);
+
+private slots:
+    void toVideoLayout1x1();
+    void toVideoLayout2x2();
+    void toVideoLayout3x3();
+    void toVideoLayout4x4();
+    void toVideoLayout5x5();
+
+    void toaccept();
+    void toexit();
+    void tomerge();
+    void toclear();
+    void torestore();
+
+    void toselected();
+    void tounselectedall();
+private:
+    Ui::playformnewdialog               *ui;
+    QMap<LayoutPos, VideoWidget *>      m_videoMap;
+    LayoutInfo                          m_layoutInfo;
+};
+
+#endif // PLAYFORMNEWDIALOG_H

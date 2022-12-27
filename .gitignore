@@ -1,0 +1,4 @@
+*.pro.user*
+camera-v.exe
+build/camera-v
+*.autosave*

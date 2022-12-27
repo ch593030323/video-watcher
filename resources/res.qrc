@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Awesome.otf</file>
+        <file>skin.qss</file>
+        <file>skin_image/dark/branch-closed.png</file>
+        <file>skin_image/dark/branch-end.png</file>
+        <file>skin_image/dark/branch-more.png</file>
+        <file>skin_image/dark/branch-open.png</file>
+        <file>skin_image/dark/vline.png</file>
+    </qresource>
+</RCC>
