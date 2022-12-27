@@ -121,3 +121,38 @@ QPushButton:pressed{
  }
 
 /*======================================树状图 样式end====================================*/
+
+/*======================================搜索的三个控件begin====================================*/
+QLineEdit[outer_stylesheet="search"] {
+      border:1px solid #282828; /*边框风格*/
+      background:#282828;
+      color:#f6f5fb;
+}
+
+QLabel[outer_stylesheet="search"]{
+   background:#282828;
+   image: url(:/skin_image/dark/find_15x15.png);
+}
+
+QComboBox[outer_stylesheet="search"] {
+      border:1px solid #282828; /*边框风格*/
+      background:#464646;
+      color:#f6f5fb;
+}
+
+QComboBox[outer_stylesheet="search"]:on { /* shift the text when the popup opens */
+    padding-top: 3px;
+    padding-left: 4px;
+}
+
+QComboBox[outer_stylesheet="search"]::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 30px;
+        border-width:0px;
+}
+
+QComboBox[outer_stylesheet="search"]::down-arrow {
+    image: url(:/skin_image/dark/down_arrow_15x15.png);
+}
+/*======================================搜索的三个控件end====================================*/

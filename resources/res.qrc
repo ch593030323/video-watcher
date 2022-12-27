@@ -7,5 +7,7 @@
         <file>skin_image/dark/branch-more.png</file>
         <file>skin_image/dark/branch-open.png</file>
         <file>skin_image/dark/vline.png</file>
+        <file>skin_image/dark/down_arrow_15x15.png</file>
+        <file>skin_image/dark/find_15x15.png</file>
     </qresource>
 </RCC>

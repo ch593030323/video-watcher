@@ -163,11 +163,13 @@ void MainFrame::updateLayout()
     int treeWidth = lds::videoAreaRight - lds::margin;
     //treeView
     ui->comboBox_search_station->setGeometry(
-                treeLeft, lds::margin + 0 * (30 + 10), treeWidth,  30);
-    ui->comboBox_search_camera->setGeometry(
-                treeLeft, lds::margin + 1 * (30 + 10), treeWidth,  30);
+                treeLeft, lds::margin, treeWidth * 0.3,  30);
+    ui->label_find->setGeometry(
+                ui->comboBox_search_station->geometry().right(), lds::margin, 30,  30);
+    ui->lineEdit_camera->setGeometry(
+                ui->label_find->geometry().right(), lds::margin, treeWidth * 0.7 - 30 + lds::margin / 2,  30);
     ui->treeView->setGeometry(
-                treeLeft, lds::margin + 2 * (30 + 10), treeWidth,  treeHeight);
+                treeLeft, lds::margin + 1 * (30 + 10), treeWidth,  treeHeight);
     //widget_cameraIns
     ui->widget_cameraIns->setGeometry(treeLeft, lds::marginX2 + treeHeight, treeWidth, treeWidth);
 
