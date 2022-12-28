@@ -83,6 +83,28 @@ MainFrame::MainFrame(QWidget *parent)
         ui->pushButton_play_alternate->setMenu(menu_alternate);
     }
 
+    //play_form
+    {
+        QDirIterator dir("play_form");
+        while(dir.hasNext()) {
+            dir.next();
+            if(dir.fileInfo().isFile()) {
+                ui->comboBox_form->addItem(dir.fileName(), dir.filePath());
+            }
+        }
+    }
+
+    //play_alter
+    {
+        QDirIterator dir("play_alter");
+        while(dir.hasNext()) {
+            dir.next();
+            if(dir.fileInfo().isFile()) {
+                ui->comboBox_alternate->addItem(dir.fileName(), dir.filePath());
+            }
+        }
+    }
+
     ui->pushButton_1x1->setIcon(lds::getLayoutPixmap(1));
     ui->pushButton_1x1->setText("");
     ui->pushButton_2x2->setIcon(lds::getLayoutPixmap(2));
@@ -115,27 +137,8 @@ MainFrame::MainFrame(QWidget *parent)
     connect(ui->pushButton_alternate_ok, SIGNAL(clicked()), this, SLOT(toPlayAlternateOK()));
     connect(ui->pushButton_play_alternate->menu(), SIGNAL(aboutToShow()), this, SLOT(toHoldVideoFocus()));
     connect(ui->pushButton_play_alternate->menu(), SIGNAL(aboutToHide()), this, SLOT(toReleaseVideoFocus()));
-    //play_form
-    {
-        QDirIterator dir("play_form");
-        while(dir.hasNext()) {
-            dir.next();
-            if(dir.fileInfo().isFile()) {
-                ui->comboBox_form->addItem(dir.fileName(), dir.filePath());
-            }
-        }
-    }
-
-    //play_alter
-    {
-        QDirIterator dir("play_alter");
-        while(dir.hasNext()) {
-            dir.next();
-            if(dir.fileInfo().isFile()) {
-                ui->comboBox_alternate->addItem(dir.fileName(), dir.filePath());
-            }
-        }
-    }
+    connect(ui->comboBox_search_station, SIGNAL(currentIndexChanged(int)), this, SLOT(toSearchStation(int)));
+    connect(ui->lineEdit_camera, SIGNAL(textChanged(QString)), this, SLOT(toSearchCamera(QString)));
 
 //#ifdef Q_OS_WIN
     updateCameraTree();
@@ -163,11 +166,11 @@ void MainFrame::updateLayout()
     int treeWidth = lds::videoAreaRight - lds::margin;
     //treeView
     ui->comboBox_search_station->setGeometry(
-                treeLeft, lds::margin, treeWidth * 0.3,  30);
+                treeLeft, lds::margin, treeWidth * 0.4,  30);
     ui->label_find->setGeometry(
                 ui->comboBox_search_station->geometry().right(), lds::margin, 30,  30);
     ui->lineEdit_camera->setGeometry(
-                ui->label_find->geometry().right(), lds::margin, treeWidth * 0.7 - 30 + lds::margin / 2,  30);
+                ui->label_find->geometry().right(), lds::margin, treeWidth * 0.6 - 30 + lds::margin / 2,  30);
     ui->treeView->setGeometry(
                 treeLeft, lds::margin + 1 * (30 + 10), treeWidth,  treeHeight);
     //widget_cameraIns
@@ -193,7 +196,7 @@ void MainFrame::updateCameraTree()
     QStandardItem *itemISCS = new QStandardItem(QString::fromUtf8("摄像头"));
     itemRoot->appendRow(itemISCS);
     QSqlQuery query_location;
-    query_location.exec("select obid, name from location");
+    query_location.exec("select obid, name from vw_location");
     while(query_location.next()) {
         QStandardItem *item_location = new QStandardItem;
         QString location_obid = query_location.record().value("obid").toString();
@@ -203,11 +206,11 @@ void MainFrame::updateCameraTree()
         item_location->setData(location_obid,    VideoObidRole);
         itemISCS->appendRow(item_location);
 
-        updateCameraNode(item_location);
+        updateCameraItemList(item_location);
     }
 }
 
-void MainFrame::updateCameraNode(const QString &location_obid)
+void MainFrame::updateCameraItemList(const QString &location_obid)
 {
     QStandardItem *itemRoot =  m_treeModel->invisibleRootItem();
     QStandardItem *item =  itemRoot->child(0);
@@ -220,16 +223,16 @@ void MainFrame::updateCameraNode(const QString &location_obid)
     }
     if(!item_location)
         return;
-    updateCameraNode(item_location);
+    updateCameraItemList(item_location);
 }
 
-void MainFrame::updateCameraNode(QStandardItem *item_location)
+void MainFrame::updateCameraItemList(QStandardItem *item_location)
 {
     item_location->removeRows(0, item_location->rowCount());
     QString location_obid = item_location->data(VideoObidRole).toString();
     QSqlQuery query_device;
 
-    query_device.exec(QString("select * from device where location_obid = '%1' ").arg(location_obid));
+    query_device.exec(QString("select * from vw_device where location_obid = '%1' ").arg(location_obid));
     while(query_device.next()) {
         QString state = query_device.record().value("state").toString();
         QString name = QString::fromUtf8(query_device.record().value("name").toByteArray());
@@ -406,4 +409,14 @@ void MainFrame::toReleaseVideoFocus()
     VideoWidget::lastFocusWidget->setCheckable(false);
     VideoWidget::lastFocusWidget->setChecked(false);
     VideoWidget::lastFocusWidget = NULL;
+}
+
+void MainFrame::toSearchStation(int index)
+{
+
+}
+
+void MainFrame::toSearchCamera(const QString &string)
+{
+
 }

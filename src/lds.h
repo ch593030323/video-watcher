@@ -136,6 +136,8 @@ public:
     QColor getsubwindowColor() const;
     static QColor subwindowColor;
 
+    static QVariant selectValue(const QString &sql, const QString &arg0);
+
     static const int margin;
     static const int marginX2;
     static const int border_width;

@@ -50,7 +50,16 @@ public:
 
 private slots:
     void sendValueToOms(void);
+
     void slotExpandNode(const QModelIndex &index);
+
+    virtual void toSearchStation(int index);
+
+    virtual void toSearchCamera(const QString &string);
+
+    void updateCameraSqlAndItemListOnce(const QString &location_obid);
+private:
+    bool updateCameraSqlList(const QString &location_obid);
 
 private:
     Database    *m_pDatabase;

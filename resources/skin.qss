@@ -33,14 +33,14 @@ QPushButton{
         border-color:#282828; /*边框颜色*/
         border-radius:10px; /*边框倒角*/
         background:#464646;
-        color:#f6f5fb;     
-        min-width: 80px; 
+        color:#f6f5fb;
+        min-width: 80px;
         min-height: 30px;
 }
 QPushButton:pressed{
        background: #ff506b;
        color:#f6f5fb;
-       border-radius:10px; 
+       border-radius:10px;
        border-width:0px;
 }
 
@@ -48,13 +48,13 @@ QPushButton:pressed{
 #buttonIcon{
        background:transparent;
        border-width:0px;
-       min-width: 40px; 
+       min-width: 40px;
        min-height: 40px;
 }
 #buttonIcon:pressed{
        background: #ff506b;
        color:#f6f5fb;
-       border-radius:10px; 
+       border-radius:10px;
        border-width:0px;
 }
 
@@ -134,10 +134,18 @@ QLabel[outer_stylesheet="search"]{
    image: url(:/skin_image/dark/find_15x15.png);
 }
 
+
 QComboBox[outer_stylesheet="search"] {
       border:1px solid #282828; /*边框风格*/
       background:#464646;
       color:#f6f5fb;
+      selection-background-color: #ff506b;/*hover color*/
+}
+
+QComboBox[outer_stylesheet="search"] QAbstractItemView {
+     border:1px solid #282828; /*边框风格*/
+     background: #282828;
+     border-radius:0px;
 }
 
 QComboBox[outer_stylesheet="search"]:on { /* shift the text when the popup opens */
@@ -149,10 +157,11 @@ QComboBox[outer_stylesheet="search"]::drop-down {
     subcontrol-origin: padding;
     subcontrol-position: top right;
     width: 30px;
-        border-width:0px;
+    border-width:0px;
 }
 
 QComboBox[outer_stylesheet="search"]::down-arrow {
     image: url(:/skin_image/dark/down_arrow_15x15.png);
 }
 /*======================================搜索的三个控件end====================================*/
+

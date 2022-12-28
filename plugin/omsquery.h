@@ -56,7 +56,7 @@ private:
      * @brief stringToOpartor
      * 将操作符转为枚举，如: (op:=) >>> (Comparison:EQ)
      */
-    Comparison stringToOpartor(QString op);
+    Comparison stringToOperator(QString op);
 
 public:
     /**

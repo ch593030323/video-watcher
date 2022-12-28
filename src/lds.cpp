@@ -48,6 +48,14 @@ QColor lds::getsubwindowColor() const
     return subwindowColor;
 }
 
+QVariant lds::selectValue(const QString &sql, const QString &arg0)
+{
+    QSqlQuery query;
+    query.exec(sql.arg(arg0));
+    query.next();
+    return query.record().value(0);
+}
+
 lds::lds(QWidget *parent) : QWidget(parent)
 {
     setObjectName("lds");
@@ -138,17 +146,11 @@ void lds::init()
     //    qApp->setFont(font);
 
     /*
-表：location
-[obid:001---key]	[name:A1]	[type:0：station、1：train]
+表：vw_location
+[obid:001---key]	[name:A1]	[type:0：station、1：train] [state 0:no device 1 has device]
 
-表：device
+表：vw_device
 [obid:001001---key	name:"摄像头1"]	[location_obid:001]	[type:1：直机、2：球机]	[state:1：在线、2：离线、3：故障]	[url:视频流地址]
-
-表：video_form_master
-[obid:001--key]	[name:组播1]	[width:3]	[height:3]
-
-表：video_form_detail
-[obid:001--key]	[video_obid:001]	[x:0]	[y:0]	[row_spans:1] [column_spans:1]	[device_obid:001002]
 */
     //database
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
@@ -157,13 +159,14 @@ void lds::init()
         qDebug() << "db open error:" << db.lastError().text();
     }
     QSqlQuery query;
-    qDebug() << __LINE__ << query.exec("create table location ("
+    qDebug() << __LINE__ << query.exec("create table vw_location ("
                                        "obid varchar(20) primary key, "
                                        "name varchar(20), "
-                                       "type int)"
+                                       "type int,"
+                                       "state int)"
                                        );
 
-    qDebug() << __LINE__ << query.exec("create table device ("
+    qDebug() << __LINE__ << query.exec("create table vw_device ("
                                        "obid varchar(20) primary key, "
                                        "name varchar(20), "
                                        "location_obid varchar(20), "
@@ -173,47 +176,22 @@ void lds::init()
                                        ")"
                                        );
 
-    qDebug() << __LINE__ << query.exec("create table video_form_master ("
-                                       "obid varchar(20) primary key, "
-                                       "name varchar(20),"
-                                       "column_count int,"
-                                       "row_count int)"
-                                       );
+    qDebug() << __LINE__ << query.exec("insert into vw_location values('001', 'station', 0, 1)");
+    qDebug() << __LINE__ << query.exec("insert into vw_location values('002', 'train', 1, 1)");
 
-    qDebug() << __LINE__ << query.exec("create table video_form_detail ("
-                                       "obid varchar(20) primary key, "
-                                       "video_obid varchar(20), "
-                                       "x int,"
-                                       "y int,"
-                                       "row_spans int,"
-                                       "column_spans int,"
-                                       "device_obid varchar(20)"
-                                       ")"
-                                       );
-
-    qDebug() << __LINE__ << query.exec("insert into location values('001', 'station', 0)");
-    qDebug() << __LINE__ << query.exec("insert into location values('002', 'train', 1)");
-
-    qDebug() << __LINE__ << query.exec("insert into device values('001000', '摄像头0', '001', 1, 1, 'rtsp://admin:*Dt12a34b@192.7.3.159')");
+    qDebug() << __LINE__ << query.exec("insert into vw_device values('001000', '摄像头0', '001', 1, 1, 'rtsp://admin:*Dt12a34b@192.7.3.159')");
     //'rtsp://admin:*Dt12a34b@192.7.3.159')"););
-    qDebug() << __LINE__ << query.exec("insert into device values('001001', '摄像头1', '001', 1, 1, 'rtmp://10.137.32.250:1935/rtp/34020000001320000211_34020000001310000002')");
+    qDebug() << __LINE__ << query.exec("insert into vw_device values('001001', '摄像头1', '001', 1, 1, 'rtmp://10.137.32.250:1935/rtp/34020000001320000211_34020000001310000002')");
     //'rtsp://admin:*Dt12a34b@192.7.3.159')"););
     //http://vfx.mtime.cn/Video/2021/01/07/mp4/210107172407759182_1080.mp4')");
-    qDebug() << __LINE__ << query.exec("insert into device values('001002', '摄像头2', '001', 1, 1, 'rtsp://10.137.32.250:554/rtp/34020000001320000225_34020000001310000003')");
+    qDebug() << __LINE__ << query.exec("insert into vw_device values('001002', '摄像头2', '001', 1, 1, 'rtsp://10.137.32.250:554/rtp/34020000001320000225_34020000001310000003')");
     //http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4')");
-    qDebug() << __LINE__ << query.exec("insert into device values('001003', '摄像头3', '001', 1, 1, 'rtsp://10.137.32.250:554/rtp/34020000001320000130_34020000001310000001')");
+    qDebug() << __LINE__ << query.exec("insert into vw_device values('001003', '摄像头3', '001', 1, 1, 'rtsp://10.137.32.250:554/rtp/34020000001320000130_34020000001310000001')");
     //http://vfx.mtime.cn/Video/2019/03/17/mp4/190317150237409904.mp4')");
-    qDebug() << __LINE__ << query.exec("insert into device values('002001', '摄像头4', '002', 1, 1, 'http://vfx.mtime.cn/Video/2019/03/14/mp4/190314223540373995.mp4')");
-    qDebug() << __LINE__ << query.exec("insert into device values('002002', '摄像头5', '002', 1, 1, 'http://vfx.mtime.cn/Video/2021/01/07/mp4/210107172407759182_1080.mp4')");
-    qDebug() << __LINE__ << query.exec("insert into device values('002003', '摄像头6', '002', 1, 1, 'http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4')");
-    qDebug() << __LINE__ << query.exec("insert into device values('002004', '摄像头7', '002', 1, 1, 'http://vfx.mtime.cn/Video/2019/03/17/mp4/190317150237409904.mp4')");
-
-    qDebug() << __LINE__ << query.exec("insert into video_form_master values('001', '组播001', 1, 1 )");
-    qDebug() << __LINE__ << query.exec("insert into video_form_master values('002', '组播002', 2, 2 )");
-    qDebug() << __LINE__ << query.exec("insert into video_form_master values('003', '组播003', 3, 3 )");
-    qDebug() << __LINE__ << query.exec("insert into video_form_master values('004', '组播004', 4, 4 )");
-    qDebug() << __LINE__ << query.exec("insert into video_form_master values('005', '组播005', 3, 3 )");
-    qDebug() << __LINE__ << query.exec("insert into video_form_detail values('001', '005', 0, 0, 2, 2, '001001')");
+    qDebug() << __LINE__ << query.exec("insert into vw_device values('002001', '摄像头4', '002', 1, 1, 'http://vfx.mtime.cn/Video/2019/03/14/mp4/190314223540373995.mp4')");
+    qDebug() << __LINE__ << query.exec("insert into vw_device values('002002', '摄像头5', '002', 1, 1, 'http://vfx.mtime.cn/Video/2021/01/07/mp4/210107172407759182_1080.mp4')");
+    qDebug() << __LINE__ << query.exec("insert into vw_device values('002003', '摄像头6', '002', 1, 1, 'http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4')");
+    qDebug() << __LINE__ << query.exec("insert into vw_device values('002004', '摄像头7', '002', 1, 1, 'http://vfx.mtime.cn/Video/2019/03/17/mp4/190317150237409904.mp4')");
 
 
     qRegisterMetaType<FFmpegData>("FFmpegData");
@@ -227,7 +205,7 @@ QString LayoutCell::url() const
 QString LayoutCell::url(QString device_obid)
 {
     QSqlQuery query_device;
-    query_device.exec(QString(" select url from device where obid = '%1'").arg(device_obid));
+    query_device.exec(QString(" select url from wx_device where obid = '%1'").arg(device_obid));
     query_device.next();
     return query_device.record().value("url").toString();
 }

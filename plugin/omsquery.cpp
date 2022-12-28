@@ -84,7 +84,7 @@ bool OMSQuery::selectObIdList(const SqlContent &content)
                 return false;
             }
             AType and_key_atype = m_database->matchAType(value.field.name.toLocal8Bit().data());
-            condVect.append(and_key_atype, stringToOpartor(value.op), value.field.type, value.value.toString());
+            condVect.append(and_key_atype, stringToOperator(value.op), value.field.type, value.value.toString());
         }
         int count = m_database->find(m_database->matchOType(content.table.toLocal8Bit().data()), condVect.constData(), condVect.size());
         obidVect.resize(count);
@@ -208,7 +208,7 @@ bool OMSQuery::selectCount(const SqlContent &content)
                 return false;
             }
             AType and_key_atype = m_database->matchAType(value.field.name.toLocal8Bit().data());
-            condVect.append(and_key_atype, stringToOpartor(value.op), value.field.type, value.value.toString());
+            condVect.append(and_key_atype, stringToOperator(value.op), value.field.type, value.value.toString());
         }
         count = m_database->find(m_database->matchOType(content.table.toLocal8Bit().data()), condVect.constData(), condVect.size());
 
@@ -252,7 +252,7 @@ bool OMSQuery::selectObidAndAttributeList(const SqlContent &content)
                 return false;
             }
             AType and_key_atype = m_database->matchAType(value.field.name.toLocal8Bit().data());
-            condVect.append(and_key_atype, stringToOpartor(value.op), value.field.type, value.value.toString());
+            condVect.append(and_key_atype, stringToOperator(value.op), value.field.type, value.value.toString());
         }
 
         int count = m_database->find(m_database->matchOType(content.table.toLocal8Bit().data()), condVect.constData(), condVect.size());
@@ -359,7 +359,7 @@ bool OMSQuery::dataTypeIsValid(const QString &type)
     return !createDataPtr(type).isNull();
 }
 
-Comparison OMSQuery::stringToOpartor(QString op)
+Comparison OMSQuery::stringToOperator(QString op)
 {
     //=|!=|<|<=|>|>=
     if("=" == op) {

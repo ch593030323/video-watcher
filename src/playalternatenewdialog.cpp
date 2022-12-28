@@ -146,7 +146,7 @@ void PlayAlternateNewDialog::toadjust()
         }
         if(line.type == CameraType) {
             QSqlQuery query;
-            query.exec(QString("select name from device where obid = '%1' ").arg(line.value));
+            query.exec(QString("select name from vw_device where obid = '%1' ").arg(line.value));
             query.next();
             QString name = query.record().value("name").toString();
             item->setText(name);

@@ -27,8 +27,8 @@ public:
 
     void updateLayout();
     void updateCameraTree();
-    void updateCameraNode(const QString &location_obid);
-    void updateCameraNode(QStandardItem *item_location);
+    void updateCameraItemList(const QString &location_obid);
+    void updateCameraItemList(QStandardItem *item_location);
     void updateAndExpandNode(const QString &loaction_obid);
 private slots:
 
@@ -67,11 +67,14 @@ private slots:
     void toHoldVideoFocus();
     void toReleaseVideoFocus();
 
+    virtual void toSearchStation(int index);
+    virtual void toSearchCamera(const QString &string);
+
 protected:
     void resizeEvent(QResizeEvent *event);
-public:
+protected:
     Ui::MainWidget *ui;
-private:
+protected:
     TreeVideoModel *m_treeModel;
     QMap<LayoutPos, VideoWidget *> m_videoMap;
     LayoutInfo m_layoutInfo;
