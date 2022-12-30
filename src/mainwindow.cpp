@@ -5,6 +5,7 @@
 #include "playformnewdialog.h"
 #include "playalternatenewdialog.h"
 #include "lds.h"
+#include "treevideoview.h"
 
 #include <QTreeView>
 #include <QStandardItemModel>
@@ -27,15 +28,6 @@ http://vfx.mtime.cn/Video/2021/01/07/mp4/210107172407759182_1080.mp4
 http://vfx.mtime.cn/Video/2019/04/02/mp4/190402084548910831.mp4
 
 */
-static QString cameraStateString(QString state) {
-    if("0" == state)
-        return QString::fromUtf8("在线");
-    if("1" == state)
-        return QString::fromUtf8("故障");
-    if("2" == state)
-        return QString::fromUtf8("离线");
-    return "unknow code:" + state;
-}
 
 MainFrame::MainFrame(QWidget *parent)
     : QWidget(parent)
@@ -52,14 +44,6 @@ MainFrame::MainFrame(QWidget *parent)
     ui->frame_play_form->setObjectName("Window");
     ui->widget_cameraIns->layout()->setMargin(0);
     ui->widget_cameraIns->hide();
-
-    m_treeModel = new TreeVideoModel(this);
-    ui->treeView->setModel(m_treeModel);
-    ui->treeView->setHeaderHidden(true);
-    ui->treeView->header()->setStretchLastSection(true);
-    ui->treeView->expandAll();
-    ui->treeView->setDragEnabled(true);
-    ui->treeView->setEditTriggers(QTreeView::NoEditTriggers);
 
     //VideoWidget
     m_layoutInfo = LayoutInfo(3, 3);
@@ -137,13 +121,6 @@ MainFrame::MainFrame(QWidget *parent)
     connect(ui->pushButton_alternate_ok, SIGNAL(clicked()), this, SLOT(toPlayAlternateOK()));
     connect(ui->pushButton_play_alternate->menu(), SIGNAL(aboutToShow()), this, SLOT(toHoldVideoFocus()));
     connect(ui->pushButton_play_alternate->menu(), SIGNAL(aboutToHide()), this, SLOT(toReleaseVideoFocus()));
-    connect(ui->comboBox_search_station, SIGNAL(currentIndexChanged(int)), this, SLOT(toSearchStation(int)));
-    connect(ui->lineEdit_camera, SIGNAL(textChanged(QString)), this, SLOT(toSearchCamera(QString)));
-
-//#ifdef Q_OS_WIN
-    updateCameraTree();
-    ui->treeView->expandAll();
-//#endif
 }
 
 MainFrame::~MainFrame()
@@ -165,14 +142,7 @@ void MainFrame::updateLayout()
     int treeLeft = this->width() - lds::videoAreaRight;
     int treeWidth = lds::videoAreaRight - lds::margin;
     //treeView
-    ui->comboBox_search_station->setGeometry(
-                treeLeft, lds::margin, treeWidth * 0.4,  30);
-    ui->label_find->setGeometry(
-                ui->comboBox_search_station->geometry().right(), lds::margin, 30,  30);
-    ui->lineEdit_camera->setGeometry(
-                ui->label_find->geometry().right(), lds::margin, treeWidth * 0.6 - 30 + lds::margin / 2,  30);
-    ui->treeView->setGeometry(
-                treeLeft, lds::margin + 1 * (30 + 10), treeWidth,  treeHeight);
+    ui->treeView->setGeometry(treeLeft, lds::margin, treeWidth,  treeHeight);
     //widget_cameraIns
     ui->widget_cameraIns->setGeometry(treeLeft, lds::marginX2 + treeHeight, treeWidth, treeWidth);
 
@@ -188,91 +158,16 @@ void MainFrame::updateLayout()
     VideoWidget::parseVideoArea(m_layoutInfo, this, QRect(lds::margin / 2, lds::margin / 2 + lds::border_width, videoAreaWidth, videoAreaHeight), m_videoMap);
 }
 
-void MainFrame::updateCameraTree()
+void MainFrame::setDataSource(DataSource *datasource)
 {
-    m_treeModel->clear();
-
-    QStandardItem *itemRoot =  m_treeModel->invisibleRootItem();
-    QStandardItem *itemISCS = new QStandardItem(QString::fromUtf8("摄像头"));
-    itemRoot->appendRow(itemISCS);
-    QSqlQuery query_location;
-    query_location.exec("select obid, name from vw_location");
-    while(query_location.next()) {
-        QStandardItem *item_location = new QStandardItem;
-        QString location_obid = query_location.record().value("obid").toString();
-        QString location_name = query_location.record().value("name").toString();
-        item_location->setText(location_name);
-        item_location->setData(VideoNodeStation, VideoNodeType);
-        item_location->setData(location_obid,    VideoObidRole);
-        itemISCS->appendRow(item_location);
-
-        updateCameraItemList(item_location);
-    }
-}
-
-void MainFrame::updateCameraItemList(const QString &location_obid)
-{
-    QStandardItem *itemRoot =  m_treeModel->invisibleRootItem();
-    QStandardItem *item =  itemRoot->child(0);
-    QStandardItem *item_location = 0;
-    for(int k = 0; k < item->rowCount(); k ++) {
-        item_location = item->child(k);
-        if(item_location && item_location->data(VideoObidRole).toString() == location_obid) {
-            break;
-        }
-    }
-    if(!item_location)
-        return;
-    updateCameraItemList(item_location);
-}
-
-void MainFrame::updateCameraItemList(QStandardItem *item_location)
-{
-    item_location->removeRows(0, item_location->rowCount());
-    QString location_obid = item_location->data(VideoObidRole).toString();
-    QSqlQuery query_device;
-
-    query_device.exec(QString("select * from vw_device where location_obid = '%1' ").arg(location_obid));
-    while(query_device.next()) {
-        QString state = query_device.record().value("state").toString();
-        QString name = QString::fromUtf8(query_device.record().value("name").toByteArray());
-        QString type = query_device.record().value("type").toString();
-        QString obid = query_device.record().value("obid").toString();
-        QString url = query_device.record().value("url").toString();
-
-        QStandardItem *item_device = new QStandardItem;
-        item_device->setText(name);
-        item_device->setToolTip("[" + cameraStateString(state) + "]" + name);
-        item_device->setData(VideoNodeTrain,    VideoNodeType);
-        item_device->setData(name,              VideoNameRole);
-        item_device->setData(type,              VideoTypeRole);
-        item_device->setData(obid,              VideoObidRole);
-        item_device->setData(state,             VideoStateRole);
-        item_device->setData(url,               VideoUrlRole);
-        item_device->setData(lds::getFontPixmap(0xf05e, QColor("red"), QSize(12, 12)),   Qt::DecorationRole);
-        item_device->setData(lds::getFontPixmap(0x25cf, QColor("green"), QSize(12, 12)),   Qt::DecorationRole);
-//            item_device->setData(lds::getFontPixmap(0x25cf, QColor(245, 180, 0), QSize(12, 12)),   Qt::DecorationRole);
-
-        item_location->appendRow(item_device);
-
-        //
-        if(!lds::PlayThreadMap.contains(obid)) {
-            PlayThread *thread = new PlayThread(url, this);
-            lds::PlayThreadMap.insert(obid,thread);
-        }
-    }
-}
-
-void MainFrame::updateAndExpandNode(const QString &loaction_obid)
-{
-
+    ui->treeView->setDataSource(datasource);
+    ui->treeView->slotInitAll();
 }
 
 void MainFrame::toVideoLayout1x1()
 {
     m_layoutInfo = LayoutInfo(1, 1);
     updateLayout();
-
 }
 
 void MainFrame::toVideoLayout2x2()
@@ -357,8 +252,8 @@ void MainFrame::cameraMoveRestore()
 void MainFrame::toPlayFormNew()
 {
     playformnewdialog dialog(this);
+    dialog.setDataSource(ui->treeView->dataSource());
     dialog.resize(this->size());
-    dialog.setTreeModel(m_treeModel);
     dialog.exec();
 }
 
@@ -378,8 +273,8 @@ void MainFrame::toPlayFormOK()
 void MainFrame::toPlayAlternateNew()
 {
     PlayAlternateNewDialog dialog(this);
+    dialog.setDataSource(ui->treeView->dataSource());
     dialog.resize(this->size());
-    dialog.setTreeModel(m_treeModel);
     dialog.exec();
 }
 
@@ -409,14 +304,4 @@ void MainFrame::toReleaseVideoFocus()
     VideoWidget::lastFocusWidget->setCheckable(false);
     VideoWidget::lastFocusWidget->setChecked(false);
     VideoWidget::lastFocusWidget = NULL;
-}
-
-void MainFrame::toSearchStation(int index)
-{
-
-}
-
-void MainFrame::toSearchCamera(const QString &string)
-{
-
 }

@@ -2,8 +2,6 @@
 #include <oms/request.h>
 #include <oms/database.h>
 //#include <Helper/Attribute/dynamicManager.h>
-
-
 #include "omsquery.h"
 #include "ui_mainwindow.h"
 #include "src/treevideomodel.h"
@@ -11,18 +9,14 @@
 #include <QSqlQuery>
 #include <QSqlError>
 
-
-
-
 ////////////////////////////////////////////////////////////////////////////////
 
 VideoWatcherWidget::VideoWatcherWidget(QWidget *parent, Database *database, void *data, int environ)
     : MainFrame(parent)
-    //    , m_pDatabase(database)
     , m_environ(environ)
+    , m_pDatabase(database)
 {
     // UI chores
-
     setDatabase(database);
     char* para = (char* )data;
     setData(QString::fromUtf8(para));
@@ -42,7 +36,7 @@ VideoWatcherWidget::VideoWatcherWidget(QWidget *parent, Database *database, void
     m_permitId = 0;
     m_atypeId = 0;
     //    connect(m_button, SIGNAL(clicked (bool)), this, SLOT(sendValueToOms()));
-    connect(ui->treeView, SIGNAL(expanded(QModelIndex)), this, SLOT(slotExpandNode(QModelIndex)));
+    setDataSource(new DataSourceOMS(static_cast<OMSDatabase *>(database), CCTV, STATION, this));
 };
 
 
@@ -51,56 +45,6 @@ void VideoWatcherWidget::setDatabase(Database *database)
 {
     m_pDatabase = database;
     OMSDatabase *d = static_cast<OMSDatabase *>(m_pDatabase);
-
-    QSqlQuery q;
-    OMSQuery query_cctv(d);
-    OMSQuery query_camera(d);
-
-    q.exec("delete from vw_location");
-    q.exec("delete from vw_device");
-    //
-    ui->comboBox_search_station->clear();
-    ui->comboBox_search_station->addItem(QString::fromUtf8("所有"), "all");
-    query_cctv.exec(QString("select obid, StringData:Name from CCTVController where IntegerData:PointAddress = %1  ")
-                      .arg(CCTV));
-    while(query_cctv.next()) {
-        QString obid = query_cctv.value("obid").toString();
-        QString name = query_cctv.value("Name").toString();
-        query_camera.exec(QString("select count from Camera where LinkData:ParentLink = %1")
-                                 .arg(obid));
-        query_camera.next();
-        int count = query_camera.value(0).toInt();
-
-        ui->comboBox_search_station->addItem(name, obid);
-        q.exec(QString("insert into vw_location(obid, name, type, state) values('%1', '%2', 0, 0)")
-               .arg(obid)
-               .arg(name));
-
-
-        if(0 <  count) {
-            q.exec(QString("insert into vw_device(obid, name, location_obid, type, state, url) values('%1', '', '%2', 0, 0, '')")
-                                           .arg(obid + "001")
-                                           .arg(obid));
-        }
-
-
-        //        query_camera.select(QString("select obid, StringData:Name,IntegerData:FaultState from Camera where LinkData:ParentLink = %1")
-        //                                                   .arg(obid));
-        //        while(query_camera.next()) {
-        //            QString obid2 = query_camera.value("obid").toString();
-        //            QString name2 = query_camera.value("Name").toString();
-        //            QString FaultState = query_camera.value("FaultState").toString();
-        //            q.exec(QString("insert into vw_device values('%1', '%2', '%3', 1, %4, 'http://vfx.mtime.cn/Video/2021/01/07/mp4/210107172407759182_1080.mp4')")
-        //                   .arg(obid2)
-        //                   .arg(name2)
-        //                   .arg(obid)
-        //                   .arg(FaultState));
-        //        }
-    }
-    this->updateCameraTree();
-
-    //TO DO
-    //
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -478,91 +422,6 @@ void VideoWatcherWidget::sendValueToOms(void)
     //qDebug()<<"VideoWatcherWidget::sendValueToOms==============end";//wzx
 }
 
-void VideoWatcherWidget::slotExpandNode(const QModelIndex &index)
-{
-    if(index.data(VideoNodeType).toInt() == VideoNodeStation) {
-        QString obid = index.data(VideoObidRole).toString();
-        updateCameraSqlAndItemListOnce(obid);
-    }
-}
-
-void VideoWatcherWidget::toSearchStation(int index)
-{
-    OMSDatabase *d = static_cast<OMSDatabase *>(m_pDatabase);
-    QString obid = ui->comboBox_search_station->itemData(index).toString();
-    if("all" == obid)
-        return;
-
-    updateCameraSqlAndItemListOnce(obid);
-}
-
-void VideoWatcherWidget::toSearchCamera(const QString &string)
-{
-    int camera_index = -1;
-    int station_index = ui->comboBox_search_station->currentIndex();
-    QString obid = ui->comboBox_search_station->itemData(station_index).toString();
-
-    if(obid == "all") {
-        return;
-    }
-    QSqlQuery query;
-    query.exec(QString("select obid, name from vw_device where location_obid = %1")
-               .arg(obid));
-    int index = -1;
-    while(query.next()) {
-        index ++;
-        if(query.record().value("name").toString().contains(string)) {
-            camera_index = index;
-            break;
-        }
-    }
-
-    station_index --; //take off "all" item
-    if(camera_index >= 0 && station_index >= 0) {
-        QStandardItem *itemRoot     = m_treeModel->invisibleRootItem();
-        QStandardItem *itemISCS     = itemRoot ? itemRoot->child(0) : 0;
-        QStandardItem *itemStation  = itemISCS ? itemISCS->child(station_index) : 0;
-        QStandardItem *itemCamera   = itemStation ? itemStation->child(camera_index) : 0;
-        ui->treeView->setCurrentIndex(itemCamera ? itemCamera->index() : QModelIndex());
-    }
-
-}
-
-void VideoWatcherWidget::updateCameraSqlAndItemListOnce(const QString &location_obid)
-{
-    if(1 == lds::selectValue("select state from vw_location where obid = %1", location_obid))
-        return;
-
-    updateCameraSqlList(location_obid);
-    updateCameraItemList(location_obid);
-
-    QSqlQuery q;
-    q.exec(QString("update vw_location set state = 1 where obid = %1").arg(location_obid));
-}
-
-bool VideoWatcherWidget::updateCameraSqlList(const QString &location_obid)
-{
-    OMSDatabase *d = static_cast<OMSDatabase *>(m_pDatabase);
-    QSqlQuery q;
-    OMSQuery query_camera(d);
-
-    q.exec(QString("delete from vw_device where location_obid = '%1' ").arg(location_obid));
-    query_camera.exec(QString("select obid, StringData:Name,IntegerData:FaultState from Camera where LinkData:ParentLink = %1")
-                        .arg(location_obid));
-    while(query_camera.next()) {
-        QString obid2 = query_camera.value("obid").toString();
-        QString name2 = query_camera.value("Name").toString();
-        QString FaultState = query_camera.value("FaultState").toString();
-        q.exec(QString("insert into vw_device values('%1', '%2', '%3', 1, %4, 'http://vfx.mtime.cn/Video/2021/01/07/mp4/210107172407759182_1080.mp4')")
-               .arg(obid2)
-               .arg(name2)
-               .arg(location_obid)
-               .arg(FaultState));
-    }
-    return true;
-}
-
-
 bool VideoWatcherWidget::checkPermitAndAor(QString& msg){
     bool flag = true;
     if(flag && !m_pUserIface->ds6k_isObjectInUserAORSet(m_obId)){
@@ -576,4 +435,61 @@ bool VideoWatcherWidget::checkPermitAndAor(QString& msg){
         flag = false;
     }
     return flag;
+}
+
+DataSourceOMS::DataSourceOMS(OMSDatabase *database, const QString &PointAddress, const QString &Address, QObject *parent)
+    : DataSource(parent)
+{
+    m_database = database;
+    m_PointAddress = PointAddress;
+    m_Address = Address;
+}
+
+QList<DataSource::Location> DataSourceOMS::getLocationList()
+{
+    QList<DataSource::Location> r;
+    OMSQuery query_camera(m_database);
+    OMSQuery query_cctv(m_database);
+    query_cctv.exec(QString("select obid, StringData:Name from CCTVController where IntegerData:PointAddress = %1  ")
+                    .arg(m_PointAddress));
+    while(query_cctv.next()) {
+        QString obid = query_cctv.value("obid").toString();
+        QString name = query_cctv.value("Name").toString();
+        query_camera.exec(QString("select count from Camera where LinkData:ParentLink = %1")
+                          .arg(obid));
+        query_camera.next();
+        int count = query_camera.value(0).toInt();
+
+        DataSource::Location d;
+        d.obid = obid;
+        d.name = name;
+        d.type = 0;
+        d.state = 0;
+        d.camera_count = count;
+
+        r << d;
+    }
+
+    return r;
+}
+
+QList<DataSource::Camera> DataSourceOMS::getCameraList(const QString &location_obid)
+{
+    QList<DataSource::Camera> r;
+    OMSQuery query_camera(m_database);
+    query_camera.exec(QString("select obid, StringData:Name,IntegerData:FaultState from Camera where LinkData:ParentLink = %1")
+                      .arg(location_obid));
+    while(query_camera.next()) {
+        DataSource::Camera d;
+        d.obid = query_camera.value("obid").toString();
+        d.name = query_camera.value("Name").toString();
+        d.location_obid = location_obid;
+        d.type = 1;
+        d.state = query_camera.value("FaultState").toInt();
+        d.url = "http://vfx.mtime.cn/Video/2021/01/07/mp4/210107172407759182_1080.mp4";
+
+        r << d;
+    }
+
+    return r;
 }

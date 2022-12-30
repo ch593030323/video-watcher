@@ -175,25 +175,6 @@ void lds::init()
                                        "url varchar(20)"
                                        ")"
                                        );
-
-    qDebug() << __LINE__ << query.exec("insert into vw_location values('001', 'station', 0, 1)");
-    qDebug() << __LINE__ << query.exec("insert into vw_location values('002', 'train', 1, 1)");
-
-    qDebug() << __LINE__ << query.exec("insert into vw_device values('001000', '摄像头0', '001', 1, 1, 'rtsp://admin:*Dt12a34b@192.7.3.159')");
-    //'rtsp://admin:*Dt12a34b@192.7.3.159')"););
-    qDebug() << __LINE__ << query.exec("insert into vw_device values('001001', '摄像头1', '001', 1, 1, 'rtmp://10.137.32.250:1935/rtp/34020000001320000211_34020000001310000002')");
-    //'rtsp://admin:*Dt12a34b@192.7.3.159')"););
-    //http://vfx.mtime.cn/Video/2021/01/07/mp4/210107172407759182_1080.mp4')");
-    qDebug() << __LINE__ << query.exec("insert into vw_device values('001002', '摄像头2', '001', 1, 1, 'rtsp://10.137.32.250:554/rtp/34020000001320000225_34020000001310000003')");
-    //http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4')");
-    qDebug() << __LINE__ << query.exec("insert into vw_device values('001003', '摄像头3', '001', 1, 1, 'rtsp://10.137.32.250:554/rtp/34020000001320000130_34020000001310000001')");
-    //http://vfx.mtime.cn/Video/2019/03/17/mp4/190317150237409904.mp4')");
-    qDebug() << __LINE__ << query.exec("insert into vw_device values('002001', '摄像头4', '002', 1, 1, 'http://vfx.mtime.cn/Video/2019/03/14/mp4/190314223540373995.mp4')");
-    qDebug() << __LINE__ << query.exec("insert into vw_device values('002002', '摄像头5', '002', 1, 1, 'http://vfx.mtime.cn/Video/2021/01/07/mp4/210107172407759182_1080.mp4')");
-    qDebug() << __LINE__ << query.exec("insert into vw_device values('002003', '摄像头6', '002', 1, 1, 'http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4')");
-    qDebug() << __LINE__ << query.exec("insert into vw_device values('002004', '摄像头7', '002', 1, 1, 'http://vfx.mtime.cn/Video/2019/03/17/mp4/190317150237409904.mp4')");
-
-
     qRegisterMetaType<FFmpegData>("FFmpegData");
 }
 
@@ -339,4 +320,38 @@ void PlayThread::open()
 void PlayThread::close()
 {
     this->stop();
+}
+
+DataSource::DataSource(QObject *parent)
+    : QObject(parent)
+{
+
+}
+
+QList<DataSource::Location> DataSource::getLocationList()
+{
+    QList<DataSource::Location> r;
+    r << DataSource::Location{"001", "station", 0, 0, 4};
+    r << DataSource::Location{"002", "train",   1, 0, 4};
+
+    return r;
+}
+
+QList<DataSource::Camera> DataSource::getCameraList(const QString &location_obid)
+{
+    QList<DataSource::Camera> r;
+    if(location_obid == "001") {
+        r << DataSource::Camera{"001000", "摄像头0", "001", 1, 1, "rtsp://admin:*Dt12a34b@192.7.3.159"};
+        r << DataSource::Camera{"001001", "摄像头1", "001", 1, 1, "rtmp://10.137.32.250:1935/rtp/34020000001320000211_34020000001310000002"};
+        r << DataSource::Camera{"001002", "摄像头2", "001", 1, 1, "rtsp://10.137.32.250:554/rtp/34020000001320000225_34020000001310000003"};
+        r << DataSource::Camera{"001003", "摄像头3", "001", 1, 1, "rtsp://10.137.32.250:554/rtp/34020000001320000130_34020000001310000001"};
+    }
+    if(location_obid == "002") {
+        r << DataSource::Camera{"002001", "摄像头4", "002", 1, 1, "http://vfx.mtime.cn/Video/2019/03/14/mp4/190314223540373995.mp4"};
+        r << DataSource::Camera{"002002", "摄像头5", "002", 1, 1, "http://vfx.mtime.cn/Video/2021/01/07/mp4/210107172407759182_1080.mp4"};
+        r << DataSource::Camera{"002003", "摄像头6", "002", 1, 1, "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4"};
+        r << DataSource::Camera{"002004", "摄像头7", "002", 1, 1, "http://vfx.mtime.cn/Video/2019/03/17/mp4/190317150237409904.mp4"};
+    }
+
+    return r;
 }

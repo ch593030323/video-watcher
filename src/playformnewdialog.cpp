@@ -51,6 +51,13 @@ playformnewdialog::~playformnewdialog()
     delete ui;
 }
 
+
+void playformnewdialog::setDataSource(DataSource *datasource)
+{
+    ui->treeView->setDataSource(datasource);
+    ui->treeView->slotInitControl();
+}
+
 void playformnewdialog::resizeEvent(QResizeEvent *event)
 {
     updateLayout();
@@ -131,16 +138,6 @@ void playformnewdialog::updateLayout(bool isRemovePlayer)
         k.value()->setContextMenuDataList(pairList);
 
     }
-}
-
-void playformnewdialog::setTreeModel(QStandardItemModel *model)
-{
-    ui->treeView->setModel(model);
-    ui->treeView->setHeaderHidden(true);
-    ui->treeView->header()->setStretchLastSection(true);
-    ui->treeView->expandAll();
-    ui->treeView->setDragEnabled(true);
-    ui->treeView->setEditTriggers(QTreeView::NoEditTriggers);
 }
 
 QList<VideoWidget *> playformnewdialog::selectedWidgetList()

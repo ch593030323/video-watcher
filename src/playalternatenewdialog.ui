@@ -15,9 +15,9 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_4">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0,1">
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1">
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
@@ -26,7 +26,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QTreeView" name="treeView"/>
+        <widget class="TreeVideoWidget" name="treeView" native="true"/>
        </item>
       </layout>
      </item>
@@ -41,6 +41,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="pushButton_add">
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>40</height>
+          </size>
+         </property>
          <property name="text">
           <string>添加&gt;&gt;</string>
          </property>
@@ -48,6 +54,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="pushButton_del">
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>40</height>
+          </size>
+         </property>
          <property name="text">
           <string>删除&gt;&gt;</string>
          </property>
@@ -68,6 +80,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="pushButton_add_gap">
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>40</height>
+          </size>
+         </property>
          <property name="text">
           <string>添加间隔&gt;&gt;</string>
          </property>
@@ -128,6 +146,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_adjust">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>40</height>
+        </size>
+       </property>
        <property name="text">
         <string>整理</string>
        </property>
@@ -135,6 +159,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_ok">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>40</height>
+        </size>
+       </property>
        <property name="text">
         <string>确定</string>
        </property>
@@ -142,6 +172,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_exit">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>40</height>
+        </size>
+       </property>
        <property name="text">
         <string>退出</string>
        </property>
@@ -151,6 +187,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TreeVideoWidget</class>
+   <extends>QWidget</extends>
+   <header>src/treevideowidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

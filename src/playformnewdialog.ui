@@ -52,16 +52,6 @@
     <string>1x1</string>
    </property>
   </widget>
-  <widget class="QTreeView" name="treeView">
-   <property name="geometry">
-    <rect>
-     <x>570</x>
-     <y>80</y>
-     <width>256</width>
-     <height>192</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QPushButton" name="pushButton_ok">
    <property name="geometry">
     <rect>
@@ -140,7 +130,25 @@
     <string>5x5</string>
    </property>
   </widget>
+  <widget class="TreeVideoWidget" name="treeView" native="true">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>100</y>
+     <width>120</width>
+     <height>80</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TreeVideoWidget</class>
+   <extends>QWidget</extends>
+   <header>src/treevideowidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -2,6 +2,7 @@
 #define VIDEOWATCHER_WIDGET_H
 
 #include "src/mainwindow.h"
+#include "src/lds.h"
 
 #include <QtGui>
 #include <oms/data_all.h>
@@ -13,6 +14,21 @@
 
 class GraphicComp;
 class ScheDynamicManager;
+
+
+class DataSourceOMS : public DataSource {
+    Q_OBJECT
+public:
+    DataSourceOMS(OMSDatabase *database, const QString &PointAddress, const QString &Address, QObject *parent = 0);
+
+    virtual QList<Location> getLocationList();
+    virtual QList<Camera> getCameraList(const QString &location_obid);
+
+private:
+    OMSDatabase *m_database;
+    QString m_PointAddress;
+    QString m_Address;
+};
 
 class VideoWatcherWidget : public MainFrame
 {
@@ -51,16 +67,6 @@ public:
 private slots:
     void sendValueToOms(void);
 
-    void slotExpandNode(const QModelIndex &index);
-
-    virtual void toSearchStation(int index);
-
-    virtual void toSearchCamera(const QString &string);
-
-    void updateCameraSqlAndItemListOnce(const QString &location_obid);
-private:
-    bool updateCameraSqlList(const QString &location_obid);
-
 private:
     Database    *m_pDatabase;
     OperationLog *m_pLog;
@@ -82,8 +88,8 @@ private:
     QString     m_logMsg;
     bool        m_replaceNeed;
 
-    static const int CCTV = 10;
-    static const int STATION = 28;
+    QString CCTV = "10";
+    QString STATION = "28";
 };
 
 #endif

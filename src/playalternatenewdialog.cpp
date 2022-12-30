@@ -26,14 +26,10 @@ PlayAlternateNewDialog::~PlayAlternateNewDialog()
     delete ui;
 }
 
-void PlayAlternateNewDialog::setTreeModel(QStandardItemModel *model)
+void PlayAlternateNewDialog::setDataSource(DataSource *datasource)
 {
-    ui->treeView->setModel(model);
-    ui->treeView->setHeaderHidden(true);
-    ui->treeView->header()->setStretchLastSection(true);
-    ui->treeView->expandAll();
-    ui->treeView->setDragEnabled(true);
-    ui->treeView->setEditTriggers(QTreeView::NoEditTriggers);
+    ui->treeView->setDataSource(datasource);
+    ui->treeView->slotInitControl();
 }
 
 void PlayAlternateNewDialog::toadd()

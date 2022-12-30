@@ -1,13 +1,15 @@
 #ifndef PLAYALTERNATENEWDIALOG_H
 #define PLAYALTERNATENEWDIALOG_H
 
-#include <QDialog>
+#include "lds.h"
+
+
 
 namespace Ui {
 class PlayAlternateNewDialog;
 }
 
-class QStandardItemModel;
+
 class PlayAlternateNewDialog : public QDialog
 {
     Q_OBJECT
@@ -25,8 +27,7 @@ public:
     explicit PlayAlternateNewDialog(QWidget *parent = 0);
     ~PlayAlternateNewDialog();
 
-    void setTreeModel(QStandardItemModel *model);
-
+    void setDataSource(DataSource *datasource);
 private slots:
     void toadd();
     void todel();

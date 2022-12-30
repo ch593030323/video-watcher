@@ -263,16 +263,6 @@
     <string>test</string>
    </property>
   </widget>
-  <widget class="TreeVideoView" name="treeView">
-   <property name="geometry">
-    <rect>
-     <x>520</x>
-     <y>150</y>
-     <width>256</width>
-     <height>192</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QPushButton" name="pushButton_1x1">
    <property name="geometry">
     <rect>
@@ -472,51 +462,23 @@
     <string>组播</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="comboBox_search_station">
+  <widget class="TreeVideoWidget" name="treeView" native="true">
    <property name="geometry">
     <rect>
-     <x>520</x>
-     <y>60</y>
-     <width>151</width>
-     <height>34</height>
+     <x>590</x>
+     <y>90</y>
+     <width>261</width>
+     <height>201</height>
     </rect>
-   </property>
-   <property name="outer_stylesheet" stdset="0">
-    <string>search</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="lineEdit_camera">
-   <property name="geometry">
-    <rect>
-     <x>740</x>
-     <y>60</y>
-     <width>113</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <property name="outer_stylesheet" stdset="0">
-    <string>search</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_find">
-   <property name="geometry">
-    <rect>
-     <x>680</x>
-     <y>60</y>
-     <width>31</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="outer_stylesheet" stdset="0">
-    <string>search</string>
    </property>
   </widget>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TreeVideoView</class>
-   <extends>QTreeView</extends>
-   <header>src/treevideoview.h</header>
+   <class>TreeVideoWidget</class>
+   <extends>QWidget</extends>
+   <header>src/treevideowidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

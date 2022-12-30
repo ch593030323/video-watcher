@@ -20,16 +20,13 @@ QT_END_NAMESPACE
 class MainFrame : public QWidget
 {
     Q_OBJECT
-
 public:
     MainFrame(QWidget *parent = 0);
     ~MainFrame();
 
     void updateLayout();
-    void updateCameraTree();
-    void updateCameraItemList(const QString &location_obid);
-    void updateCameraItemList(QStandardItem *item_location);
-    void updateAndExpandNode(const QString &loaction_obid);
+    void setDataSource(DataSource *datasource);
+
 private slots:
 
     /**
@@ -67,17 +64,12 @@ private slots:
     void toHoldVideoFocus();
     void toReleaseVideoFocus();
 
-    virtual void toSearchStation(int index);
-    virtual void toSearchCamera(const QString &string);
-
 protected:
     void resizeEvent(QResizeEvent *event);
+
 protected:
     Ui::MainWidget *ui;
-protected:
-    TreeVideoModel *m_treeModel;
     QMap<LayoutPos, VideoWidget *> m_videoMap;
     LayoutInfo m_layoutInfo;
-
 };
 #endif // MAINWINDOW_H

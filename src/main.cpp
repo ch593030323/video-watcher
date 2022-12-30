@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
 //    lds::init();
 
     MainFrame w;
+    w.setDataSource(new DataSource(&w));
     w.resize(1000, 700);
     w.show();
     return a.exec();

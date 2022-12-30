@@ -6,7 +6,7 @@
 #include "lds.h"
 
 class VideoWidget;
-class QStandardItemModel;
+
 namespace Ui {
 class playformnewdialog;
 }
@@ -19,16 +19,17 @@ public:
     explicit playformnewdialog(QWidget *parent = 0);
     ~playformnewdialog();
 
-    void resizeEvent(QResizeEvent *event);
+    void setDataSource(DataSource *datasource);
 
     void updateLayout(bool isRemovePlayer = false);
 
-    void setTreeModel(QStandardItemModel *model);
-
-    QList<VideoWidget *> selectedWidgetList();
-
 protected:
     void contextMenuEvent(QContextMenuEvent * event);
+
+    void resizeEvent(QResizeEvent *event);
+
+private:
+    QList<VideoWidget *> selectedWidgetList();
 
 private slots:
     void toVideoLayout1x1();

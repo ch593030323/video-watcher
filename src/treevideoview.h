@@ -6,7 +6,7 @@
 class TreeVideoView : public QTreeView
 {
 public:
-    TreeVideoView(QWidget *parent);
+    TreeVideoView(QWidget *parent = 0);
 
 signals:
     void signalRefresh();
