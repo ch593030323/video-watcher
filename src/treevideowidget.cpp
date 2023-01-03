@@ -58,15 +58,17 @@ TreeVideoWidget::TreeVideoWidget(QWidget *parent)
     vlayout->addLayout(hlayout);
     vlayout->addWidget(m_treeView, 1);
     vlayout->setSpacing(0);
+    vlayout->setMargin(0);
 
     setLayout(vlayout);
+
 
     connect(m_lineEdit, SIGNAL(textChanged(QString)), this, SLOT(slotShowCloseButton(QString)));
     connect(m_buttonClose, SIGNAL(clicked()), m_lineEdit, SLOT(clear()));
     connect(m_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSelectStation(int)));
     connect(m_lineEdit, SIGNAL(textChanged(QString)), this, SLOT(slotSearchCamera(QString)));
     connect(m_treeView, SIGNAL(expanded(QModelIndex)), this, SLOT(slotUpdateAndExpandNode(QModelIndex)));
-
+    connect(m_treeView, SIGNAL(signalRefresh()), this, SLOT(slotInitAll()));
 }
 
 void TreeVideoWidget::setDataSource(DataSource *datasource)

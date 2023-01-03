@@ -5,6 +5,7 @@
 
 class TreeVideoView : public QTreeView
 {
+    Q_OBJECT
 public:
     TreeVideoView(QWidget *parent = 0);
 
