@@ -11,5 +11,6 @@
         <file>skin_image/dark/find_15x15.png</file>
         <file>skin_image/dark/circle_xmark_15x15.png</file>
         <file>skin_image/dark/circle_xmark_pressed_15x15.png</file>
+        <file>video.png</file>
     </qresource>
 </RCC>

@@ -120,7 +120,7 @@ public:
         //for sql
         QString obid;
         QString name;
-        int type;//车站的类型，0：车站、1：列车
+        int type;//车站的类型，0：车站、1：列车 【暂作废】
 
         //for var
         int state;//state 0:no device 1 has device 默认是0，加载一个节点后改为1，刷新时需要改成0才能刷新

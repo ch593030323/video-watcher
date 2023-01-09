@@ -33,6 +33,8 @@ public slots:
     void slotInitAll();
     void slotInitSql();
     void slotInitControl();
+    void slotSettings();
+    void slotAppSettings();
 
 private slots:
     void slotShowCloseButton(const QString &text);
@@ -54,6 +56,8 @@ private:
     QPushButton *m_buttonClose;
     DataSource *m_datasource;
     TreeVideoModel *m_treeModel;
+
+    QLineEdit *settings_edit;
 };
 
 #endif // TREEVIDEOWIDGET_H

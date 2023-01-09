@@ -12,7 +12,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 VideoWatcherWidget::VideoWatcherWidget(QWidget *parent, Database *database, void *data, int environ)
-    : MainFrame(parent)
+    : QWidget(parent)
     , m_environ(environ)
     , m_pDatabase(database)
 {
@@ -36,7 +36,12 @@ VideoWatcherWidget::VideoWatcherWidget(QWidget *parent, Database *database, void
     m_permitId = 0;
     m_atypeId = 0;
     //    connect(m_button, SIGNAL(clicked (bool)), this, SLOT(sendValueToOms()));
-    setDataSource(new DataSourceOMS(static_cast<OMSDatabase *>(database), CCTV, STATION, this));
+    QVBoxLayout *vlayout = new QVBoxLayout;
+    MainFrame *window = new MainFrame;
+    vlayout->addWidget(window);
+    vlayout->setMargin(0);
+    this->setLayout(vlayout);
+    window->setDataSource(new DataSourceOMS(static_cast<OMSDatabase *>(database), CCTV, STATION, this));
 };
 
 
@@ -454,7 +459,7 @@ QList<DataSource::Location> DataSourceOMS::getLocationList()
                     .arg(m_PointAddress));
     while(query_cctv.next()) {
         QString obid = query_cctv.value("obid").toString();
-        QString name = query_cctv.value("Name").toString();
+        QString name = QString::fromUtf8(query_cctv.value("Name").toByteArray().data());
         query_camera.exec(QString("select count from Camera where LinkData:ParentLink = %1")
                           .arg(obid));
         query_camera.next();
@@ -486,7 +491,7 @@ QList<DataSource::Camera> DataSourceOMS::getCameraList(const QString &location_o
         d.location_obid = location_obid;
         d.type = 1;
         d.state = query_camera.value("FaultState").toInt();
-        d.url = "http://vfx.mtime.cn/Video/2021/01/07/mp4/210107172407759182_1080.mp4";
+        d.url = "rtsp://10.137.32.250:554/rtp/34020000001320000067_34020000001310000001";
 
         r << d;
     }

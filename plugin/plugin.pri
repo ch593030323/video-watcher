@@ -11,9 +11,10 @@ HEADERS += \
     plugin/omsqueryparser.h
 
 SOURCES += \
-    plugin/main.cpp \
     plugin/chapplication.cpp \
     plugin/VideoWatcher_plugin.cpp \
     plugin/VideoWatcher_widget.cpp \
     plugin/omsquery.cpp\
     plugin/omsqueryparser.cpp
+
+contains(DEFINES, OUTPUT_APP):SOURCES += plugin/main.cpp

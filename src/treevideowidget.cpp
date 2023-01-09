@@ -1,6 +1,7 @@
 #include "treevideowidget.h"
 #include "treevideoview.h"
 #include "treevideomodel.h"
+#include "json/json.h"
 
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -69,6 +70,11 @@ TreeVideoWidget::TreeVideoWidget(QWidget *parent)
     connect(m_lineEdit, SIGNAL(textChanged(QString)), this, SLOT(slotSearchCamera(QString)));
     connect(m_treeView, SIGNAL(expanded(QModelIndex)), this, SLOT(slotUpdateAndExpandNode(QModelIndex)));
     connect(m_treeView, SIGNAL(signalRefresh()), this, SLOT(slotInitAll()));
+<<<<<<< Updated upstream
+=======
+    connect(m_treeView, SIGNAL(signalSettings()), this, SLOT(slotSettings()));
+
+>>>>>>> Stashed changes
 }
 
 void TreeVideoWidget::setDataSource(DataSource *datasource)
@@ -121,6 +127,40 @@ void TreeVideoWidget::slotInitSql()
                    .arg(obid));
         }
     }
+    Json::Value root;
+    Json::FastWriter writer;
+
+    Json::Value global;
+    {
+        Json::Value state_choice;
+        state_choice["0"] = QString::fromUtf8("在线").toStdString();
+        state_choice["1"] = QString::fromUtf8("故障").toStdString();
+        state_choice["2"] = QString::fromUtf8("离线").toStdString();
+        global["state_choice"] = state_choice;
+
+        global["column_count"] = 2;
+        global["row_count"] = 2;
+        global["default_video_url_list"] = "";
+    }
+    root["global"] = global;
+
+    Json::Value cameraList;
+    {
+        Json::Value cameraValue;
+        cameraValue["obid"] = "";
+        cameraValue["name"] = "";
+        cameraValue["location_obid"] = "";
+        cameraValue["type"] = "";
+        cameraValue["state"] = "";
+
+        cameraList.append(cameraValue);
+    }
+    root["cameraList"] = cameraList;
+    std::string json_file = writer.write(root);
+    QString jsonString = QString::fromStdString(json_file).toLocal8Bit();
+
+    qDebug() << "jsonString" << jsonString;
+
 }
 
 void TreeVideoWidget::slotInitControl()
@@ -136,6 +176,45 @@ void TreeVideoWidget::slotInitControl()
     }
     this->updateCameraTree();
     m_treeView->expand(m_treeModel->index(0, 0));
+}
+
+void TreeVideoWidget::slotSettings()
+{
+    QDialog d(this);
+    d.setObjectName("Window");
+    QVBoxLayout *vlayout = new QVBoxLayout;
+    QLabel *label  = new QLabel;
+    QModelIndex index = m_treeView->currentIndex();
+    label->setText(index.data(VideoUrlRole).toString());
+
+    settings_edit=new QLineEdit;
+    settings_edit->setText(QString("%1,%2 %3x%4")
+                           .arg(this->parentWidget()->parentWidget()->x())
+                           .arg(this->parentWidget()->parentWidget()->y())
+                           .arg(this->parentWidget()->parentWidget()->width())
+                           .arg(this->parentWidget()->parentWidget()->height())
+                           );
+    QPushButton *b = new QPushButton;
+    b->setText("AppTo");
+    connect(b, SIGNAL(clicked()), this, SLOT(slotAppSettings()));
+
+    vlayout->addWidget(label);
+    vlayout->addWidget(settings_edit);
+    vlayout->addWidget(b);
+    d.setLayout(vlayout);
+
+    d.exec();
+}
+
+void TreeVideoWidget::slotAppSettings()
+{
+    QString xy = settings_edit->text().split(" ").value(0);
+    QString wh = settings_edit->text().split(" ").value(1);
+    int w = wh.split("x").value(0).toInt();
+    int h = wh.split("x").value(1).toInt();
+    int x = xy.split(",").value(0).toInt();
+    int y = xy.split(",").value(1).toInt();
+    this->parentWidget()->parentWidget()->setGeometry(x, y, w, h);
 }
 
 void TreeVideoWidget::slotShowCloseButton(const QString &text)
@@ -225,11 +304,12 @@ void TreeVideoWidget::updateCameraSqlList(const QString &location_obid)
     QSqlQuery q;
     q.exec(QString("delete from vw_device where location_obid = '%1' ").arg(location_obid));
     for(DataSource::Camera c : m_datasource->getCameraList(location_obid)) {
-        q.exec(QString("insert into vw_device values('%1', '%2', '%3', 1, %4, 'http://vfx.mtime.cn/Video/2021/01/07/mp4/210107172407759182_1080.mp4')")
+        q.exec(QString("insert into vw_device values('%1', '%2', '%3', 1, %4, '%5')")
                .arg(c.obid)
                .arg(c.name)
                .arg(location_obid)
-               .arg(c.state));
+               .arg(c.state)
+               .arg(c.url));
     }
 }
 

@@ -30,8 +30,7 @@ private:
     QString m_Address;
 };
 
-class VideoWatcherWidget : public MainFrame
-{
+class VideoWatcherWidget : public QWidget{
     Q_OBJECT
 
 public:

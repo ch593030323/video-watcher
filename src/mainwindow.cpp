@@ -30,7 +30,7 @@ http://vfx.mtime.cn/Video/2019/04/02/mp4/190402084548910831.mp4
 */
 
 MainFrame::MainFrame(QWidget *parent)
-    : QWidget(parent)
+    : QFrame(parent)
     , ui(new Ui::MainWidget)
 {
     ui->setupUi(this);
@@ -138,7 +138,7 @@ void MainFrame::updateLayout()
 {
     int videoAreaWidth = this->width() - lds::videoAreaRight - lds::margin;
     int videoAreaHeight = this->height() - lds::videoAreaBottom - lds::margin;
-    int treeHeight = videoAreaHeight / 2 - lds::margin;
+    int treeHeight = videoAreaHeight - lds::margin;
     int treeLeft = this->width() - lds::videoAreaRight;
     int treeWidth = lds::videoAreaRight - lds::margin;
     //treeView

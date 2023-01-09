@@ -11,6 +11,7 @@ public:
 
 signals:
     void signalRefresh();
+    void signalSettings();
 
 protected:
     void contextMenuEvent(QContextMenuEvent * event);

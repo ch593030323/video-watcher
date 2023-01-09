@@ -17,7 +17,7 @@ namespace Ui { class MainWidget; }
 QT_END_NAMESPACE
 
 //这里用MainWindow的话，插件编译会有问题，做记录
-class MainFrame : public QWidget
+class MainFrame : public QFrame
 {
     Q_OBJECT
 public:

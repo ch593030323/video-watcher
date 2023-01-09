@@ -11,24 +11,25 @@ OMSQueryParser::Parser::Parser(QObject *parent) : QObject(parent)
 
 }
 
-bool OMSQueryParser::Parser::parser(const QString &sql, OMSQueryParser::SqlContent &content, const QVariantList &bindvalueList)
+bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlContent &content, const QVariantList &bindvalueList)
 {
     BindRegexp rx(bindvalueList);
     int begin = 0;
 
     if(rx.indexInExecType(sql, SelectObIdList) >= 0) {
         content.type = SelectObIdList;
+
     } else if(rx.indexInExecType(sql, SelectCount) >= 0) {
         content.type = SelectCount;
 
-    } else if(rx.indexInExecType(sql, SelectAttribute) >= 0) {
-        content.type = SelectAttribute;
+    } else if(rx.indexInExecType(sql, SelectAttributeByObId) >= 0) {
+        content.type = SelectAttributeByObId;
 
     } else if(rx.indexInExecType(sql, WriteAttribute) >= 0) {
         content.type = WriteAttribute;
 
-    } else if(rx.indexInExecType(sql, SelectObidAndAttributeList) >= 0) {
-        content.type = SelectObidAndAttributeList;
+    } else if(rx.indexInExecType(sql, SelectAttribute) >= 0) {
+        content.type = SelectAttribute;
 
     } else {
         content.type = ExecType::None;
@@ -38,9 +39,7 @@ bool OMSQueryParser::Parser::parser(const QString &sql, OMSQueryParser::SqlConte
 
     switch(content.type) {
     case SelectCount:
-        // select count from CCTVController where IntegerData:PointAdress = ? and StringData:Adress = ?
     case SelectObIdList:
-        // select obid from CCTVController where IntegerData:PointAdress = ? and StringData:Adress = ?
     {
         QString sql_string          = rx.cap(0);
         QString sql_table           = rx.cap(1);
@@ -60,17 +59,16 @@ bool OMSQueryParser::Parser::parser(const QString &sql, OMSQueryParser::SqlConte
             QString and_key_type    = rx.cap(1);
             QString and_key_name    = rx.cap(2);
             QString and_operator    = rx.cap(3);
-            QVariant and_value      = rx.cap(4, k);
+            QVariant and_value      = rx.cap(4);
             content.sql_and << SqlAnd{SqlField{and_key_type, and_key_name}, and_operator, and_value};
         }
     }
         break;
-    case SelectAttribute:
-        // select StringData:Name, IntegerData:PointAdress from OMS where obid = ?
+    case SelectAttributeByObId:
     {
         QString sql_string = rx.cap(0);
         QString sql_field  = rx.cap(1);
-        QString sql_obid   = rx.cap(2, 0).toString();
+        QString sql_obid   = rx.cap(2);
         content.obid = sql_obid;
 
         QStringList sql_field_list = sql_field.split(",", QString::SkipEmptyParts, Qt::CaseInsensitive);
@@ -90,7 +88,6 @@ bool OMSQueryParser::Parser::parser(const QString &sql, OMSQueryParser::SqlConte
     }
         break;
     case WriteAttribute:
-        // write into OMS (obid, StringData:Name, IntegerData:PointAdress) values (?, ?, ?) writeOptions 23
     {
         QString sql_string          = rx.cap(0);
         QString sql_field           = rx.cap(1);
@@ -130,13 +127,19 @@ bool OMSQueryParser::Parser::parser(const QString &sql, OMSQueryParser::SqlConte
         }
     }
         break;
-    case SelectObidAndAttributeList:
-        // select obid, StringData:Name, IntegerData:PointAdress from CCTVController where IntegerData:PointAdress = ? and StringData:Adress = ?
+    case SelectAttribute:
     {
         QString sql_string          = rx.cap(0);
         QString sql_field           = rx.cap(1);
-        QString sql_table           = rx.cap(2);
-        QString sql_and             = rx.cap(3);
+        QString sql_field2          = rx.cap(2);
+        QString sql_table           = rx.cap(3);
+        QString sql_and             = rx.cap(4);
+
+        sql_field += sql_field2;
+        if(sql_field.startsWith(ObidName)) {
+            sql_field.remove(0, 4);//4: length of obid
+            content.sql_field << SqlField{"", ObidName};
+        }
 
         content.table = sql_table;
         //
@@ -169,7 +172,7 @@ bool OMSQueryParser::Parser::parser(const QString &sql, OMSQueryParser::SqlConte
             QString and_key_type    = rx.cap(1);
             QString and_key_name    = rx.cap(2);
             QString and_operator    = rx.cap(3);
-            QVariant and_value      = rx.cap(4, k);
+            QVariant and_value      = rx.cap(4);
             content.sql_and << SqlAnd{SqlField{and_key_type, and_key_name}, and_operator, and_value};
         }
         //
@@ -192,7 +195,7 @@ void OMSQueryParser::Parser::addBindValue(int index, const QVariant &var)
 
 bool OMSQueryParser::Parser::exec(SqlContent &content)
 {
-    if(!parser(m_prepareSql, content, m_bindvalueList)) {
+    if(!parse(m_prepareSql, content, m_bindvalueList)) {
         qDebug() << content.error;
         return false;
     }
@@ -201,7 +204,7 @@ bool OMSQueryParser::Parser::exec(SqlContent &content)
 
 bool OMSQueryParser::Parser::exec(SqlContent &content, const QString &sql)
 {
-    if(!parser(sql, content)) {
+    if(!parse(sql, content)) {
         qDebug() << content.error;
         return false;
     }
@@ -229,21 +232,12 @@ OMSQueryParser::BindRegexp::BindRegexp(const QVariantList &bindvalueList)
 {
     setCaseSensitivity(Qt::CaseInsensitive);
     m_bindvalueList = bindvalueList;
-}
-
-void OMSQueryParser::BindRegexp::setPattern(const QString &pattern)
-{
-    if(m_bindvalueList.isEmpty()) {
-        QString p = pattern;
-        QRegExp::setPattern(p.replace(R"(\?)", R"(\w+)"));
-    } else {
-        QRegExp::setPattern(pattern);
-    }
+    m_bindvalueIndex = -1;
 }
 
 int OMSQueryParser::BindRegexp::indexInExecType(const QString &str, OMSQueryParser::ExecType type)
 {
-    QString rx_string = regexpSql(type);
+    QString rx_string  = regexpSql(type);
     setPattern(rx_string);
     int r = indexIn(str);
     return r;
@@ -251,26 +245,25 @@ int OMSQueryParser::BindRegexp::indexInExecType(const QString &str, OMSQueryPars
 
 QString OMSQueryParser::BindRegexp::cap(int nth)
 {
-    return QRegExp::cap(nth);
+    QString capValue = QRegExp::cap(nth);
+    if(capValue == "?") {
+        m_bindvalueIndex++;
+        capValue = m_bindvalueList.value(m_bindvalueIndex).toString();
+    }
+    return capValue;
 }
-
-QVariant OMSQueryParser::BindRegexp::cap(int nth, int bindedIndex)
-{
-    return ifnull(m_bindvalueList.value(bindedIndex), QRegExp::cap(nth));
-}
-
 
 QString OMSQueryParser::regexpSql(OMSQueryParser::ExecType type)
 {
     switch(type) {
     case SelectObIdList:
         return R"(select\s+obid\s+from\s+(\w+))" + rx_where;
-    case SelectAttribute:
-        return  R"(select\s+(\w+\s*:\s*\w+(?:\s*,\s*\w+\s*:\s*\w+)*)\s+from\s+OMS\s+where\s+obid\s*=\s*(\?))";
+    case SelectAttributeByObId:
+        return R"(select\s+(\w+\s*:\s*\w+(?:\s*,\s*\w+\s*:\s*\w+)*)\s+from\s+OMS\s+where\s+obid\s*=\s*(\?))";
     case WriteAttribute:
         return R"(write\s+into\s+OMS\s*\((\s*obid(?:\s*,\s*\w+\s*:\s*\w+)*)\)\s*values\s*\((\s*\?(?:\s*,\s*\?)*)\))" + rx_option;
-    case SelectObidAndAttributeList:
-        return  R"(select\s+obid((?:\s*,\s*\w+\s*:\s*\w+)*)\s+from\s+(\w+))" + rx_where;
+    case SelectAttribute:
+        return R"(select\s+((?:obid|\w+\s*:\s*\w+)?)((?:\s*,\s*\w+\s*:\s*\w+)*)\s+from\s+(\w+))" + rx_where;
     case SelectCount:
         return R"(select\s+count\s+from\s+(\w+))" + rx_where;
     }

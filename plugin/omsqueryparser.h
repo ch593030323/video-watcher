@@ -19,11 +19,21 @@ namespace OMSQueryParser {
  */
 enum ExecType{
     None,
+
+    //
     SelectObIdList,
+
+    // select count from CCTVController where IntegerData:PointAdress = ? and StringData:Adress = ?
     SelectCount,
-    SelectAttribute,
+
+    // select StringData:Name, IntegerData:PointAdress from OMS where obid = ?
+    SelectAttributeByObId,
+
+    // write into OMS (obid, StringData:Name, IntegerData:PointAdress) values (?, ?, ?) writeOptions 23
     WriteAttribute,
-    SelectObidAndAttributeList
+
+    // select obid, StringData:Name, IntegerData:PointAdress from CCTVController where IntegerData:PointAdress = ? and StringData:Adress = ?
+    SelectAttribute,
 };
 
 /**
@@ -34,6 +44,7 @@ struct SqlField {
     QString type;
     QString name;
 };
+static const QString ObidName = "obid";
 
 /**
  * @brief The SqlAnd struct
@@ -63,7 +74,7 @@ struct SqlContent {
     QString table;
     QList<SqlAnd> sql_and;
 
-    ///SelectAttribute
+    ///SelectAttributeByObId
     QList<SqlField> sql_field;
     QString obid;
 
@@ -72,7 +83,7 @@ struct SqlContent {
     //        QString obid;
     QString write_options;
 
-    ///SelectObidAndAttributeList
+    ///SelectAttribute
     //    QString table;
     //    QList<SqlAnd> sql_and;
     //    QList<SqlField> sql_field;
@@ -92,20 +103,24 @@ static const QString rx_operator = R"((?:=|!=|<|<=|>|>=){1})";
 static const QString rx_and_or   = R"((?:and|or){1})";
 static const QString rx_option   = R"((?:\s+writeOptions\s+(\w+))?)";
 static const QString rx_field    = R"((\w+)\s*:\s*(\w+))";
+static const QString rx_bindvalue= R"((?:\?|\w+))";
 
 //where IntegerData:PointAdress = ? and StringData:Adress = ?
-static const QString rx_where    = QString(R"(\s+where\s+(\w+\s*:\s*\w+\s*=\s*\?(?:\s+and\s+\w+\s*:\s*\w+\s*=\s*\?)*))")
-        .replace("=", rx_operator);
+static const QString rx_where_d  = QString(R"(\s+where\s+(\w+\s*:\s*\w+\s*=\s*\?(?:\s+and\s+\w+\s*:\s*\w+\s*=\s*\?)*))")
+        .replace("=", rx_operator)
+        .replace(R"(\?)", rx_bindvalue);
+static const QString rx_where    = "(?:" + rx_where_d + ")?";
 
-//StringData:Adress = ?
+//StringData:Adress = ? and StringData:xx = yy
 static const QString rx_and      = QString(R"((\w+)\s*:\s*(\w+)\s*(=)\s*(\?))")
-        .replace("=", rx_operator);
+        .replace("=", rx_operator)
+        .replace(R"(\?)", rx_bindvalue);
 
 /**
  * @brief regexpSql
  * 根据type返回对应的正则表达式
  */
-static QString regexpSql(ExecType type);
+QString regexpSql(ExecType type);
 
 /**
  * @brief The BindRegexp struct
@@ -114,19 +129,17 @@ static QString regexpSql(ExecType type);
 struct BindRegexp : QRegExp {
     BindRegexp(const QVariantList &bindvalueList);
 
-    void setPattern(const QString &pattern);
-
     /**
      * @brief indexInExecType
      * 执行两个操作，setPattern 和 indexIn
      */
-    int indexInExecType(const QString &str, ExecType type);
+    int indexInExecType(const QString &str, OMSQueryParser::ExecType type);
 
     QString cap(int nth);
-    QVariant cap(int nth, int bindedIndex);
 
 private:
     QVariantList m_bindvalueList;
+    int m_bindvalueIndex;
 };
 
 /**
@@ -137,7 +150,7 @@ class Parser : public QObject {
 public:
     Parser(QObject *parent = 0);
 
-    bool parser(const QString &sql, SqlContent &content, const QVariantList &bindvalueList = QVariantList());
+    bool parse(const QString &sql, SqlContent &content, const QVariantList &bindvalueList = QVariantList());
     //
     void prepare(const QString &sql);
 
