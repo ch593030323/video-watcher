@@ -15,7 +15,6 @@
 #include <oms/request.h>
 #include <oms/oms_database.h>
 
-
 /**
  * @brief The OMSQuery class
  * 一个类qsqlquery的oms database访问类
@@ -27,38 +26,6 @@ class OMSQuery : public QObject
 public:
     OMSQuery(OMSDatabase *database, QObject *parent = 0);
 
-private:
-    /**
-     * @brief createDataPtr
-     * 创建data的智能指针
-     * @param type 如：IntegerData、StringData等
-     */
-    static QSharedPointer<Data> createDataPtr(const QString &type);
-    static QSharedPointer<Data> createDataPtr(const QString &type, const QString &defaultValue);
-    static bool dataTypeIsValid(const QString &type);
-
-    /**
-     * @brief The ConditionVector class
-     * 简化Condition的使用，不用考虑指针释放问题
-     */
-    class ConditionVector {
-    public:
-        void append(AType aType, Comparison comparison, const QString &valueType, const QString &value);
-
-        inline const Condition *constData() const { return m_conditionVector.data(); }
-        inline int size() const {return m_conditionVector.size();}
-    private:
-        QVector<QSharedPointer<Data> > m_ptrVector;
-        QVector<Condition> m_conditionVector;
-    };
-
-    /**
-     * @brief stringToOpartor
-     * 将操作符转为枚举，如: (op:=) >>> (Comparison:EQ)
-     */
-    Comparison stringToOperator(QString op);
-
-public:
     /**
      * @brief selectObIdList
      * 一个简单的实时库ObId list查询方法
@@ -67,17 +34,26 @@ public:
     bool selectObIdList(const OMSQueryParser::SqlContent &content);
 
     /**
-     * @brief selectAttribute
+     * @brief selectAttributeByObId
      * 一个简单的实时库属性查询方法
      */
-    bool selectAttribute(const QString &sql);
-    bool selectAttribute(const OMSQueryParser::SqlContent &content);
+    bool selectAttributeByObId(const QString &sql);
+    bool selectAttributeByObId(const OMSQueryParser::SqlContent &content);
 
     /**
      * @brief select
      * 通用查询方法
      */
     bool exec(const QString &sql);
+    bool exec(const QString &sql, const QVariantList &bindvalueList);
+
+    /**
+     * @brief serialExec
+     * 支持多条sql连续查询，上次的结果集是这次的输入参数
+     * 使用前推荐用serialPrepare来清理下model
+     */
+    bool serialExec(const QString &sql);
+    void serialPrepare();
 
     /**
      * @brief selectCount
@@ -87,11 +63,11 @@ public:
     bool selectCount(const OMSQueryParser::SqlContent &content);
 
     /**
-     * @brief selectObidAndAttributeList
+     * @brief selectAttribute
      * 一个包含了selectObIdList、selectAttribute功能的方法
      */
-    bool selectObidAndAttributeList(const QString &sql);
-    bool selectObidAndAttributeList(const OMSQueryParser::SqlContent &content);
+    bool selectAttribute(const QString &sql);
+    bool selectAttribute(const OMSQueryParser::SqlContent &content);
 
     /**
     /* @brief lastError
@@ -112,12 +88,83 @@ public:
     QVariant value(int index);
     QVariant value(const QString &field_name);
 
+    /**
+     * @brief test
+     * 测试
+     */
+    void test();
 private:
+    /**
+     * @brief createDataPtr
+     * 创建data的智能指针
+     * @param type 如：IntegerData、StringData等
+     */
+    static QSharedPointer<Data> createDataPtr(const QString &type);
+    static QSharedPointer<Data> createDataPtr(const QString &type, const QVariant &defaultValue);
+    static bool dataTypeIsValid(const QString &type);
+
+    /**
+     * @brief The ConditionVector class
+     * 简化Condition的使用，不用考虑指针释放问题
+     */
+    class ConditionVector {
+    public:
+        void append(AType aType, Comparison comparison, const QString &valueType, const QVariant &value);
+
+        inline const Condition *constData() const { return m_conditionVector.data(); }
+        inline int size() const {return m_conditionVector.size();}
+    private:
+        QVector<QSharedPointer<Data> > m_ptrVector;
+        QVector<Condition> m_conditionVector;
+    };
+
+    /**
+     * @brief stringToOpartor
+     * 将操作符转为枚举，如: (op:=) >>> (Comparison:EQ)
+     */
+    Comparison stringToOperator(QString op);
+
+    /**
+     * @brief clearModel
+     * 删除model的所有数据
+     */
+    void clearModel();
+
+    /**
+     * @brief printModel
+     * 打印
+     */
+    void printModel(QString title);
+
+    /**
+     * @brief The ValueLocker class
+     * 类QMutexLocker
+     */
+    template<typename T>
+    class ValueLocker{
+    public:
+        ValueLocker(T *valuePtr, const T &constructionValue, const T &destoryValue){
+            m_valuePtr      = valuePtr;
+            *m_valuePtr     = constructionValue;
+            m_destoryValue  = destoryValue;
+        }
+
+        ~ValueLocker(){
+            *m_valuePtr = m_destoryValue;
+        }
+
+    private:
+        T *m_valuePtr;
+        T m_destoryValue;
+    };
+
+public:
     OMSDatabase *m_database;
     QString m_lastError;
 
     QStandardItemModel *m_model;
     int m_model_row;
+    bool m_model_clear_every_time;
 };
 
 #endif // OMSQUERY_H

@@ -50,6 +50,22 @@ void VideoWatcherWidget::setDatabase(Database *database)
 {
     m_pDatabase = database;
     OMSDatabase *d = static_cast<OMSDatabase *>(m_pDatabase);
+
+    OMSQuery query(d);
+    query.test();
+//    ChoiceData data;
+//    StringData stringData;
+//    AType att_atype = d->matchAType("Name");
+//    ObId id = 12884915094;
+//    std::cout << __LINE__ << att_atype << std::endl;
+//    Request req(id, att_atype, static_cast<Data*>(&stringData));
+//    d->read(&req, 1);
+
+//    std::cout << __LINE__ << " : " << QString::fromStdString(stringData).toStdString() << std::endl;
+////    std::cout << __LINE__ << std::endl;
+////    for(int k = 0 ; k < data.getNumberOfChoices(); k++) {
+////        std::cout << data.getObIds()[k] << data.getStrings()[k] << std::endl;
+////    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

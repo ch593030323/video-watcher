@@ -1,5 +1,7 @@
 #include "omsqueryparser.h"
 
+#include <QtDebug>
+
 static QVariant ifnull(const QVariant &p1, const QString &p2) {
     if(p1.isNull())
         return p2;
@@ -60,6 +62,11 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
             QString and_key_name    = rx.cap(2);
             QString and_operator    = rx.cap(3);
             QVariant and_value      = rx.cap(4);
+
+            //where IntegerData:PointAddress = ? and StringData:Address = ?
+            if(and_value == "?" && rx.bindNext())
+                and_value = rx.bindValue();
+
             content.sql_and << SqlAnd{SqlField{and_key_type, and_key_name}, and_operator, and_value};
         }
     }
@@ -69,6 +76,11 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
         QString sql_string = rx.cap(0);
         QString sql_field  = rx.cap(1);
         QString sql_obid   = rx.cap(2);
+
+        //where obid = ?
+        if(sql_obid == "?" && rx.bindNext())
+            sql_obid = rx.bindValue().toString();
+
         content.obid = sql_obid;
 
         QStringList sql_field_list = sql_field.split(",", QString::SkipEmptyParts, Qt::CaseInsensitive);
@@ -106,10 +118,15 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
             content.error = ErrorQueryString(sql);
             return false;
         }
-        //obid, StringData:Name, IntegerData:PointAdress
+        //write into(obid, StringData:Name, IntegerData:PointAddress)
         rx.setPattern(rx_field);
         for(int k = 0; k < sql_field_list.count(); k ++) {
-            QVariant field_value = ifnull(bindvalueList.value(k), sql_bind_list.value(k));
+            QVariant field_value = sql_bind_list.value(k);
+
+            //values(?,?,?)
+            if(field_value == "?" && rx.bindNext())
+                field_value = rx.bindValue();
+
             if(k == 0) {
                 content.obid = field_value.toString();
             } else {
@@ -131,13 +148,11 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
     {
         QString sql_string          = rx.cap(0);
         QString sql_field           = rx.cap(1);
-        QString sql_field2          = rx.cap(2);
-        QString sql_table           = rx.cap(3);
-        QString sql_and             = rx.cap(4);
+        QString sql_table           = rx.cap(2);
+        QString sql_and             = rx.cap(3);
 
-        sql_field += sql_field2;
         if(sql_field.startsWith(ObidName)) {
-            sql_field.remove(0, 4);//4: length of obid
+            sql_field.remove(0, ObidName.length());
             content.sql_field << SqlField{"", ObidName};
         }
 
@@ -173,40 +188,16 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
             QString and_key_name    = rx.cap(2);
             QString and_operator    = rx.cap(3);
             QVariant and_value      = rx.cap(4);
+
+            //where IntegerData:PointAddress = ? and StringData:Address = ?
+            if(and_value == "?" && rx.bindNext())
+                and_value = rx.bindValue();
+
             content.sql_and << SqlAnd{SqlField{and_key_type, and_key_name}, and_operator, and_value};
         }
         //
     }
         break;
-    }
-    return true;
-}
-
-void OMSQueryParser::Parser::prepare(const QString &sql)
-{
-    m_prepareSql = sql;
-    m_bindvalueList.clear();
-}
-
-void OMSQueryParser::Parser::addBindValue(int index, const QVariant &var)
-{
-    m_bindvalueList << var;
-}
-
-bool OMSQueryParser::Parser::exec(SqlContent &content)
-{
-    if(!parse(m_prepareSql, content, m_bindvalueList)) {
-        qDebug() << content.error;
-        return false;
-    }
-    return true;
-}
-
-bool OMSQueryParser::Parser::exec(SqlContent &content, const QString &sql)
-{
-    if(!parse(sql, content)) {
-        qDebug() << content.error;
-        return false;
     }
     return true;
 }
@@ -243,14 +234,15 @@ int OMSQueryParser::BindRegexp::indexInExecType(const QString &str, OMSQueryPars
     return r;
 }
 
-QString OMSQueryParser::BindRegexp::cap(int nth)
+bool OMSQueryParser::BindRegexp::bindNext()
 {
-    QString capValue = QRegExp::cap(nth);
-    if(capValue == "?") {
-        m_bindvalueIndex++;
-        capValue = m_bindvalueList.value(m_bindvalueIndex).toString();
-    }
-    return capValue;
+    m_bindvalueIndex++;
+    return m_bindvalueIndex < m_bindvalueList.count();
+}
+
+QVariant OMSQueryParser::BindRegexp::bindValue()
+{
+    return m_bindvalueList.value(m_bindvalueIndex);
 }
 
 QString OMSQueryParser::regexpSql(OMSQueryParser::ExecType type)
@@ -263,7 +255,7 @@ QString OMSQueryParser::regexpSql(OMSQueryParser::ExecType type)
     case WriteAttribute:
         return R"(write\s+into\s+OMS\s*\((\s*obid(?:\s*,\s*\w+\s*:\s*\w+)*)\)\s*values\s*\((\s*\?(?:\s*,\s*\?)*)\))" + rx_option;
     case SelectAttribute:
-        return R"(select\s+((?:obid|\w+\s*:\s*\w+)?)((?:\s*,\s*\w+\s*:\s*\w+)*)\s+from\s+(\w+))" + rx_where;
+        return R"(select\s+((?:obid|\w+\s*:\s*\w+)?(?:\s*,\s*\w+\s*:\s*\w+)*)\s+from\s+(\w+))" + rx_where;
     case SelectCount:
         return R"(select\s+count\s+from\s+(\w+))" + rx_where;
     }

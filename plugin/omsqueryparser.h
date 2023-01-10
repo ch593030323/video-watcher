@@ -5,13 +5,12 @@
 #include <QVariant>
 #include <QRegExp>
 #include <QStringList>
-#include <QtDebug>
 
 namespace OMSQueryParser {
+
 #define StringToObId(string)        string.toULongLong()
 #define ErrorQueryString(sql)       ("Error: query '" + sql + "' cannot be resolved.")
 #define ErrorDataType(dataType)     ("Error: data type'" + dataType + "' cannot be resolved.")
-
 
 /**
  * @brief The ExecType enum
@@ -20,21 +19,29 @@ namespace OMSQueryParser {
 enum ExecType{
     None,
 
-    //
+    // select obid from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?
     SelectObIdList,
 
-    // select count from CCTVController where IntegerData:PointAdress = ? and StringData:Adress = ?
+    // select count from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?
     SelectCount,
 
-    // select StringData:Name, IntegerData:PointAdress from OMS where obid = ?
+    // select StringData:Name, IntegerData:PointAddress from OMS where obid = ?
     SelectAttributeByObId,
 
-    // write into OMS (obid, StringData:Name, IntegerData:PointAdress) values (?, ?, ?) writeOptions 23
+    // write into OMS (obid, StringData:Name, IntegerData:PointAddress) values (?, ?, ?) writeOptions 23
     WriteAttribute,
 
-    // select obid, StringData:Name, IntegerData:PointAdress from CCTVController where IntegerData:PointAdress = ? and StringData:Adress = ?
+    // select obid, StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?
+    // select obid                                           from CCTVController
+    // select StringData:Name, IntegerData:PointAddress       from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?
     SelectAttribute,
 };
+
+/**
+ * @brief ObidName
+ * 查询语句中出现的关键字obid
+ */
+static const QString ObidName = "obid";
 
 /**
  * @brief The SqlField struct
@@ -44,7 +51,6 @@ struct SqlField {
     QString type;
     QString name;
 };
-static const QString ObidName = "obid";
 
 /**
  * @brief The SqlAnd struct
@@ -105,13 +111,13 @@ static const QString rx_option   = R"((?:\s+writeOptions\s+(\w+))?)";
 static const QString rx_field    = R"((\w+)\s*:\s*(\w+))";
 static const QString rx_bindvalue= R"((?:\?|\w+))";
 
-//where IntegerData:PointAdress = ? and StringData:Adress = ?
+//where IntegerData:PointAddress = ? and StringData:Address = ?
 static const QString rx_where_d  = QString(R"(\s+where\s+(\w+\s*:\s*\w+\s*=\s*\?(?:\s+and\s+\w+\s*:\s*\w+\s*=\s*\?)*))")
         .replace("=", rx_operator)
         .replace(R"(\?)", rx_bindvalue);
 static const QString rx_where    = "(?:" + rx_where_d + ")?";
 
-//StringData:Adress = ? and StringData:xx = yy
+//StringData:Address = ? and StringData:xx = yy
 static const QString rx_and      = QString(R"((\w+)\s*:\s*(\w+)\s*(=)\s*(\?))")
         .replace("=", rx_operator)
         .replace(R"(\?)", rx_bindvalue);
@@ -135,7 +141,17 @@ struct BindRegexp : QRegExp {
      */
     int indexInExecType(const QString &str, OMSQueryParser::ExecType type);
 
-    QString cap(int nth);
+    /**
+     * @brief bindNext
+     * 遍历bindvalueList
+     */
+    bool bindNext();
+
+    /**
+     * @brief bindValue
+     * 通常在next()后调用，读取bindvalueList的值
+     */
+    QVariant bindValue();
 
 private:
     QVariantList m_bindvalueList;
@@ -151,18 +167,8 @@ public:
     Parser(QObject *parent = 0);
 
     bool parse(const QString &sql, SqlContent &content, const QVariantList &bindvalueList = QVariantList());
-    //
-    void prepare(const QString &sql);
 
-    void addBindValue(int index, const QVariant &var);
 
-    bool exec(SqlContent &content);
-    //
-    bool exec(SqlContent &content, const QString &sql);
-
-private:
-    QString      m_prepareSql;
-    QVariantList m_bindvalueList;
 };
 }
 

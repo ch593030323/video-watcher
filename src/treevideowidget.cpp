@@ -21,6 +21,22 @@ static QString cameraStateString(QString state) {
     return "unknow code:" + state;
 }
 
+QPixmap getCameraStatePixmap(QString state) {
+    if("0" == state) {
+        return lds::getFontPixmap(0x25cf, QColor("green"), QSize(12, 12));
+    }
+
+    if("1" == state) {
+        return lds::getFontPixmap(0xf05e, QColor("red"), QSize(12, 12));
+
+    }
+    if("2" == state) {
+        return lds::getFontPixmap(0x25cf, QColor(245, 180, 0), QSize(12, 12));
+    }
+
+    return QPixmap();
+}
+
 TreeVideoWidget::TreeVideoWidget(QWidget *parent)
     : QWidget(parent)
 {
@@ -70,11 +86,8 @@ TreeVideoWidget::TreeVideoWidget(QWidget *parent)
     connect(m_lineEdit, SIGNAL(textChanged(QString)), this, SLOT(slotSearchCamera(QString)));
     connect(m_treeView, SIGNAL(expanded(QModelIndex)), this, SLOT(slotUpdateAndExpandNode(QModelIndex)));
     connect(m_treeView, SIGNAL(signalRefresh()), this, SLOT(slotInitAll()));
-<<<<<<< Updated upstream
-=======
     connect(m_treeView, SIGNAL(signalSettings()), this, SLOT(slotSettings()));
 
->>>>>>> Stashed changes
 }
 
 void TreeVideoWidget::setDataSource(DataSource *datasource)
@@ -152,6 +165,7 @@ void TreeVideoWidget::slotInitSql()
         cameraValue["location_obid"] = "";
         cameraValue["type"] = "";
         cameraValue["state"] = "";
+        cameraValue["obid"] = "";
 
         cameraList.append(cameraValue);
     }
@@ -374,9 +388,7 @@ void TreeVideoWidget::updateCameraItemList(QStandardItem *item_location)
         item_device->setData(obid,              VideoObidRole);
         item_device->setData(state,             VideoStateRole);
         item_device->setData(url,               VideoUrlRole);
-        item_device->setData(lds::getFontPixmap(0xf05e, QColor("red"), QSize(12, 12)),   Qt::DecorationRole);
-        item_device->setData(lds::getFontPixmap(0x25cf, QColor("green"), QSize(12, 12)),   Qt::DecorationRole);
-        //            item_device->setData(lds::getFontPixmap(0x25cf, QColor(245, 180, 0), QSize(12, 12)),   Qt::DecorationRole);
+        item_device->setData(getCameraStatePixmap(state),   Qt::DecorationRole);
 
         item_location->appendRow(item_device);
 
