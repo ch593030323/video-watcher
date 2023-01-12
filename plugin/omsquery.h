@@ -41,7 +41,7 @@ public:
     bool selectAttributeByObId(const OMSQueryParser::SqlContent &content);
 
     /**
-     * @brief select
+     * @brief exec
      * 通用查询方法
      */
     bool exec(const QString &sql);
@@ -51,6 +51,7 @@ public:
      * @brief serialExec
      * 支持多条sql连续查询，上次的结果集是这次的输入参数
      * 使用前推荐用serialPrepare来清理下model
+     * exec = serialPrepare + serialExec
      */
     bool serialExec(const QString &sql);
     void serialPrepare();

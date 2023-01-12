@@ -514,3 +514,39 @@ QList<DataSource::Camera> DataSourceOMS::getCameraList(const QString &location_o
 
     return r;
 }
+
+QList<DataSource::CameraState> DataSourceOMS::getCameraStateList()
+{
+    QList<DataSource::CameraState> r;
+    OMSQuery query(m_database);
+    query.serialPrepare();
+    query.serialExec("select obid, StringData:Name from ObjectType where StringData:Name = Camera");
+    query.serialExec("select LongLongData:ObjectSpecifier,StringData:Name from ObjectAttribute "
+                       "where StringData:Name = FaultState and LinkData:ParentLink=?");
+    query.serialExec("select obid, StringData:Name, IntegerData:Rank from Choice where LinkData:ParentLink=?");
+    while(query.next()) {
+        DataSource::CameraState d;
+        d.rank = query.value("Rank").toInt();
+        d.name = query.value("Name").toString();
+        r << d;
+    }
+    return r;
+}
+
+QList<DataSource::CameraType> DataSourceOMS::getCameraTypeList()
+{
+    QList<DataSource::CameraType> r;
+    OMSQuery query(m_database);
+    query.serialPrepare();
+    query.serialExec("select obid, StringData:Name from ObjectType where StringData:Name = Camera");
+    query.serialExec("select LongLongData:ObjectSpecifier,StringData:Name from ObjectAttribute "
+                       "where StringData:Name = Type and LinkData:ParentLink=?");
+    query.serialExec("select obid, StringData:Name, IntegerData:Rank from Choice where LinkData:ParentLink=?");
+    while(query.next()) {
+        DataSource::CameraType d;
+        d.rank = query.value("Rank").toInt();
+        d.name = query.value("Name").toString();
+        r << d;
+    }
+    return r;
+}

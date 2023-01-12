@@ -9,12 +9,18 @@ class TreeVideoView : public QTreeView
 public:
     TreeVideoView(QWidget *parent = 0);
 
+    void hideMenu();
 signals:
     void signalRefresh();
     void signalSettings();
+    void signalExportJson();
+    void signalImportJson();
 
 protected:
     void contextMenuEvent(QContextMenuEvent * event);
+
+private:
+    bool m_hideMenu;
 };
 
 #endif // TREEVIDEOVIEW_H

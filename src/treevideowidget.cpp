@@ -2,6 +2,7 @@
 #include "treevideoview.h"
 #include "treevideomodel.h"
 #include "json/json.h"
+#include "lds.h"
 
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -21,16 +22,16 @@ static QString cameraStateString(QString state) {
     return "unknow code:" + state;
 }
 
-QPixmap getCameraStatePixmap(QString state) {
-    if("0" == state) {
+QPixmap getCameraStatePixmap(int state) {
+    if(0 == state) {
         return lds::getFontPixmap(0x25cf, QColor("green"), QSize(12, 12));
     }
 
-    if("1" == state) {
+    if(1 == state) {
         return lds::getFontPixmap(0xf05e, QColor("red"), QSize(12, 12));
 
     }
-    if("2" == state) {
+    if(2 == state) {
         return lds::getFontPixmap(0x25cf, QColor(245, 180, 0), QSize(12, 12));
     }
 
@@ -79,7 +80,6 @@ TreeVideoWidget::TreeVideoWidget(QWidget *parent)
 
     setLayout(vlayout);
 
-
     connect(m_lineEdit, SIGNAL(textChanged(QString)), this, SLOT(slotShowCloseButton(QString)));
     connect(m_buttonClose, SIGNAL(clicked()), m_lineEdit, SLOT(clear()));
     connect(m_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSelectStation(int)));
@@ -87,7 +87,8 @@ TreeVideoWidget::TreeVideoWidget(QWidget *parent)
     connect(m_treeView, SIGNAL(expanded(QModelIndex)), this, SLOT(slotUpdateAndExpandNode(QModelIndex)));
     connect(m_treeView, SIGNAL(signalRefresh()), this, SLOT(slotInitAll()));
     connect(m_treeView, SIGNAL(signalSettings()), this, SLOT(slotSettings()));
-
+    connect(m_treeView, SIGNAL(signalExportJson()), this, SLOT(slotExportJson()));
+    connect(m_treeView, SIGNAL(signalImportJson()), this, SLOT(slotImportJson()));
 }
 
 void TreeVideoWidget::setDataSource(DataSource *datasource)
@@ -110,6 +111,11 @@ QModelIndex TreeVideoWidget::currentIndex()
     return m_treeView->currentIndex();
 }
 
+void TreeVideoWidget::hideMenu()
+{
+    m_treeView->hideMenu();
+}
+
 void TreeVideoWidget::slotInitAll()
 {
     slotInitSql();
@@ -121,6 +127,7 @@ void TreeVideoWidget::slotInitSql()
     QSqlQuery q;
     q.exec("delete from vw_location");
     q.exec("delete from vw_device");
+    q.exec("delete from vw_device_state");
     for(DataSource::Location location : m_datasource->getLocationList()) {
         QString obid = location.obid;
         QString name = location.name;
@@ -140,41 +147,11 @@ void TreeVideoWidget::slotInitSql()
                    .arg(obid));
         }
     }
-    Json::Value root;
-    Json::FastWriter writer;
-
-    Json::Value global;
-    {
-        Json::Value state_choice;
-        state_choice["0"] = QString::fromUtf8("在线").toStdString();
-        state_choice["1"] = QString::fromUtf8("故障").toStdString();
-        state_choice["2"] = QString::fromUtf8("离线").toStdString();
-        global["state_choice"] = state_choice;
-
-        global["column_count"] = 2;
-        global["row_count"] = 2;
-        global["default_video_url_list"] = "";
+    for(DataSource::CameraState state : m_datasource->getCameraStateList()) {
+        q.exec(QString("insert into vw_device_state(rank, name) values(%1, '%2')")
+               .arg(state.rank)
+               .arg(state.name));
     }
-    root["global"] = global;
-
-    Json::Value cameraList;
-    {
-        Json::Value cameraValue;
-        cameraValue["obid"] = "";
-        cameraValue["name"] = "";
-        cameraValue["location_obid"] = "";
-        cameraValue["type"] = "";
-        cameraValue["state"] = "";
-        cameraValue["obid"] = "";
-
-        cameraList.append(cameraValue);
-    }
-    root["cameraList"] = cameraList;
-    std::string json_file = writer.write(root);
-    QString jsonString = QString::fromStdString(json_file).toLocal8Bit();
-
-    qDebug() << "jsonString" << jsonString;
-
 }
 
 void TreeVideoWidget::slotInitControl()
@@ -229,6 +206,20 @@ void TreeVideoWidget::slotAppSettings()
     int x = xy.split(",").value(0).toInt();
     int y = xy.split(",").value(1).toInt();
     this->parentWidget()->parentWidget()->setGeometry(x, y, w, h);
+}
+
+void TreeVideoWidget::slotExportJson()
+{
+    QFile file("video.json");
+    file.open(QFile::WriteOnly);
+    file.write(m_datasource->toJson());
+    file.close();
+}
+
+void TreeVideoWidget::slotImportJson()
+{
+    m_datasource->fromJson("video.json");
+    slotInitAll();
 }
 
 void TreeVideoWidget::slotShowCloseButton(const QString &text)
@@ -373,15 +364,18 @@ void TreeVideoWidget::updateCameraItemList(QStandardItem *item_location)
 
     query_device.exec(QString("select * from vw_device where location_obid = '%1' ").arg(location_obid));
     while(query_device.next()) {
-        QString state = query_device.record().value("state").toString();
-        QString name = QString::fromUtf8(query_device.record().value("name").toByteArray());
-        QString type = query_device.record().value("type").toString();
         QString obid = query_device.record().value("obid").toString();
+        QString name = QString::fromUtf8(query_device.record().value("name").toByteArray());
+        int state = query_device.record().value("state").toInt();
+        int type = query_device.record().value("type").toInt();
         QString url = query_device.record().value("url").toString();
+
+        QString stateName = m_datasource->getCameraStateName(state);
+        QString typeName = m_datasource->getCameraTypeName(type);
 
         QStandardItem *item_device = new QStandardItem;
         item_device->setText(name);
-        item_device->setToolTip("[" + cameraStateString(state) + "]" + name);
+        item_device->setToolTip("[" + stateName+ "]" + "[" + typeName + "]" + name);
         item_device->setData(VideoNodeTrain,    VideoNodeType);
         item_device->setData(name,              VideoNameRole);
         item_device->setData(type,              VideoTypeRole);

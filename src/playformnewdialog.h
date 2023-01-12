@@ -1,9 +1,12 @@
 #ifndef PLAYFORMNEWDIALOG_H
 #define PLAYFORMNEWDIALOG_H
 
+#include "lds.h"
+#include "videolayout.h"
+#include "datasource.h"
+
 #include <QDialog>
 #include <QMap>
-#include "lds.h"
 
 class VideoWidget;
 

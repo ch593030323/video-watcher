@@ -1,14 +1,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "videowidget.h"
+#include "ffmpeg.h"
+#include "datasource.h"
+
 #include <QWidget>
 #include <QStandardItemModel>
-#include "videowidget.h"
 #include <QtGui>
 //#include "QJsonDocument.h"
 //#include "QJsonObject.h"
 //#include "QJsonArray.h"
-#include "ffmpeg.h"
 
 
 class TreeVideoModel;

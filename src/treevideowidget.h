@@ -2,8 +2,9 @@
 #define TREEVIDEOWIDGET_H
 
 #include <QWidget>
+#include <QStandardItem>
 
-#include "lds.h"
+#include "datasource.h"
 
 class TreeVideoView;
 class QAbstractItemModel;
@@ -29,12 +30,16 @@ public:
 
     QModelIndex currentIndex();
 
+    void hideMenu();
+
 public slots:
     void slotInitAll();
     void slotInitSql();
     void slotInitControl();
     void slotSettings();
     void slotAppSettings();
+    void slotExportJson();
+    void slotImportJson();
 
 private slots:
     void slotShowCloseButton(const QString &text);
@@ -49,7 +54,7 @@ private:
     void updateCameraItemList(const QString &location_obid);
     void updateCameraTree();
 
-private:
+public:
     TreeVideoView *m_treeView;
     QComboBox *m_comboBox;
     QLineEdit *m_lineEdit;

@@ -167,8 +167,6 @@ public:
     Parser(QObject *parent = 0);
 
     bool parse(const QString &sql, SqlContent &content, const QVariantList &bindvalueList = QVariantList());
-
-
 };
 }
 

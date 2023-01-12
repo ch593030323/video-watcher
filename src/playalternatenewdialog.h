@@ -2,7 +2,7 @@
 #define PLAYALTERNATENEWDIALOG_H
 
 #include "lds.h"
-
+#include "datasource.h"
 
 
 namespace Ui {

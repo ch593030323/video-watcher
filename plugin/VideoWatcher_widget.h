@@ -23,6 +23,8 @@ public:
 
     virtual QList<Location> getLocationList();
     virtual QList<Camera> getCameraList(const QString &location_obid);
+    virtual QList<CameraState> getCameraStateList();
+    virtual QList<CameraType> getCameraTypeList();
 
 private:
     OMSDatabase *m_database;

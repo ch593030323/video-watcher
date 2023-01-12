@@ -3,6 +3,7 @@
 
 #include "json/json.h"
 #include "lds.h"
+#include "videolayout.h"
 
 #include <QWidget>
 #include <QFrame>

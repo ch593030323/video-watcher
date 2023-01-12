@@ -14,7 +14,10 @@ HEADERS += \
     $$PWD/src/lds.h \
     $$PWD/src/videocontrolpanel.h \
     $$PWD/src/treevideoview.h \
-    $$PWD/src/treevideowidget.h
+    $$PWD/src/treevideowidget.h \
+    $$PWD/src/datasource.h \
+    $$PWD/src/playthread.h \
+    $$PWD/src/videolayout.h
 
 SOURCES += \
     $$PWD/src/mainwindow.cpp \
@@ -25,7 +28,10 @@ SOURCES += \
     $$PWD/src/lds.cpp \
     $$PWD/src/videocontrolpanel.cpp \
     $$PWD/src/treevideoview.cpp \
-    $$PWD/src/treevideowidget.cpp
+    $$PWD/src/treevideowidget.cpp \
+    $$PWD/src/datasource.cpp \
+    $$PWD/src/playthread.cpp \
+    $$PWD/src/videolayout.cpp
 
 
 FORMS += \
