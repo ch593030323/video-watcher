@@ -11,17 +11,6 @@
 #include <QComboBox>
 #include <QHeaderView>
 
-
-static QString cameraStateString(QString state) {
-    if("0" == state)
-        return QString::fromUtf8("在线");
-    if("1" == state)
-        return QString::fromUtf8("故障");
-    if("2" == state)
-        return QString::fromUtf8("离线");
-    return "unknow code:" + state;
-}
-
 QPixmap getCameraStatePixmap(int state) {
     if(0 == state) {
         return lds::getFontPixmap(0x25cf, QColor("green"), QSize(12, 12));

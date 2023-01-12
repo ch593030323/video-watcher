@@ -16,7 +16,7 @@ class JsonDataSource : public DataSource {
 public:
     JsonDataSource(const QString &jsonPath, QObject *parent = 0);
 
-    void update();
+    bool update();
 
     virtual QList<Location> getLocationList();
     virtual QList<Camera> getCameraList(const QString &location_obid);

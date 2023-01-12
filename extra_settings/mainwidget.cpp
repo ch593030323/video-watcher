@@ -19,7 +19,7 @@ mainWidget::mainWidget(QWidget *parent) :
     ui->setupUi(this);
     this->setObjectName("Window");
 
-    m_datasource = new JsonDataSource("D:/Users/Dy/Documents/qt_project/build-VideoWatcher-Desktop_Qt_5_9_6_MinGW_32bit-Debug/video.json", this);
+    m_datasource = new JsonDataSource("C:/Users/ch593/Documents/qt_project/build-VideoWatcher-Desktop_Qt_5_12_3_MinGW_32_bit-Debug/video.json", this);
     ui->treeView->hideMenu();
     ui->treeView->setDataSource(m_datasource);
 
@@ -28,7 +28,7 @@ mainWidget::mainWidget(QWidget *parent) :
     ui->tableView->setModel(m_tableModel);
     ui->tableView->horizontalHeader()->hide();
     ui->tableView->horizontalHeader()->setStretchLastSection(true);
-    ui->tableView->setEditTriggers(QTableView::AllEditTriggers);
+    ui->tableView->setEditTriggers(QTableView::SelectedClicked);
 
 
 
@@ -62,7 +62,8 @@ void mainWidget::toexit()
 
 void mainWidget::toreload()
 {
-    m_datasource->update();
+    if(!m_datasource->update())
+        return;
     ui->treeView->slotInitAll();
 
     ui->comboBox_state->clear();
@@ -81,13 +82,15 @@ void mainWidget::tosub_defatult_video_url()
 
 void mainWidget::toadd_defatult_video_url()
 {
-    int row = m_tableModel->rowCount() - 1;
-    if(row >= 0 && m_tableModel->index(row, 0).data().toString().trimmed().isEmpty()) {
-        m_tableModel->removeRow(row);
+    int row = m_tableModel->rowCount();
+    if(row > 0 && m_tableModel->index(row - 1, 0).data().toString().trimmed().isEmpty()) {
+        m_tableModel->removeRow(row -1);
     }
 
-    m_tableModel->insertRow(m_tableModel->rowCount());
-    ui->tableView->selectRow(m_tableModel->rowCount() - 1);
+    m_tableModel->insertRow(row);
+    ui->tableView->selectRow(row);
+    ui->tableView->setCurrentIndex(m_tableModel->index(row, 0));
+    ui->tableView->edit(m_tableModel->index(row, 0));
 }
 
 void mainWidget::toCheckTable(QWidget *editor, QAbstractItemDelegate::EndEditHint hint)
@@ -103,12 +106,13 @@ JsonDataSource::JsonDataSource(const QString &jsonPath, QObject *parent)
     m_jsonPath = jsonPath;
 }
 
-void JsonDataSource::update()
+bool JsonDataSource::update()
 {
     QSqlQuery query;
     QFile file(m_jsonPath);
     if(!file.open(QFile::ReadOnly)) {
         qDebug() << file.errorString();
+        return false;
     }
     QByteArray json =  file.readAll();
     Json::Value value;
@@ -159,6 +163,7 @@ void JsonDataSource::update()
             m_cameraList << camera_item;
         }
     }
+    return true;
 }
 
 QList<DataSource::Location> JsonDataSource::getLocationList()
