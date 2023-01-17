@@ -17,7 +17,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,1">
      <item>
-      <widget class="TreeVideoWidget" name="treeView" native="true"/>
+      <widget class="TreeVideoSearch" name="treeView" native="true"/>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -197,9 +197,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TreeVideoWidget</class>
+   <class>TreeVideoSearch</class>
    <extends>QWidget</extends>
-   <header>src/treevideowidget.h</header>
+   <header>src/treevideosearch.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

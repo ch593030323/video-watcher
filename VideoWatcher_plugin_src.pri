@@ -10,6 +10,7 @@ HEADERS += \
     $$PWD/src/playalternatenewdialog.h \
     $$PWD/src/playformnewdialog.h \
     $$PWD/src/treevideomodel.h \
+    $$PWD/src/treevideosearch.h \
     $$PWD/src/videowidget.h \
     $$PWD/src/lds.h \
     $$PWD/src/videocontrolpanel.h \
@@ -24,6 +25,7 @@ SOURCES += \
     $$PWD/src/playalternatenewdialog.cpp \
     $$PWD/src/playformnewdialog.cpp \
     $$PWD/src/treevideomodel.cpp \
+    $$PWD/src/treevideosearch.cpp \
     $$PWD/src/videowidget.cpp \
     $$PWD/src/lds.cpp \
     $$PWD/src/videocontrolpanel.cpp \

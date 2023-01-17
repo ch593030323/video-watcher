@@ -183,8 +183,8 @@ bool OMSQuery::exec(const QString &sql, const QVariantList &bindvalueList)
     case SelectAttributeByObId:
         return selectAttributeByObId(content);
     case WriteAttribute:
-        //TODO write
-        return false;
+
+        return writeAtrribute(content);
     case SelectAttribute:
         return selectAttribute(content);
     }
@@ -348,6 +348,62 @@ bool OMSQuery::selectAttribute(const SqlContent &content)
     return true;
 }
 
+//write into OMS (obid, StringData:Name) values(?, ?)
+bool OMSQuery::writeAtrribute(const QString &sql)
+{
+    Parser p;
+    SqlContent content;
+
+    if(!p.parse(sql, content)) {
+        m_lastError = content.error;
+        return false;
+    }
+    return writeAtrribute(content);
+}
+
+bool OMSQuery::writeAtrribute(const SqlContent &content)
+{
+    //option
+    WriteOptions writeOptions = PUT_IF_NOT_EQUAL;
+    if(!content.write_options.isEmpty()) {
+        writeOptions = int(content.write_options.toInt());
+    }
+
+    QVector<Request> reqVector(content.sql_bind.size());
+    QVector<QSharedPointer<Data> >fieldDataVector(content.sql_bind.size());
+
+    try {
+        //reqVector
+        for(int k = 0; k < content.sql_bind.size(); k ++) {
+            const SqlBind &bind = content.sql_bind[k];
+
+            if(!dataTypeIsValid(bind.field.type)) {
+                m_lastError = ErrorDataType(bind.field.type);
+                return false;
+            }
+
+            QSharedPointer<Data> fieldData = createDataPtr(bind.field.type, bind.value);
+            AType nAType = m_database->matchAType(bind.field.name.toLocal8Bit().data());
+            ObId nObId = StringToObId(content.obid);
+
+            fieldDataVector[k] = fieldData;
+            reqVector[k].set(nObId,
+                             nAType,
+                             fieldData.data(),
+                             NULL,
+                             0,
+                             writeOptions,
+                             NULL);
+        }
+        //write
+        m_database->write(reqVector.data(), reqVector.size());
+    } catch(Exception &e) {
+        m_lastError = QString::fromStdString(e.getDescription());
+        return false;
+    }
+    return true;
+}
+
 bool OMSQuery::next()
 {
     m_model_row ++;
@@ -379,36 +435,88 @@ void OMSQuery::test()
         query.exec("select obid from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
                    QVariantList() << 10 << 28);
         query.printModel("selectObIdList");
+        query.exec("select obid from CCTVController where IntegerData:PointAddress = 10 and StringData:Address = 28");
+        query.printModel("selectObIdList");
 
         query.exec("select count from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
                    QVariantList() << 10 << 28);
+        query.printModel("selectCount");
+        query.exec("select count from CCTVController where IntegerData:PointAddress = 10 and StringData:Address = 28");
         query.printModel("selectCount");
 
         query.exec("select StringData:Name, IntegerData:PointAddress from OMS where obid = ?",
                    QVariantList() << "2023055425537  ");
         query.printModel("selectAttributeByObId");
+        query.exec("select StringData:Name, IntegerData:PointAddress from OMS where obid = 2023055425537");
+        query.printModel("selectAttributeByObId");
 
         query.exec("select obid, StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
                    QVariantList() << 10 << 28);
+        query.printModel("SelectAttribute");
+        query.exec("select obid, StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = 10 and StringData:Address = 28");
         query.printModel("SelectAttribute");
 
         query.exec("select StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
                    QVariantList() << 10 << 28);
         query.printModel("SelectAttribute");
+        query.exec("select StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = 10 and StringData:Address = 28");
+        query.printModel("SelectAttribute");
 
         query.exec("select obid from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
                    QVariantList() << 10 << 28);
         query.printModel("SelectAttribute");
+        query.exec("select obid from CCTVController where IntegerData:PointAddress = 10 and StringData:Address = 28");
+        query.printModel("SelectAttribute");
+
+
+        //test for write into
+        //  select obid, Name
+        query.exec("select obid, StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
+                   QVariantList() << 10 << 28);
+        query.next();
+        ObId obid = StringToObId(query.value("obid").toString());
+        QString Name = query.value("Name").toString();
+        //  482 "2023055425537" "马家园车辆段"
+        //  chang Name
+        Name += "(1)";
+        //  write
+        query.exec("write into OMS (obid, StringData:Name) values(?, ?)",
+                   QVariantList() << obid << Name);
+        //  read
+        query.exec("select obid, StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
+                   QVariantList() << 10 << 28);
+        query.next();
+        //  check
+        if(Name != query.value("Name").toString()) {
+            qDebug() << "Error: test failed";
+        } else {
+            Name = query.value("Name").toString();
+            Name.chop(3);
+            //restore
+            query.exec("write into OMS (obid, StringData:Name) values(?, ?)",
+                       QVariantList() << obid << Name);
+            query.exec("select obid, StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
+                       QVariantList() << 10 << 28);
+            query.next();
+            qDebug() << __LINE__ << query.value("obid").toString() << query.value("Name").toString();
+        }
+
     }
 
     //serialExec
     {
         OMSQuery query(m_database);
 
-        query.serialPrepare();
-        query.serialExec("select obid, StringData:Name from ObjectType where StringData:Name = Camera");
+        query.exec("select obid, StringData:Name from ObjectType where StringData:Name = Camera");
         query.serialExec("select LongLongData:ObjectSpecifier,StringData:Name from ObjectAttribute "
-                           "where StringData:Name = FaultState and LinkData:ParentLink=?");
+                         "where StringData:Name = FaultState and LinkData:ParentLink=?");
+        query.serialExec("select obid, StringData:Name, IntegerData:Rank from Choice where LinkData:ParentLink=?");
+        query.printModel("serialExec");
+
+
+        query.exec("select obid, StringData:Name from ObjectType where StringData:Name = ?", QVariantList() << "Camera");
+        query.serialExec("select LongLongData:ObjectSpecifier,StringData:Name from ObjectAttribute "
+                         "where StringData:Name = FaultState and LinkData:ParentLink=?");
         query.serialExec("select obid, StringData:Name, IntegerData:Rank from Choice where LinkData:ParentLink=?");
         query.printModel("serialExec");
     }
@@ -489,6 +597,10 @@ void OMSQuery::clearModel()
 
 void OMSQuery::printModel(QString title)
 {
+    if(m_model->rowCount() == 0) {
+        qDebug() << title <<  "Error: No Data!";
+        return;
+    }
     int width_cell = 13;
     int width_table = 1;
     for(int col = 0; col < m_model->columnCount(); col ++) {
@@ -503,7 +615,7 @@ void OMSQuery::printModel(QString title)
     //head
     QString heads = "|";
     for(int col = 0; col < m_model->columnCount(); col ++) {
-       heads += m_model->headerData(col, Qt::Horizontal).toString().leftJustified(width_cell) + "|";
+        heads += m_model->headerData(col, Qt::Horizontal).toString().leftJustified(width_cell) + "|";
     }
     qDebug() << heads;
     qDebug() << QString(width_table, '-');

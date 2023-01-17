@@ -13,10 +13,7 @@ QString LayoutCell::url() const
 
 QString LayoutCell::url(QString device_obid)
 {
-    QSqlQuery query_device;
-    query_device.exec(QString(" select url from wx_device where obid = '%1'").arg(device_obid));
-    query_device.next();
-    return query_device.record().value("url").toString();
+    return lds::selectValue("select url from wx_device where obid = '%1'", device_obid).toString();
 }
 
 int LayoutCell::indexOf(QRect rect, const QList<LayoutCell> &list)

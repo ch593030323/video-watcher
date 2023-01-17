@@ -1,8 +1,6 @@
 #ifndef LDS_H
 #define LDS_H
 
-#include "playthread.h"
-
 #include <QRect>
 #include <QWidget>
 #include <QChar>
@@ -60,9 +58,6 @@ public:
 
 //    static QRect AppBoundingRect;
     static QRect MoveToCenter(QWidget *widget, QRect rect);
-
-    //url and play thread
-    static QMap<QString, PlayThread *> PlayThreadMap;
 
     static QString IconFontFamily;
     static QPixmap getFontPixmap(QChar ch, const QColor &color = QColor("#f6f5fb"), const QSize &size = QSize(40, 40));

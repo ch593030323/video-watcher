@@ -28,20 +28,17 @@ HEADERS += \
     src/datasource.h \
     src/treevideomodel.h \
     src/treevideoview.h \
-    src/treevideowidget.h \
-    src/lds.h \
-    src/playthread.h
+    src/treevideosearch.h \
+    src/lds.h
 
 SOURCES += \
     src/datasource.cpp \
     src/treevideomodel.cpp \
     src/treevideoview.cpp \
-    src/treevideowidget.cpp \
-    src/lds.cpp \
-    src/playthread.cpp
+    src/treevideosearch.cpp \
+    src/lds.cpp
 
 include(jsoncpp/jsoncpp.pri)
-include(ffmpeg/ffmpeg.pri)
 
 RESOURCES += \
     resources/res.qrc

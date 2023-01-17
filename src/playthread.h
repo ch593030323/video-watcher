@@ -10,7 +10,10 @@
 class PlayThread : public FFmpegThread{
     Q_OBJECT
 public:
-    explicit PlayThread(const QString &url, QObject *parent = 0) : FFmpegThread(url, parent) {}
+    //url and play thread
+    static QMap<QString, PlayThread *> PlayThreadMap;
+public:
+    explicit PlayThread(const QString &url, QObject *parent = 0);
     virtual ~PlayThread();
     int receiverImageConnectionCount() const;
     void open();

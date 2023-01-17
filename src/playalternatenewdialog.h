@@ -4,6 +4,8 @@
 #include "lds.h"
 #include "datasource.h"
 
+#include <QDialog>
+
 
 namespace Ui {
 class PlayAlternateNewDialog;

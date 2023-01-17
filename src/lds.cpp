@@ -1,8 +1,12 @@
 #include "lds.h"
 #include "json/json.h"
 
+#include <QFont>
+#include <QApplication>
+#include <QPainter>
+#include <QFontDatabase>
+
 //QRect lds::AppBoundingRect;
-QMap<QString, PlayThread *> lds::PlayThreadMap;
 QString lds::IconFontFamily;
 
 QColor lds::highlightColor;
@@ -194,7 +198,6 @@ void lds::init()
                                        "value varchar(20)"
                                        ")"
                                        );
-    qRegisterMetaType<FFmpegData>("FFmpegData");
 }
 
 QList<AlterPlayFrame> AlterPlayFrame::readFrom(const QString &filepath)

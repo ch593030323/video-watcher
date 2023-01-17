@@ -67,7 +67,7 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
             if(and_value == "?" && rx.bindNext())
                 and_value = rx.bindValue();
 
-            content.sql_and << SqlAnd{SqlField{and_key_type, and_key_name}, and_operator, and_value};
+            content.sql_and << SqlAnd{{and_key_type, and_key_name}, and_operator, and_value};
         }
     }
         break;
@@ -109,7 +109,6 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
         QStringList sql_field_list = sql_field.split(",", QString::SkipEmptyParts);
         QStringList sql_bind_list = sql_bind.split(",", QString::SkipEmptyParts);
 
-        content.write_options = sql_write_options;
         if(sql_field_list.isEmpty()) {
             content.error = ErrorQueryString(sql);
             return false;
@@ -121,7 +120,8 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
         //write into(obid, StringData:Name, IntegerData:PointAddress)
         rx.setPattern(rx_field);
         for(int k = 0; k < sql_field_list.count(); k ++) {
-            QVariant field_value = sql_bind_list.value(k);
+            //trimmed if field_value is ' ?'
+            QVariant field_value = sql_bind_list.value(k).trimmed();
 
             //values(?,?,?)
             if(field_value == "?" && rx.bindNext())
@@ -139,8 +139,20 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
                 QString field_key       = rx.cap(1);
                 QString field_name      = rx.cap(2);
 
-                content.sql_bind << SqlBind{field_key, field_name, field_value};
+                content.sql_bind << SqlBind{{field_key, field_name}, field_value};
             }
+        }
+        //write option
+        content.write_options = sql_write_options;
+        if(content.write_options == "?" && rx.bindNext())
+            content.write_options = rx.bindValue().toString();
+
+        //  write_option must be digit
+        bool numberOk = false;
+        content.write_options.toInt(&numberOk);
+        if(!content.write_options.isEmpty() && !numberOk) {
+            content.error = ErrorQueryStringMsg("writeOptions must be digit!", sql);
+            return false;
         }
     }
         break;
@@ -193,7 +205,7 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
             if(and_value == "?" && rx.bindNext())
                 and_value = rx.bindValue();
 
-            content.sql_and << SqlAnd{SqlField{and_key_type, and_key_name}, and_operator, and_value};
+            content.sql_and << SqlAnd{{and_key_type, and_key_name}, and_operator, and_value};
         }
         //
     }
@@ -251,9 +263,11 @@ QString OMSQueryParser::regexpSql(OMSQueryParser::ExecType type)
     case SelectObIdList:
         return R"(select\s+obid\s+from\s+(\w+))" + rx_where;
     case SelectAttributeByObId:
-        return R"(select\s+(\w+\s*:\s*\w+(?:\s*,\s*\w+\s*:\s*\w+)*)\s+from\s+OMS\s+where\s+obid\s*=\s*(\?))";
+        return QString(R"(select\s+(\w+\s*:\s*\w+(?:\s*,\s*\w+\s*:\s*\w+)*)\s+from\s+OMS\s+where\s+obid\s*=\s*(\?))")
+                .replace(R"(\?)", rx_bindvalue);
     case WriteAttribute:
-        return R"(write\s+into\s+OMS\s*\((\s*obid(?:\s*,\s*\w+\s*:\s*\w+)*)\)\s*values\s*\((\s*\?(?:\s*,\s*\?)*)\))" + rx_option;
+        return QString(R"(write\s+into\s+OMS\s*\((\s*obid(?:\s*,\s*\w+\s*:\s*\w+)*)\)\s*values\s*\((\s*\?(?:\s*,\s*\?)*)\))" + rx_option)
+                .replace(R"(\?)", rx_bindvalue);
     case SelectAttribute:
         return R"(select\s+((?:obid|\w+\s*:\s*\w+)?(?:\s*,\s*\w+\s*:\s*\w+)*)\s+from\s+(\w+))" + rx_where;
     case SelectCount:

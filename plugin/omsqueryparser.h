@@ -8,9 +8,10 @@
 
 namespace OMSQueryParser {
 
-#define StringToObId(string)        string.toULongLong()
-#define ErrorQueryString(sql)       ("Error: query '" + sql + "' cannot be resolved.")
-#define ErrorDataType(dataType)     ("Error: data type'" + dataType + "' cannot be resolved.")
+#define StringToObId(string)            string.toULongLong()
+#define ErrorQueryString(sql)           ("Error: query '" + sql + "' cannot be resolved.")
+#define ErrorQueryStringMsg(msg, sql)   (QString() + "Error: " + msg + " In query '" + sql + "' cannot be resolved.")
+#define ErrorDataType(dataType)         ("Error: data type'" + dataType + "' cannot be resolved.")
 
 /**
  * @brief The ExecType enum
@@ -107,7 +108,7 @@ struct SqlContent {
 //
 static const QString rx_operator = R"((?:=|!=|<|<=|>|>=){1})";
 static const QString rx_and_or   = R"((?:and|or){1})";
-static const QString rx_option   = R"((?:\s+writeOptions\s+(\w+))?)";
+static const QString rx_option   = R"((?:\s+writeOptions\s+(\?))?)";
 static const QString rx_field    = R"((\w+)\s*:\s*(\w+))";
 static const QString rx_bindvalue= R"((?:\?|\w+))";
 

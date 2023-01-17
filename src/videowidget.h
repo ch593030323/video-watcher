@@ -4,6 +4,7 @@
 #include "json/json.h"
 #include "lds.h"
 #include "videolayout.h"
+#include "playthread.h"
 
 #include <QWidget>
 #include <QFrame>

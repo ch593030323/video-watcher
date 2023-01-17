@@ -19,7 +19,7 @@ mainWidget::mainWidget(QWidget *parent) :
     ui->setupUi(this);
     this->setObjectName("Window");
 
-    m_datasource = new JsonDataSource("C:/Users/ch593/Documents/qt_project/build-VideoWatcher-Desktop_Qt_5_12_3_MinGW_32_bit-Debug/video.json", this);
+    m_datasource = new JsonDataSource("D:/Users/Dy/Documents/qt_project/build-VideoWatcher-Desktop_Qt_5_9_6_MinGW_32bit-Debug/video.json", this);
     ui->treeView->hideMenu();
     ui->treeView->setDataSource(m_datasource);
 

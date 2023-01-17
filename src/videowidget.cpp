@@ -122,7 +122,7 @@ void VideoWidget::updateImage(const FFmpegData &d)
         FFmpegThread *thread = qobject_cast<FFmpegThread *>(sender());
         if(!thread)
             return;
-        if(lds::PlayThreadMap.value(m_playListObid, NULL) != thread)
+        if(PlayThread::PlayThreadMap.value(m_playListObid, NULL) != thread)
             return;
     }
     m_ffmpegData = d;
@@ -132,7 +132,7 @@ void VideoWidget::updateImage(const FFmpegData &d)
 
 void VideoWidget::toControlPlay()
 {
-    PlayThread *thread = lds::PlayThreadMap.value(m_info.device_obid, NULL);
+    PlayThread *thread = PlayThread::PlayThreadMap.value(m_info.device_obid, NULL);
     if(!thread)
         return;
     thread->play();
@@ -142,7 +142,7 @@ void VideoWidget::toControlPlay()
 
 void VideoWidget::toControlPause()
 {
-    PlayThread *thread = lds::PlayThreadMap.value(m_info.device_obid, NULL);
+    PlayThread *thread = PlayThread::PlayThreadMap.value(m_info.device_obid, NULL);
     if(!thread)
         return;
     thread->pause();
@@ -398,7 +398,7 @@ void VideoWidget::removePlayer()
 
 void VideoWidget::removeThread(QString device_obid)
 {
-    PlayThread *thread = lds::PlayThreadMap.value(device_obid, NULL);
+    PlayThread *thread = PlayThread::PlayThreadMap.value(device_obid, NULL);
     if(!thread)
         return;
     disconnect(thread, SIGNAL(receiveImage(FFmpegData)), this, SLOT(updateImage(FFmpegData)));
@@ -410,7 +410,7 @@ void VideoWidget::removeThread(QString device_obid)
 
 void VideoWidget::addThread(QString device_obid)
 {
-    PlayThread *thread = lds::PlayThreadMap.value(device_obid, NULL);
+    PlayThread *thread = PlayThread::PlayThreadMap.value(device_obid, NULL);
     if(!thread)
         return;
     thread->open();
@@ -424,7 +424,7 @@ void VideoWidget::addPlayer(const QString &deviceObid)
     if(m_info.device_obid == deviceObid)
         return;
 
-    PlayThread *thread = lds::PlayThreadMap.value(deviceObid);
+    PlayThread *thread = PlayThread::PlayThreadMap.value(deviceObid);
     if(!thread)
         return;
 

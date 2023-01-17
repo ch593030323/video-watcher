@@ -61,6 +61,9 @@ void VideoControlPanel::showAutoHide(int timeout)
 
 void VideoControlPanel::updateProgress(int cur, int total)
 {
+    //当直播时，total小于零，即无播放时长
+    if(total < 0)
+        return;
     if(m_processCur == cur && m_processTotal == total)
         return;
     m_processCur = cur;

@@ -1,5 +1,14 @@
 #include "playthread.h"
 
+QMap<QString, PlayThread *> PlayThread::PlayThreadMap;
+
+PlayThread::PlayThread(const QString &url, QObject *parent)
+    : FFmpegThread(url, parent)
+{
+
+    qRegisterMetaType<FFmpegData>("FFmpegData");
+}
+
 PlayThread::~PlayThread()
 {
     if (this->isRunning()) {

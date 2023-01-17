@@ -71,6 +71,13 @@ public:
     bool selectAttribute(const OMSQueryParser::SqlContent &content);
 
     /**
+     * @brief writeAtrribute
+     * 写数据到OMS数据库里
+     */
+    bool writeAtrribute(const QString &sql);
+    bool writeAtrribute(const OMSQueryParser::SqlContent &content);
+
+    /**
     /* @brief lastError
      * 最后一次报错信息
      */
