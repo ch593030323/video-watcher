@@ -29,6 +29,7 @@ HEADERS += \
     src/treevideomodel.h \
     src/treevideoview.h \
     src/treevideosearch.h \
+    src/tableviewadd.h \
     src/lds.h
 
 SOURCES += \
@@ -36,6 +37,7 @@ SOURCES += \
     src/treevideomodel.cpp \
     src/treevideoview.cpp \
     src/treevideosearch.cpp \
+    src/tableviewadd.cpp \
     src/lds.cpp
 
 include(jsoncpp/jsoncpp.pri)

@@ -12,7 +12,6 @@ DataSource::DataSource(QObject *parent)
 
 QByteArray DataSource::toJson()
 {
-
     Json::Value settings;
     settings["default_column_count"] = lds::selectValue("select value from vw_settings where name = 'settings:%1' ", "default_column_count").toInt();
     settings["default_row_count"] = lds::selectValue("select value from vw_settings where name = 'settings:%1' ", "default_row_count").toInt();

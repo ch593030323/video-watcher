@@ -23,22 +23,11 @@ mainWidget::mainWidget(QWidget *parent) :
     ui->treeView->hideMenu();
     ui->treeView->setDataSource(m_datasource);
 
-    m_tableModel = new QStandardItemModel(this);
-    m_tableModel->setHorizontalHeaderLabels({"head"});
-    ui->tableView->setModel(m_tableModel);
-    ui->tableView->horizontalHeader()->hide();
-    ui->tableView->horizontalHeader()->setStretchLastSection(true);
-    ui->tableView->setEditTriggers(QTableView::SelectedClicked);
-
-
-
     connect(ui->treeView->m_treeView->selectionModel(), SIGNAL(currentChanged(QModelIndex, QModelIndex)), this, SLOT(slotUpdateInfo(QModelIndex, QModelIndex)));
     connect(ui->pushButton_exit, SIGNAL(clicked()), this, SLOT(toexit()));
     connect(ui->pushButton_reload, SIGNAL(clicked()), this, SLOT(toreload()));
-    connect(ui->pushButton_sub_defatult_video_url, SIGNAL(clicked()), this, SLOT(tosub_defatult_video_url()));
-    connect(ui->pushButton_add_defatult_video_url, SIGNAL(clicked()), this, SLOT(toadd_defatult_video_url()));
-    connect(ui->tableView->itemDelegate(), SIGNAL(closeEditor(QWidget *, QAbstractItemDelegate::EndEditHint)),
-            this, SLOT(toCheckTable(QWidget *, QAbstractItemDelegate::EndEditHint)));
+    connect(ui->pushButton_sub_defatult_video_url, SIGNAL(clicked()), ui->tableView, SLOT(toRemove()));
+    connect(ui->pushButton_add_defatult_video_url, SIGNAL(clicked()), ui->tableView, SLOT(toAdd()));
 
     toreload();
 }
@@ -73,31 +62,6 @@ void mainWidget::toreload()
     ui->comboBox_type->clear();
     for(DataSource::CameraType state : m_datasource->getCameraTypeList())
         ui->comboBox_type->addItem(state.name, state.rank);
-}
-
-void mainWidget::tosub_defatult_video_url()
-{
-    m_tableModel->removeRow(ui->tableView->currentIndex().row());
-}
-
-void mainWidget::toadd_defatult_video_url()
-{
-    int row = m_tableModel->rowCount();
-    if(row > 0 && m_tableModel->index(row - 1, 0).data().toString().trimmed().isEmpty()) {
-        m_tableModel->removeRow(row -1);
-    }
-
-    m_tableModel->insertRow(row);
-    ui->tableView->selectRow(row);
-    ui->tableView->setCurrentIndex(m_tableModel->index(row, 0));
-    ui->tableView->edit(m_tableModel->index(row, 0));
-}
-
-void mainWidget::toCheckTable(QWidget *editor, QAbstractItemDelegate::EndEditHint hint)
-{
-    if(editor && editor->property("text").toString().trimmed().isEmpty()) {
-        m_tableModel->removeRow(m_tableModel->rowCount() - 1);
-    }
 }
 
 JsonDataSource::JsonDataSource(const QString &jsonPath, QObject *parent)

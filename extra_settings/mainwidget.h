@@ -41,15 +41,10 @@ private slots:
     void slotUpdateInfo(const QModelIndex &current, const QModelIndex &previous);
     void toexit();
     void toreload();
-    void tosub_defatult_video_url();
-    void toadd_defatult_video_url();
-    void toCheckTable(QWidget *editor, QAbstractItemDelegate::EndEditHint hint);
-
 
 private:
     Ui::mainWidget *ui;
     JsonDataSource *m_datasource;
-    QStandardItemModel *m_tableModel;
 };
 
 #endif // MAINWIDGET_H
