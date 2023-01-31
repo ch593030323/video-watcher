@@ -606,6 +606,7 @@ void OMSQuery::printModel(QString title)
     for(int col = 0; col < m_model->columnCount(); col ++) {
         width_table += width_cell + 1;
     }
+    width_table = qMax(width_table, 2 * (width_cell + 1) + 1);
     //title
     QString title_line;
     int width_title = (width_table - title.size() + 1)/2;

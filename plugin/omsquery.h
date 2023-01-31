@@ -98,7 +98,7 @@ public:
 
     /**
      * @brief test
-     * 测试
+     * 仅测试环境下，用于测试功能的完整性
      */
     void test();
 private:
