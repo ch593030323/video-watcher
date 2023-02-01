@@ -58,16 +58,15 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
             }
 
             QString and_string      = rx.cap(0);
-            QString and_key_type    = rx.cap(1);
-            QString and_key_name    = rx.cap(2);
-            QString and_operator    = rx.cap(3);
-            QVariant and_value      = rx.cap(4);
+            QString and_key_name    = rx.cap(1);
+            QString and_operator    = rx.cap(2);
+            QVariant and_value      = rx.cap(3);
 
-            //where IntegerData:PointAddress = ? and StringData:Address = ?
+            //where PointAddress = ? and Address = ?
             if(and_value == "?" && rx.bindNext())
                 and_value = rx.bindValue();
 
-            content.sql_and << SqlAnd{{and_key_type, and_key_name}, and_operator, and_value};
+            content.sql_and << SqlAnd{and_key_name.toLocal8Bit(), and_operator, and_value};
         }
     }
         break;
@@ -93,9 +92,8 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
             }
 
             QString field_string = rx.cap(0);
-            QString field_type   = rx.cap(1);
-            QString field_name   = rx.cap(2);
-            content.sql_field << SqlField{field_type, field_name};
+            QString field_name   = rx.cap(1);
+            content.sql_field_list << field_name.toLocal8Bit();
         }
     }
         break;
@@ -117,7 +115,7 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
             content.error = ErrorQueryString(sql);
             return false;
         }
-        //write into(obid, StringData:Name, IntegerData:PointAddress)
+        //write into(obid, Name, PointAddress)
         rx.setPattern(rx_field);
         for(int k = 0; k < sql_field_list.count(); k ++) {
             //trimmed if field_value is ' ?'
@@ -136,10 +134,9 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
                     return false;
                 }
                 QString field_string    = rx.cap(0);
-                QString field_key       = rx.cap(1);
-                QString field_name      = rx.cap(2);
+                QString field_name      = rx.cap(1);
 
-                content.sql_bind << SqlBind{{field_key, field_name}, field_value};
+                content.sql_bind << SqlBind{field_name.toLocal8Bit(), field_value};
             }
         }
         //write option
@@ -165,7 +162,7 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
 
         if(sql_field.startsWith(ObidName)) {
             sql_field.remove(0, ObidName.length());
-            content.sql_field << SqlField{"", ObidName};
+            content.sql_field_list << ObidName.toLocal8Bit();
         }
 
         content.table = sql_table;
@@ -180,9 +177,8 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
             }
 
             QString field_string = rx.cap(0);
-            QString field_type   = rx.cap(1);
-            QString field_name   = rx.cap(2);
-            content.sql_field << SqlField{field_type, field_name};
+            QString field_name   = rx.cap(1);
+            content.sql_field_list << field_name.toLocal8Bit();
         }
 
         //
@@ -196,16 +192,15 @@ bool OMSQueryParser::Parser::parse(const QString &sql, OMSQueryParser::SqlConten
             }
 
             QString and_string      = rx.cap(0);
-            QString and_key_type    = rx.cap(1);
-            QString and_key_name    = rx.cap(2);
-            QString and_operator    = rx.cap(3);
-            QVariant and_value      = rx.cap(4);
+            QString and_key_name    = rx.cap(1);
+            QString and_operator    = rx.cap(2);
+            QVariant and_value      = rx.cap(3);
 
-            //where IntegerData:PointAddress = ? and StringData:Address = ?
+            //where PointAddress = ? and Address = ?
             if(and_value == "?" && rx.bindNext())
                 and_value = rx.bindValue();
 
-            content.sql_and << SqlAnd{{and_key_type, and_key_name}, and_operator, and_value};
+            content.sql_and << SqlAnd{and_key_name.toLocal8Bit(), and_operator, and_value};
         }
         //
     }
@@ -221,13 +216,13 @@ void OMSQueryParser::SqlContent::print()
     qDebug() << "obid:" << obid;
     qDebug() << "write_options:" << write_options;
     for(SqlAnd value : sql_and) {
-        qDebug() <<  "sql_and:" << value.field.type << value.field.name << value.op << value.value;
+        qDebug() <<  "sql_and:" << value.field_name << value.op << value.value;
     }
-    for(SqlField value : sql_field) {
-        qDebug() << "sql_field:" << value.type << value.name;
+    for(QString value : sql_field_list) {
+        qDebug() << "sql_field:" << value;
     }
     for(SqlBind value : sql_bind) {
-        qDebug() << "sql_bind:" << value.field.type << value.field.name << value.value;
+        qDebug() << "sql_bind:" << value.field_name << value.value;
     }
 }
 
@@ -263,13 +258,13 @@ QString OMSQueryParser::regexpSql(OMSQueryParser::ExecType type)
     case SelectObIdList:
         return R"(select\s+obid\s+from\s+(\w+))" + rx_where;
     case SelectAttributeByObId:
-        return QString(R"(select\s+(\w+\s*:\s*\w+(?:\s*,\s*\w+\s*:\s*\w+)*)\s+from\s+OMS\s+where\s+obid\s*=\s*(\?))")
+        return QString(R"(select\s+(\w+(?:\s*,\s*\w+)*)\s+from\s+OMS\s+where\s+obid\s*=\s*(\?))")
                 .replace(R"(\?)", rx_bindvalue);
     case WriteAttribute:
-        return QString(R"(write\s+into\s+OMS\s*\((\s*obid(?:\s*,\s*\w+\s*:\s*\w+)*)\)\s*values\s*\((\s*\?(?:\s*,\s*\?)*)\))" + rx_option)
+        return QString(R"(write\s+into\s+OMS\s*\((\s*obid(?:\s*,\s*\w+)*)\)\s*values\s*\((\s*\?(?:\s*,\s*\?)*)\))" + rx_option)
                 .replace(R"(\?)", rx_bindvalue);
     case SelectAttribute:
-        return R"(select\s+((?:obid|\w+\s*:\s*\w+)?(?:\s*,\s*\w+\s*:\s*\w+)*)\s+from\s+(\w+))" + rx_where;
+        return R"(select\s+((?:obid|\w+)?(?:\s*,\s*\w+)*)\s+from\s+(\w+))" + rx_where;
     case SelectCount:
         return R"(select\s+count\s+from\s+(\w+))" + rx_where;
     }

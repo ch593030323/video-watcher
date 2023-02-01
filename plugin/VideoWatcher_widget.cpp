@@ -53,19 +53,19 @@ void VideoWatcherWidget::setDatabase(Database *database)
 
     OMSQuery query(d);
     query.test();
-//    ChoiceData data;
-//    StringData stringData;
-//    AType att_atype = d->matchAType("Name");
-//    ObId id = 12884915094;
-//    std::cout << __LINE__ << att_atype << std::endl;
-//    Request req(id, att_atype, static_cast<Data*>(&stringData));
-//    d->read(&req, 1);
+    //    ChoiceData data;
+    //    StringData stringData;
+    //    AType att_atype = d->matchAType("Name");
+    //    ObId id = 12884915094;
+    //    std::cout << __LINE__ << att_atype << std::endl;
+    //    Request req(id, att_atype, static_cast<Data*>(&stringData));
+    //    d->read(&req, 1);
 
-//    std::cout << __LINE__ << " : " << QString::fromStdString(stringData).toStdString() << std::endl;
-////    std::cout << __LINE__ << std::endl;
-////    for(int k = 0 ; k < data.getNumberOfChoices(); k++) {
-////        std::cout << data.getObIds()[k] << data.getStrings()[k] << std::endl;
-////    }
+    //    std::cout << __LINE__ << " : " << QString::fromStdString(stringData).toStdString() << std::endl;
+    ////    std::cout << __LINE__ << std::endl;
+    ////    for(int k = 0 ; k < data.getNumberOfChoices(); k++) {
+    ////        std::cout << data.getObIds()[k] << data.getStrings()[k] << std::endl;
+    ////    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -471,12 +471,12 @@ QList<DataSource::Location> DataSourceOMS::getLocationList()
     QList<DataSource::Location> r;
     OMSQuery query_camera(m_database);
     OMSQuery query_cctv(m_database);
-    query_cctv.exec(QString("select obid, StringData:Name from CCTVController where IntegerData:PointAddress = %1  ")
+    query_cctv.exec(QString("select obid, Name from CCTVController where PointAddress = %1  ")
                     .arg(m_PointAddress));
     while(query_cctv.next()) {
         QString obid = query_cctv.value("obid").toString();
         QString name = QString::fromUtf8(query_cctv.value("Name").toByteArray().data());
-        query_camera.exec(QString("select count from Camera where LinkData:ParentLink = %1")
+        query_camera.exec(QString("select count from Camera where ParentLink = %1")
                           .arg(obid));
         query_camera.next();
         int count = query_camera.value(0).toInt();
@@ -498,7 +498,7 @@ QList<DataSource::Camera> DataSourceOMS::getCameraList(const QString &location_o
 {
     QList<DataSource::Camera> r;
     OMSQuery query_camera(m_database);
-    query_camera.exec(QString("select obid, StringData:Name,IntegerData:FaultState from Camera where LinkData:ParentLink = %1")
+    query_camera.exec(QString("select obid, Name, FaultState from Camera where ParentLink = %1")
                       .arg(location_obid));
     while(query_camera.next()) {
         DataSource::Camera d;
@@ -520,10 +520,10 @@ QList<DataSource::CameraState> DataSourceOMS::getCameraStateList()
     QList<DataSource::CameraState> r;
     OMSQuery query(m_database);
     query.serialPrepare();
-    query.serialExec("select obid, StringData:Name from ObjectType where StringData:Name = Camera");
-    query.serialExec("select LongLongData:ObjectSpecifier,StringData:Name from ObjectAttribute "
-                       "where StringData:Name = FaultState and LinkData:ParentLink=?");
-    query.serialExec("select obid, StringData:Name, IntegerData:Rank from Choice where LinkData:ParentLink=?");
+    query.serialExec("select obid, Name from ObjectType where Name = Camera");
+    query.serialExec("select ObjectSpecifier,Name from ObjectAttribute "
+                     "where Name = FaultState and ParentLink=?");
+    query.serialExec("select obid, Name, Rank from Choice where ParentLink=?");
     while(query.next()) {
         DataSource::CameraState d;
         d.rank = query.value("Rank").toInt();
@@ -538,10 +538,10 @@ QList<DataSource::CameraType> DataSourceOMS::getCameraTypeList()
     QList<DataSource::CameraType> r;
     OMSQuery query(m_database);
     query.serialPrepare();
-    query.serialExec("select obid, StringData:Name from ObjectType where StringData:Name = Camera");
-    query.serialExec("select LongLongData:ObjectSpecifier,StringData:Name from ObjectAttribute "
-                       "where StringData:Name = Type and LinkData:ParentLink=?");
-    query.serialExec("select obid, StringData:Name, IntegerData:Rank from Choice where LinkData:ParentLink=?");
+    query.serialExec("select obid, Name from ObjectType where Name = Camera");
+    query.serialExec("select ObjectSpecifier,Name from ObjectAttribute "
+                     "where Name = Type and ParentLink=?");
+    query.serialExec("select obid, Name, Rank from Choice where ParentLink=?");
     while(query.next()) {
         DataSource::CameraType d;
         d.rank = query.value("Rank").toInt();

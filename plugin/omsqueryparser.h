@@ -9,9 +9,9 @@
 namespace OMSQueryParser {
 
 #define StringToObId(string)            string.toULongLong()
-#define ErrorQueryString(sql)           ("Error: query '" + sql + "' cannot be resolved.")
-#define ErrorQueryStringMsg(msg, sql)   (QString() + "Error: " + msg + " In query '" + sql + "' cannot be resolved.")
-#define ErrorDataType(dataType)         ("Error: data type'" + dataType + "' cannot be resolved.")
+#define ErrorQueryString(sql)           (QString() + "OMSQueryParser Error: query '" + sql + "' cannot be resolved.")
+#define ErrorQueryStringMsg(msg, sql)   (QString() + "OMSQueryParser Error: " + msg + " In query '" + sql + "' cannot be resolved.")
+#define ErrorDataType(dataType)         (QString() + "OMSQueryParser Error: data type '" + dataType + "' cannot be resolved.")
 
 /**
  * @brief The ExecType enum
@@ -20,21 +20,21 @@ namespace OMSQueryParser {
 enum ExecType{
     None,
 
-    // select obid from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?
+    // select obid from CCTVController where PointAddress = ? and Address = ?
     SelectObIdList,
 
-    // select count from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?
+    // select count from CCTVController where PointAddress = ? and Address = ?
     SelectCount,
 
-    // select StringData:Name, IntegerData:PointAddress from OMS where obid = ?
+    // select Name, PointAddress from OMS where obid = ?
     SelectAttributeByObId,
 
-    // write into OMS (obid, StringData:Name, IntegerData:PointAddress) values (?, ?, ?) writeOptions 23
+    // write into OMS (obid, Name, PointAddress) values (?, ?, ?) writeOptions 23
     WriteAttribute,
 
-    // select obid, StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?
+    // select obid, Name, PointAddress from CCTVController where PointAddress = ? and Address = ?
     // select obid                                           from CCTVController
-    // select StringData:Name, IntegerData:PointAddress       from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?
+    // select Name, PointAddress       from CCTVController where PointAddress = ? and Address = ?
     SelectAttribute,
 };
 
@@ -45,30 +45,21 @@ enum ExecType{
 static const QString ObidName = "obid";
 
 /**
- * @brief The SqlField struct
- * 查询语句的结果字段，如select string:name
- */
-struct SqlField {
-    QString type;
-    QString name;
-};
-
-/**
  * @brief The SqlAnd struct
- * 查询语句的条件字段,如 from string:name=hello
+ * 查询语句的条件字段,如 from field_name=hello
  */
 struct SqlAnd {
-    SqlField field;
+    QByteArray field_name;
     QString op;
     QVariant value;
 };
 
 /**
  * @brief The SqlBind struct
- * write into 用到，如 write into table (string:name) values(hello)
+ * write into 用到，如 write into table (field_name) values(value)
  */
 struct SqlBind {
-    SqlField field;
+    QByteArray field_name;
     QVariant value;
 };
 
@@ -82,7 +73,7 @@ struct SqlContent {
     QList<SqlAnd> sql_and;
 
     ///SelectAttributeByObId
-    QList<SqlField> sql_field;
+    QList<QByteArray> sql_field_list;
     QString obid;
 
     ///WriteAttribute
@@ -93,7 +84,7 @@ struct SqlContent {
     ///SelectAttribute
     //    QString table;
     //    QList<SqlAnd> sql_and;
-    //    QList<SqlField> sql_field;
+    //    QList<QByteArray> sql_field_list;
 
     ///SelectCount
     //    QString table;
@@ -109,17 +100,17 @@ struct SqlContent {
 static const QString rx_operator = R"((?:=|!=|<|<=|>|>=){1})";
 static const QString rx_and_or   = R"((?:and|or){1})";
 static const QString rx_option   = R"((?:\s+writeOptions\s+(\?))?)";
-static const QString rx_field    = R"((\w+)\s*:\s*(\w+))";
+static const QString rx_field    = R"((\w+))";
 static const QString rx_bindvalue= R"((?:\?|\w+))";
 
-//where IntegerData:PointAddress = ? and StringData:Address = ?
-static const QString rx_where_d  = QString(R"(\s+where\s+(\w+\s*:\s*\w+\s*=\s*\?(?:\s+and\s+\w+\s*:\s*\w+\s*=\s*\?)*))")
+//where PointAddress = ? and Address = ?
+static const QString rx_where_d  = QString(R"(\s+where\s+(\w+\s*=\s*\?(?:\s+and\s+\w+\s*=\s*\?)*))")
         .replace("=", rx_operator)
         .replace(R"(\?)", rx_bindvalue);
 static const QString rx_where    = "(?:" + rx_where_d + ")?";
 
-//StringData:Address = ? and StringData:xx = yy
-static const QString rx_and      = QString(R"((\w+)\s*:\s*(\w+)\s*(=)\s*(\?))")
+//Address = ? and xx = yy
+static const QString rx_and      = QString(R"((\w+)\s*(=)\s*(\?))")
         .replace("=", rx_operator)
         .replace(R"(\?)", rx_bindvalue);
 

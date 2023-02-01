@@ -105,11 +105,9 @@ private:
     /**
      * @brief createDataPtr
      * 创建data的智能指针
-     * @param type 如：IntegerData、StringData等
+     * @param type 如：BOOLEAN_DATA、LONGLONG_DATA等
      */
-    static QSharedPointer<Data> createDataPtr(const QString &type);
-    static QSharedPointer<Data> createDataPtr(const QString &type, const QVariant &defaultValue);
-    static bool dataTypeIsValid(const QString &type);
+    static QSharedPointer<Data> createDataPtr(DataType type, const QVariant &defaultValue = QVariant());
 
     /**
      * @brief The ConditionVector class
@@ -117,10 +115,12 @@ private:
      */
     class ConditionVector {
     public:
-        void append(AType aType, Comparison comparison, const QString &valueType, const QVariant &value);
+        void append(AType aType, Comparison comparison, QSharedPointer<Data> valuePtr);
 
         inline const Condition *constData() const { return m_conditionVector.data(); }
         inline int size() const {return m_conditionVector.size();}
+
+        void print();
     private:
         QVector<QSharedPointer<Data> > m_ptrVector;
         QVector<Condition> m_conditionVector;

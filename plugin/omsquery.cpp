@@ -5,50 +5,71 @@
 using namespace OMSQueryParser;
 
 //TODO some type not be converted
-static QVariant dataPtrToVariant(QSharedPointer<Data> ptr) {
+static QVariant DataPtrToVariant(const Data *ptr) {
+    switch(ptr->getDBDataType()) {
+    case DB_ATYPE_DATA:                 break;
+    case DB_ATYPE_LIST_DATA:            break;
+    case DB_CHOICE_DATA:                break;
+    case DB_CHOICE_LINK_DATA:           break;
+    case DB_COMPLETE_CONTAINER_DATA:    break;
+    case DB_COMPLETE_FLOAT_DATA:        break;
+    case DB_COMPLETE_INTEGER_DATA:      break;
+    case DB_COMPLETE_LONGLONG_DATA:     break;
+    case DB_COMPLETE_LINK_DATA:         break;
+    case DB_CONTAINER_DATA:             break;
+    case DB_DATA:                       break;
+    case DB_FILE_DATA:                  break;
+
+    case DB_FLOAT_DATA:                 return float(*static_cast<const FloatData *>(ptr));
+    case DB_INTEGER_DATA:               return int(*static_cast<const IntegerData *>(ptr));
+    case DB_LONGLONG_DATA:              return INT64(*static_cast<const LongLongData *>(ptr));
+    case DB_LINK_DATA:                  return ObId(*static_cast<const LinkData *>(ptr));
+
+    case DB_NAMES_DATA:                 break;
+    case DB_OTYPE_DATA:                 break;
+
+    case DB_STRING_DATA:                return QString::fromStdString(*static_cast<const StringData *>(ptr));
+
+    case DB_TEXT_DATA:                  break;
+    case DB_TEXT_FILE_DATA:             break;
+    case DB_TIME_DATA:                  break;
+    case DB_TIME_INTERVAL_DATA:         break;
+    }
+
+    return QVariant();
+}
+static QVariant DataPtrToVariant(QSharedPointer<Data> ptr) {
 
     if(ptr.isNull()) {
         return QVariant();
     }
+    return DataPtrToVariant(ptr.data());
+}
 
-    QVariant d;
-    switch(ptr->getDBDataType()) {
-    case DB_ATYPE_DATA: break;
-    case DB_ATYPE_LIST_DATA: break;
-    case DB_CHOICE_DATA: break;
-    case DB_CHOICE_LINK_DATA: break;
-    case DB_COMPLETE_CONTAINER_DATA: break;
-    case DB_COMPLETE_FLOAT_DATA: break;
-    case DB_COMPLETE_INTEGER_DATA: break;
-    case DB_COMPLETE_LONGLONG_DATA: break;
-    case DB_COMPLETE_LINK_DATA: break;
-    case DB_CONTAINER_DATA: break;
-    case DB_DATA: break;
-    case DB_FILE_DATA: break;
-    case DB_FLOAT_DATA:
-        d = float(*static_cast<FloatData *>(ptr.data()));
-        break;
-    case DB_INTEGER_DATA:
-        d = int(*static_cast<IntegerData *>(ptr.data()));
-        break;
-    case DB_LONGLONG_DATA:
-        d = INT64(*static_cast<LongLongData *>(ptr.data()));
-        break;
-    case DB_LINK_DATA:
-        d = ObId(*static_cast<LinkData *>(ptr.data()));
-        break;
-    case DB_NAMES_DATA: break;
-    case DB_OTYPE_DATA: break;
-    case DB_STRING_DATA:
-        d = QString::fromStdString(*static_cast<StringData *>(ptr.data()));
-        break;
-    case DB_TEXT_DATA: break;
-    case DB_TEXT_FILE_DATA: break;
-    case DB_TIME_DATA: break;
-    case DB_TIME_INTERVAL_DATA: break;
+static QString DataTypeToString(DataType type) {
+
+    switch(type) {
+    case BOOLEAN_DATA:              return "BOOLEAN_DATA";
+    case SHORT_DATA:                return "SHORT_DATA";
+    case INTEGER_DATA:              return "INTEGER_DATA";
+    case LONGLONG_DATA:             return "LONGLONG_DATA";
+    case FLOAT_DATA:                return "FLOAT_DATA";
+    case STRING_DATA:               return "STRING_DATA";
+    case LINK_DATA:                 return "LINK_DATA";
+    case TIME_DATA:                 return "TIME_DATA";
+    case CONTAINER_DATA:            return "CONTAINER_DATA";
+    case MULTIPLE_CHOICE_DATA:      return "MULTIPLE_CHOICE_DATA";
+    case FILE_DATA:                 return "FILE_DATA";
+    case OBJECT_TYPE_DATA:          return "OBJECT_TYPE_DATA";
+    case ATTRIBUTE_TYPE_DATA:       return "ATTRIBUTE_TYPE_DATA";
+    case TIME_INTERVAL_DATA:        return "TIME_INTERVAL_DATA";
+    case TEXT_FILE_DATA:            return "TEXT_FILE_DATA";
+    case ATTRIBUTE_TYPE_LIST_DATA:  return "ATTRIBUTE_TYPE_LIST_DATA";
+    case STATISTIC_DATA:            return "STATISTIC_DATA";
+    case PEAK_LONG_DATA:            return "PEAK_LONG_DATA";
+    case PEAK_FLOAT_DATA:           return "PEAK_FLOAT_DATA";
     }
-
-    return d;
+    return "";
 }
 
 OMSQuery::OMSQuery(OMSDatabase *database, QObject *parent)
@@ -60,7 +81,7 @@ OMSQuery::OMSQuery(OMSDatabase *database, QObject *parent)
 {
 }
 
-//select obid from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?
+//select obid from CCTVController where PointAddress = ? and Address = ?
 bool OMSQuery::selectObIdList(const QString &sql)
 {
     Parser p;
@@ -81,16 +102,21 @@ bool OMSQuery::selectObIdList(const SqlContent &content)
 
     try {
         //condition
-        for(const SqlAnd &value : content.sql_and) {
-            if(!dataTypeIsValid(value.field.type)) {
-                m_lastError =  ErrorDataType(value.field.type);
+        for(const SqlAnd &info : content.sql_and) {
+            //create data
+            AType atype = m_database->matchAType(info.field_name);
+            DataType dtype = m_database->matchDataType(atype);
+            QSharedPointer<Data> valuePtr = createDataPtr(dtype, info.value);
+            if(valuePtr.isNull()) {
+                m_lastError = ErrorDataType(DataTypeToString(dtype));
                 return false;
             }
-            AType and_key_atype = m_database->matchAType(value.field.name.toLocal8Bit().data());
-            condVect.append(and_key_atype, stringToOperator(value.op), value.field.type, value.value.toString());
+            //condition
+            condVect.append(atype, stringToOperator(info.op), valuePtr);
         }
         //find
-        int count = m_database->find(m_database->matchOType(content.table.toLocal8Bit().data()), condVect.constData(), condVect.size());
+        OType otype = m_database->matchOType(content.table.toLocal8Bit().data());
+        int count = m_database->find(otype, condVect.constData(), condVect.size());
         obidVect.resize(count);
         m_database->find(m_database->matchOType(content.table.toLocal8Bit().data()), condVect.constData(), condVect.size(), obidVect.data(), obidVect.size());
     } catch(Exception &e) {
@@ -109,7 +135,7 @@ bool OMSQuery::selectObIdList(const SqlContent &content)
     return true;
 }
 
-//select StringData:Name, IntegerData:PointAddress from OMS where obid = ?
+//select Name, PointAddress from OMS where obid = ?
 bool OMSQuery::selectAttributeByObId(const QString &sql)
 {
     Parser p;
@@ -131,28 +157,30 @@ bool OMSQuery::selectAttributeByObId(const SqlContent &content)
 
     //horizontalLabels
     QStringList horizontalLabels;
-    for(int k = 0; k < content.sql_field.count(); k ++) {
-        horizontalLabels << content.sql_field[k].name;
+    for(int k = 0; k < content.sql_field_list.count(); k ++) {
+        horizontalLabels << content.sql_field_list[k];
     }
     m_model->setHorizontalHeaderLabels(horizontalLabels);
 
     try {
         //fill model
         QList<QStandardItem *> itemList;
-        for(int k = 0; k < content.sql_field.count(); k ++) {
-            SqlField field = content.sql_field[k];
-            if(!dataTypeIsValid(field.type)) {
-                m_lastError = ErrorDataType(field.type);
+        for(int k = 0; k < content.sql_field_list.count(); k ++) {
+            QByteArray field_name = content.sql_field_list[k];
+            //create data
+            AType atype = m_database->matchAType(field_name.data());
+            DataType dtype = m_database->matchDataType(atype);
+            QSharedPointer<Data> dataPtr = createDataPtr(dtype);
+            if(dataPtr.isNull()) {
+                m_lastError = ErrorDataType(DataTypeToString(dtype));
                 return false;
             }
             //read
-            QSharedPointer<Data> dataPtr = createDataPtr(field.type);
-            AType att_atype = m_database->matchAType(field.name.toLocal8Bit().data());
-            Request req(StringToObId(obid), att_atype, dataPtr.data());
+            Request req(StringToObId(obid), atype, dataPtr.data());
             m_database->read(&req, 1);
 
             itemList << new QStandardItem();
-            itemList.last()->setData(dataPtrToVariant(dataPtr), Qt::DisplayRole);
+            itemList.last()->setData(DataPtrToVariant(dataPtr), Qt::DisplayRole);
         }
         m_model->appendRow(itemList);
     } catch (Exception &e){
@@ -222,7 +250,7 @@ void OMSQuery::serialPrepare()
 }
 
 
-//select count from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?
+//select count from CCTVController where PointAddress = ? and Address = ?
 bool OMSQuery::selectCount(const QString &sql)
 {
     Parser p;
@@ -242,13 +270,17 @@ bool OMSQuery::selectCount(const SqlContent &content)
 
     try {
         //condition
-        for(const SqlAnd &value : content.sql_and) {
-            if(!dataTypeIsValid(value.field.type)) {
-                m_lastError =  ErrorDataType(value.field.type);
+        for(const SqlAnd &info : content.sql_and) {
+            //create data
+            AType atype = m_database->matchAType(info.field_name);
+            DataType dtype = m_database->matchDataType(atype);
+            QSharedPointer<Data> valuePtr = createDataPtr(dtype, info.value);
+            if(valuePtr.isNull()) {
+                m_lastError = ErrorDataType(DataTypeToString(dtype));
                 return false;
             }
-            AType and_key_atype = m_database->matchAType(value.field.name.toLocal8Bit().data());
-            condVect.append(and_key_atype, stringToOperator(value.op), value.field.type, value.value.toString());
+            //condition
+            condVect.append(atype, stringToOperator(info.op), valuePtr);
         }
         //find
         count = m_database->find(m_database->matchOType(content.table.toLocal8Bit().data()), condVect.constData(), condVect.size());
@@ -266,7 +298,7 @@ bool OMSQuery::selectCount(const SqlContent &content)
     return true;
 }
 
-//select obid, StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?
+//select obid, Name, PointAddress from CCTVController where PointAddress = ? and Address = ?
 bool OMSQuery::selectAttribute(const QString &sql)
 {
     Parser p;
@@ -287,13 +319,17 @@ bool OMSQuery::selectAttribute(const SqlContent &content)
     // select obid into obidVect
     try {
         //condition
-        for(const SqlAnd &value : content.sql_and) {
-            if(!dataTypeIsValid(value.field.type)) {
-                m_lastError =  ErrorDataType(value.field.type);
+        for(const SqlAnd &info : content.sql_and) {
+            //create data
+            AType atype = m_database->matchAType(info.field_name);
+            DataType dtype = m_database->matchDataType(atype);
+            QSharedPointer<Data> valuePtr = createDataPtr(dtype, info.value);
+            if(valuePtr.isNull()) {
+                m_lastError = ErrorDataType(DataTypeToString(dtype));
                 return false;
             }
-            AType and_key_atype = m_database->matchAType(value.field.name.toLocal8Bit().data());
-            condVect.append(and_key_atype, stringToOperator(value.op), value.field.type, value.value.toString());
+            //condition
+            condVect.append(atype, stringToOperator(info.op), valuePtr);
         }
 
         //find
@@ -305,10 +341,10 @@ bool OMSQuery::selectAttribute(const SqlContent &content)
         return false;
     }
 
-    //horizontalLables: obid, StringData:Name, IntegerData:PointAddress
+    //horizontalLables: obid, Name, PointAddress
     QStringList labels;
-    for(const SqlField &f : content.sql_field)
-        labels << f.name;
+    for(const QString &field_name : content.sql_field_list)
+        labels << field_name;
     m_model->setHorizontalHeaderLabels(labels);
 
     try {
@@ -321,23 +357,26 @@ bool OMSQuery::selectAttribute(const SqlContent &content)
                 itemList.last()->setData(obid, Qt::DisplayRole);
             }
 
-            for(int k = 0; k < content.sql_field.count(); k ++) {
-                SqlField field = content.sql_field[k];
-                if(field.name == ObidName)
+            for(int k = 0; k < content.sql_field_list.count(); k ++) {
+                QByteArray field_name = content.sql_field_list[k];
+                if(field_name == ObidName)
                     continue;
-                if(!dataTypeIsValid(field.type)) {
-                    m_lastError = ErrorDataType(field.type);
+
+                //create data
+                AType atype = m_database->matchAType(field_name);
+                DataType dtype = m_database->matchDataType(atype);
+                QSharedPointer<Data> valuePtr = createDataPtr(dtype);
+                if(valuePtr.isNull()) {
+                    m_lastError = ErrorDataType(DataTypeToString(dtype));
                     return false;
                 }
-                QSharedPointer<Data> dataPtr = createDataPtr(field.type);
 
                 //read
-                AType att_atype = m_database->matchAType(field.name.toLocal8Bit().data());
-                Request req(obid, att_atype, dataPtr.data());
+                Request req(obid, atype, valuePtr.data());
                 m_database->read(&req, 1);
 
                 itemList << new QStandardItem();
-                itemList.last()->setData(dataPtrToVariant(dataPtr), Qt::DisplayRole);
+                itemList.last()->setData(DataPtrToVariant(valuePtr), Qt::DisplayRole);
             }//~for
             m_model->appendRow(itemList);
         }//~for
@@ -348,7 +387,7 @@ bool OMSQuery::selectAttribute(const SqlContent &content)
     return true;
 }
 
-//write into OMS (obid, StringData:Name) values(?, ?)
+//write into OMS (obid, Name) values(?, ?)
 bool OMSQuery::writeAtrribute(const QString &sql)
 {
     Parser p;
@@ -376,14 +415,16 @@ bool OMSQuery::writeAtrribute(const SqlContent &content)
         //reqVector
         for(int k = 0; k < content.sql_bind.size(); k ++) {
             const SqlBind &bind = content.sql_bind[k];
-
-            if(!dataTypeIsValid(bind.field.type)) {
-                m_lastError = ErrorDataType(bind.field.type);
+            //create data
+            AType atype = m_database->matchAType(bind.field_name);
+            DataType dtype = m_database->matchDataType(atype);
+            QSharedPointer<Data> fieldData = createDataPtr(dtype, bind.value);
+            if(fieldData.isNull()) {
+                m_lastError = ErrorDataType(bind.field_name);
                 return false;
             }
 
-            QSharedPointer<Data> fieldData = createDataPtr(bind.field.type, bind.value);
-            AType nAType = m_database->matchAType(bind.field.name.toLocal8Bit().data());
+            AType nAType = m_database->matchAType(bind.field_name);
             ObId nObId = StringToObId(content.obid);
 
             fieldDataVector[k] = fieldData;
@@ -432,46 +473,46 @@ void OMSQuery::test()
     //exec
     {
         OMSQuery query(m_database);
-        query.exec("select obid from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
+        query.exec("select obid from CCTVController where PointAddress = ? and Address = ?",
                    QVariantList() << 10 << 28);
         query.printModel("selectObIdList");
-        query.exec("select obid from CCTVController where IntegerData:PointAddress = 10 and StringData:Address = 28");
+        query.exec("select obid from CCTVController where PointAddress = 10 and Address = 28");
         query.printModel("selectObIdList");
 
-        query.exec("select count from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
+        query.exec("select count from CCTVController where PointAddress = ? and Address = ?",
                    QVariantList() << 10 << 28);
         query.printModel("selectCount");
-        query.exec("select count from CCTVController where IntegerData:PointAddress = 10 and StringData:Address = 28");
+        query.exec("select count from CCTVController where PointAddress = 10 and Address = 28");
         query.printModel("selectCount");
 
-        query.exec("select StringData:Name, IntegerData:PointAddress from OMS where obid = ?",
+        query.exec("select Name, PointAddress from OMS where obid = ?",
                    QVariantList() << "2023055425537  ");
         query.printModel("selectAttributeByObId");
-        query.exec("select StringData:Name, IntegerData:PointAddress from OMS where obid = 2023055425537");
+        query.exec("select Name, PointAddress from OMS where obid = 2023055425537");
         query.printModel("selectAttributeByObId");
 
-        query.exec("select obid, StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
+        query.exec("select obid, Name, PointAddress from CCTVController where PointAddress = ? and Address = ?",
                    QVariantList() << 10 << 28);
         query.printModel("SelectAttribute");
-        query.exec("select obid, StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = 10 and StringData:Address = 28");
+        query.exec("select obid, Name, PointAddress from CCTVController where PointAddress = 10 and Address = 28");
         query.printModel("SelectAttribute");
 
-        query.exec("select StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
+        query.exec("select Name, PointAddress from CCTVController where PointAddress = ? and Address = ?",
                    QVariantList() << 10 << 28);
         query.printModel("SelectAttribute");
-        query.exec("select StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = 10 and StringData:Address = 28");
+        query.exec("select Name, PointAddress from CCTVController where PointAddress = 10 and Address = 28");
         query.printModel("SelectAttribute");
 
-        query.exec("select obid from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
+        query.exec("select obid from CCTVController where PointAddress = ? and Address = ?",
                    QVariantList() << 10 << 28);
         query.printModel("SelectAttribute");
-        query.exec("select obid from CCTVController where IntegerData:PointAddress = 10 and StringData:Address = 28");
+        query.exec("select obid from CCTVController where PointAddress = 10 and Address = 28");
         query.printModel("SelectAttribute");
 
 
         //test for write into
         //  select obid, Name
-        query.exec("select obid, StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
+        query.exec("select obid, Name, PointAddress from CCTVController where PointAddress = ? and Address = ?",
                    QVariantList() << 10 << 28);
         query.next();
         ObId obid = StringToObId(query.value("obid").toString());
@@ -480,10 +521,10 @@ void OMSQuery::test()
         //  chang Name
         Name += "(1)";
         //  write
-        query.exec("write into OMS (obid, StringData:Name) values(?, ?)",
+        query.exec("write into OMS (obid, Name) values(?, ?)",
                    QVariantList() << obid << Name);
         //  read
-        query.exec("select obid, StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
+        query.exec("select obid, Name, PointAddress from CCTVController where PointAddress = ? and Address = ?",
                    QVariantList() << 10 << 28);
         query.next();
         //  check
@@ -493,9 +534,9 @@ void OMSQuery::test()
             Name = query.value("Name").toString();
             Name.chop(3);
             //restore
-            query.exec("write into OMS (obid, StringData:Name) values(?, ?)",
+            query.exec("write into OMS (obid, Name) values(?, ?)",
                        QVariantList() << obid << Name);
-            query.exec("select obid, StringData:Name, IntegerData:PointAddress from CCTVController where IntegerData:PointAddress = ? and StringData:Address = ?",
+            query.exec("select obid, Name, PointAddress from CCTVController where PointAddress = ? and Address = ?",
                        QVariantList() << 10 << 28);
             query.next();
             qDebug() << __LINE__ << query.value("obid").toString() << query.value("Name").toString();
@@ -507,59 +548,51 @@ void OMSQuery::test()
     {
         OMSQuery query(m_database);
 
-        query.exec("select obid, StringData:Name from ObjectType where StringData:Name = Camera");
-        query.serialExec("select LongLongData:ObjectSpecifier,StringData:Name from ObjectAttribute "
-                         "where StringData:Name = FaultState and LinkData:ParentLink=?");
-        query.serialExec("select obid, StringData:Name, IntegerData:Rank from Choice where LinkData:ParentLink=?");
+        query.exec("select obid, Name from ObjectType where Name = Camera");
+        query.serialExec("select ObjectSpecifier,Name from ObjectAttribute "
+                         "where Name = FaultState and ParentLink=?");
+        query.serialExec("select obid, Name, Rank from Choice where ParentLink=?");
         query.printModel("serialExec");
 
 
-        query.exec("select obid, StringData:Name from ObjectType where StringData:Name = ?", QVariantList() << "Camera");
-        query.serialExec("select LongLongData:ObjectSpecifier,StringData:Name from ObjectAttribute "
-                         "where StringData:Name = FaultState and LinkData:ParentLink=?");
-        query.serialExec("select obid, StringData:Name, IntegerData:Rank from Choice where LinkData:ParentLink=?");
+        query.exec("select obid, Name from ObjectType where Name = ?", QVariantList() << "Camera");
+        query.serialExec("select ObjectSpecifier,Name from ObjectAttribute "
+                         "where Name = FaultState and ParentLink=?");
+        query.serialExec("select obid, Name, Rank from Choice where ParentLink=?");
         query.printModel("serialExec");
     }
     qDebug() << "test end";
 }
 
-QSharedPointer<Data> OMSQuery::createDataPtr(const QString &type)
+QSharedPointer<Data> OMSQuery::createDataPtr(DataType type, const QVariant &defaultValue)
 {
-    QSharedPointer<Data> d;
-    if(type == "IntegerData") {
-        d = QSharedPointer<Data>(new IntegerData);
-    } else if(type == "StringData") {
-        d = QSharedPointer<Data>(new StringData);
-    } else if(type == "LinkData") {
-        d = QSharedPointer<Data>(new LinkData);
-    } else if(type == "FloatData") {
-        d = QSharedPointer<Data>(new FloatData);
-    } else if(type == "LongLongData") {
-        d = QSharedPointer<Data>(new LongLongData);
-    }
-    return d;
-}
+    switch(type) {
 
-QSharedPointer<Data> OMSQuery::createDataPtr(const QString &type, const QVariant &defaultValue)
-{
-    QSharedPointer<Data> d;
-    if(type == "IntegerData") {
-        d = QSharedPointer<Data>(new IntegerData(defaultValue.toInt()));
-    } else if(type == "StringData") {
-        d = QSharedPointer<Data>(new StringData(defaultValue.toString().toStdString()));
-    } else if(type == "LinkData") {
-        d = QSharedPointer<Data>(new LinkData(StringToObId(defaultValue.toString())));
-    } else if(type == "FloatData") {
-        d = QSharedPointer<Data>(new FloatData(defaultValue.toFloat()));
-    } else if(type == "LongLongData") {
-        d = QSharedPointer<Data>(new LongLongData(defaultValue.toLongLong()));
-    }
-    return d;
-}
+    case BOOLEAN_DATA:              //return "BOOLEAN_DATA";
+    case SHORT_DATA:                //return "SHORT_DATA";
+    case INTEGER_DATA:              return QSharedPointer<Data>(new IntegerData(defaultValue.toInt()));
+    case LONGLONG_DATA:             return QSharedPointer<Data>(new LongLongData(defaultValue.toLongLong()));
+    case FLOAT_DATA:                return QSharedPointer<Data>(new FloatData(defaultValue.toFloat()));
+    case STRING_DATA:               return QSharedPointer<Data>(new StringData(defaultValue.toString().toStdString()));
 
-bool OMSQuery::dataTypeIsValid(const QString &type)
-{
-    return !createDataPtr(type).isNull();
+    case LINK_DATA:                 return QSharedPointer<Data>(new LinkData(StringToObId(defaultValue.toString())));
+    case TIME_DATA:                 //return "TIME_DATA";
+    case CONTAINER_DATA:            //return "CONTAINER_DATA";
+    case MULTIPLE_CHOICE_DATA:      //return "MULTIPLE_CHOICE_DATA";
+    case FILE_DATA:                 //return "FILE_DATA";
+    case OBJECT_TYPE_DATA:          //return "OBJECT_TYPE_DATA";
+    case ATTRIBUTE_TYPE_DATA:       //return "ATTRIBUTE_TYPE_DATA";
+    case TIME_INTERVAL_DATA:        //return "TIME_INTERVAL_DATA";
+    case TEXT_FILE_DATA:            //return "TEXT_FILE_DATA";
+    case ATTRIBUTE_TYPE_LIST_DATA:  //return "ATTRIBUTE_TYPE_LIST_DATA";
+    case STATISTIC_DATA:            //return "STATISTIC_DATA";
+    case PEAK_LONG_DATA:            //return "PEAK_LONG_DATA";
+    case PEAK_FLOAT_DATA:           //return "PEAK_FLOAT_DATA";
+
+    default:break;
+    }
+    std::cout << ErrorDataType(DataTypeToString(type)).toLocal8Bit().data() << std::endl;
+    return QSharedPointer<Data>();
 }
 
 Comparison OMSQuery::stringToOperator(QString op)
@@ -631,9 +664,21 @@ void OMSQuery::printModel(QString title)
     qDebug() << QString(width_table, '-');
 }
 
-void OMSQuery::ConditionVector::append(AType aType, Comparison comparison, const QString &valueType, const QVariant &value)
+void OMSQuery::ConditionVector::append(AType aType, Comparison comparison, QSharedPointer<Data> valuePtr)
 {
-    QSharedPointer<Data> d = createDataPtr(valueType, value);
-    m_ptrVector << d;
-    m_conditionVector.append(Condition(aType, comparison, d.data()));
+    m_ptrVector << valuePtr;
+    m_conditionVector.append(Condition(aType, comparison, valuePtr.data()));
+}
+
+void OMSQuery::ConditionVector::print()
+{
+    qDebug() << "ConditionVector";
+    qDebug() << "size:" << this->size();
+    for(Condition d : m_conditionVector) {
+
+        qDebug() << "type:" << d.getAType();
+        qDebug() << "comparison:" << d.getComparison();
+        qDebug() << "data:" << DataPtrToVariant(d.getData());
+        qDebug() << "";
+    }
 }
