@@ -84,6 +84,12 @@ public:
     inline QString lastError() const {return m_lastError;}
 
     /**
+    /* @brief lastError
+     * 最后一次查询语句
+     */
+    inline QString lastQuery() const {return m_lastQuery;}
+
+    /**
      * @brief next
      * 用于移动光标来读取更多的值，也可以判断select是否有效
      */
@@ -93,22 +99,21 @@ public:
      * @brief value
      * next()后使用，读取select的值
      */
-    QVariant value(int index);
-    QVariant value(const QString &field_name);
+    QVariant value(int index, int role = Qt::DisplayRole);
+    QVariant value(const QString &field_name, int role = Qt::DisplayRole);
 
     /**
      * @brief test
      * 仅测试环境下，用于测试功能的完整性
      */
     void test();
-private:
-    /**
-     * @brief createDataPtr
-     * 创建data的智能指针
-     * @param type 如：BOOLEAN_DATA、LONGLONG_DATA等
-     */
-    static QSharedPointer<Data> createDataPtr(DataType type, const QVariant &defaultValue = QVariant());
 
+    /**
+     * @brief getChoiceData
+     * 获取OMS数据库的Choice数据
+     */
+    QMap<int, QString> getChoiceData(const QString &table, const QString &attr);
+private:
     /**
      * @brief The ConditionVector class
      * 简化Condition的使用，不用考虑指针释放问题
@@ -169,6 +174,7 @@ private:
 public:
     OMSDatabase *m_database;
     QString m_lastError;
+    QString m_lastQuery;
 
     QStandardItemModel *m_model;
     int m_model_row;

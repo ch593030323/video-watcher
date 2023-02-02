@@ -13,6 +13,7 @@ namespace OMSQueryParser {
 #define ErrorQueryStringMsg(msg, sql)   (QString() + "OMSQueryParser Error: " + msg + " In query '" + sql + "' cannot be resolved.")
 #define ErrorDataType(dataType)         (QString() + "OMSQueryParser Error: data type '" + dataType + "' cannot be resolved.")
 
+#define RoleDataType    Qt::UserRole + 1
 /**
  * @brief The ExecType enum
  * 查询语句的类型

@@ -5,6 +5,10 @@
 using namespace OMSQueryParser;
 
 //TODO some type not be converted
+/**
+ * @brief DataPtrToVariant
+ * Data转QVariant
+ */
 static QVariant DataPtrToVariant(const Data *ptr) {
     switch(ptr->getDBDataType()) {
     case DB_ATYPE_DATA:                 break;
@@ -38,6 +42,7 @@ static QVariant DataPtrToVariant(const Data *ptr) {
 
     return QVariant();
 }
+
 static QVariant DataPtrToVariant(QSharedPointer<Data> ptr) {
 
     if(ptr.isNull()) {
@@ -46,6 +51,10 @@ static QVariant DataPtrToVariant(QSharedPointer<Data> ptr) {
     return DataPtrToVariant(ptr.data());
 }
 
+/**
+ * @brief DataTypeToString
+ * DataType的类型转字符串
+ */
 static QString DataTypeToString(DataType type) {
 
     switch(type) {
@@ -72,6 +81,42 @@ static QString DataTypeToString(DataType type) {
     return "";
 }
 
+/**
+ * @brief createDataPtr
+ * 创建data的智能指针
+ * @param type 如：BOOLEAN_DATA、LONGLONG_DATA等
+ */
+static QSharedPointer<Data> createDataPtr(DataType type, const QVariant &defaultValue = QVariant())
+{
+    switch(type) {
+
+    case BOOLEAN_DATA:              //return "BOOLEAN_DATA";
+    case SHORT_DATA:                //return "SHORT_DATA";
+    case INTEGER_DATA:              return QSharedPointer<Data>(new IntegerData(defaultValue.toInt()));
+    case LONGLONG_DATA:             return QSharedPointer<Data>(new LongLongData(defaultValue.toLongLong()));
+    case FLOAT_DATA:                return QSharedPointer<Data>(new FloatData(defaultValue.toFloat()));
+    case STRING_DATA:               return QSharedPointer<Data>(new StringData(defaultValue.toString().toStdString()));
+
+    case LINK_DATA:                 return QSharedPointer<Data>(new LinkData(StringToObId(defaultValue.toString())));
+    case TIME_DATA:                 break;//return "TIME_DATA";
+    case CONTAINER_DATA:            break;//return "CONTAINER_DATA";
+    case MULTIPLE_CHOICE_DATA:      return QSharedPointer<Data>(new IntegerData(defaultValue.toInt()));
+    case FILE_DATA:                 //return "FILE_DATA";
+    case OBJECT_TYPE_DATA:          //return "OBJECT_TYPE_DATA";
+    case ATTRIBUTE_TYPE_DATA:       //return "ATTRIBUTE_TYPE_DATA";
+    case TIME_INTERVAL_DATA:        //return "TIME_INTERVAL_DATA";
+    case TEXT_FILE_DATA:            //return "TEXT_FILE_DATA";
+    case ATTRIBUTE_TYPE_LIST_DATA:  //return "ATTRIBUTE_TYPE_LIST_DATA";
+    case STATISTIC_DATA:            //return "STATISTIC_DATA";
+    case PEAK_LONG_DATA:            //return "PEAK_LONG_DATA";
+    case PEAK_FLOAT_DATA:           //return "PEAK_FLOAT_DATA";
+
+    default:break;
+    }
+    //std::cout << ErrorDataType(DataTypeToString(type)).toLocal8Bit().data() << std::endl;
+    return QSharedPointer<Data>();
+}
+
 OMSQuery::OMSQuery(OMSDatabase *database, QObject *parent)
     : QObject(parent)
     , m_database(database)
@@ -87,7 +132,7 @@ bool OMSQuery::selectObIdList(const QString &sql)
     Parser p;
     SqlContent content;
 
-    if(!p.parse(sql, content)) {
+    if(!p.parse(m_lastQuery = sql, content)) {
         m_lastError = content.error;
         return false;
     }
@@ -129,6 +174,7 @@ bool OMSQuery::selectObIdList(const SqlContent &content)
     for(const ObId &id : obidVect) {
         QStandardItem *item = new QStandardItem;
         item->setData(id, Qt::DisplayRole);
+        item->setData(LINK_DATA, RoleDataType);
         m_model->appendRow({item});
     }
 
@@ -141,7 +187,7 @@ bool OMSQuery::selectAttributeByObId(const QString &sql)
     Parser p;
     SqlContent content;
 
-    if(!p.parse(sql, content)) {
+    if(!p.parse(m_lastQuery = sql, content)) {
         m_lastError = content.error;
         return false;
     }
@@ -181,6 +227,7 @@ bool OMSQuery::selectAttributeByObId(const SqlContent &content)
 
             itemList << new QStandardItem();
             itemList.last()->setData(DataPtrToVariant(dataPtr), Qt::DisplayRole);
+            itemList.last()->setData(dtype, RoleDataType);
         }
         m_model->appendRow(itemList);
     } catch (Exception &e){
@@ -199,10 +246,11 @@ bool OMSQuery::exec(const QString &sql, const QVariantList &bindvalueList)
 {
     Parser p;
     SqlContent content;
-    if(!p.parse(sql, content, bindvalueList)) {
+    if(!p.parse(m_lastQuery = sql, content, bindvalueList)) {
         m_lastError = content.error;
         return false;
     }
+
     switch(content.type) {
     case OMSQueryParser::SelectObIdList:
         return selectObIdList(content);
@@ -255,7 +303,7 @@ bool OMSQuery::selectCount(const QString &sql)
 {
     Parser p;
     SqlContent content;
-    if(!p.parse(sql, content)) {
+    if(!p.parse(m_lastQuery = sql, content)) {
         m_lastError = content.error;
         return false;
     }
@@ -288,6 +336,7 @@ bool OMSQuery::selectCount(const SqlContent &content)
         //fill model
         QStandardItem *item = new QStandardItem;
         item->setData(count, Qt::DisplayRole);
+        item->setData(INTEGER_DATA, RoleDataType);
         m_model->appendRow({item});
 
     } catch(Exception &e) {
@@ -304,7 +353,7 @@ bool OMSQuery::selectAttribute(const QString &sql)
     Parser p;
     SqlContent content;
 
-    if(!p.parse(sql, content)) {
+    if(!p.parse(m_lastQuery = sql, content)) {
         m_lastError = content.error;
         return false;
     }
@@ -355,6 +404,7 @@ bool OMSQuery::selectAttribute(const SqlContent &content)
             if(labels.contains(ObidName)) {
                 itemList << new QStandardItem;
                 itemList.last()->setData(obid, Qt::DisplayRole);
+                itemList.last()->setData(LINK_DATA, RoleDataType);
             }
 
             for(int k = 0; k < content.sql_field_list.count(); k ++) {
@@ -377,6 +427,7 @@ bool OMSQuery::selectAttribute(const SqlContent &content)
 
                 itemList << new QStandardItem();
                 itemList.last()->setData(DataPtrToVariant(valuePtr), Qt::DisplayRole);
+                itemList.last()->setData(dtype, RoleDataType);
             }//~for
             m_model->appendRow(itemList);
         }//~for
@@ -393,7 +444,7 @@ bool OMSQuery::writeAtrribute(const QString &sql)
     Parser p;
     SqlContent content;
 
-    if(!p.parse(sql, content)) {
+    if(!p.parse(m_lastQuery = sql, content)) {
         m_lastError = content.error;
         return false;
     }
@@ -451,17 +502,17 @@ bool OMSQuery::next()
     return m_model_row < m_model->rowCount();
 }
 
-QVariant OMSQuery::value(int index)
+QVariant OMSQuery::value(int index, int role)
 {
     QStandardItem *item = m_model->item(m_model_row, index);
-    return item? item->data(Qt::DisplayRole) : QVariant();
+    return item? item->data(role) : QVariant();
 }
 
-QVariant OMSQuery::value(const QString &field_name)
+QVariant OMSQuery::value(const QString &field_name, int role)
 {
     for(int k = 0; k < m_model->columnCount(); k ++) {
         if(m_model->headerData(k, Qt::Horizontal).toString() == field_name) {
-            return value(k);
+            return value(k, role);
         }
     }
     return QVariant();
@@ -564,35 +615,19 @@ void OMSQuery::test()
     qDebug() << "test end";
 }
 
-QSharedPointer<Data> OMSQuery::createDataPtr(DataType type, const QVariant &defaultValue)
+QMap<int, QString> OMSQuery::getChoiceData(const QString &table, const QString &attr)
 {
-    switch(type) {
+    OMSQuery &query = *this;
 
-    case BOOLEAN_DATA:              //return "BOOLEAN_DATA";
-    case SHORT_DATA:                //return "SHORT_DATA";
-    case INTEGER_DATA:              return QSharedPointer<Data>(new IntegerData(defaultValue.toInt()));
-    case LONGLONG_DATA:             return QSharedPointer<Data>(new LongLongData(defaultValue.toLongLong()));
-    case FLOAT_DATA:                return QSharedPointer<Data>(new FloatData(defaultValue.toFloat()));
-    case STRING_DATA:               return QSharedPointer<Data>(new StringData(defaultValue.toString().toStdString()));
-
-    case LINK_DATA:                 return QSharedPointer<Data>(new LinkData(StringToObId(defaultValue.toString())));
-    case TIME_DATA:                 //return "TIME_DATA";
-    case CONTAINER_DATA:            //return "CONTAINER_DATA";
-    case MULTIPLE_CHOICE_DATA:      //return "MULTIPLE_CHOICE_DATA";
-    case FILE_DATA:                 //return "FILE_DATA";
-    case OBJECT_TYPE_DATA:          //return "OBJECT_TYPE_DATA";
-    case ATTRIBUTE_TYPE_DATA:       //return "ATTRIBUTE_TYPE_DATA";
-    case TIME_INTERVAL_DATA:        //return "TIME_INTERVAL_DATA";
-    case TEXT_FILE_DATA:            //return "TEXT_FILE_DATA";
-    case ATTRIBUTE_TYPE_LIST_DATA:  //return "ATTRIBUTE_TYPE_LIST_DATA";
-    case STATISTIC_DATA:            //return "STATISTIC_DATA";
-    case PEAK_LONG_DATA:            //return "PEAK_LONG_DATA";
-    case PEAK_FLOAT_DATA:           //return "PEAK_FLOAT_DATA";
-
-    default:break;
+    QMap<int ,QString> map;
+    query.exec("select obid, Name from ObjectType where Name = " + table);
+    query.serialExec("select ObjectSpecifier,Name from ObjectAttribute "
+                     "where Name = " + attr + " and ParentLink=?");
+    query.serialExec("select obid, Name, Rank from Choice where ParentLink=?");
+    while(query.next()) {
+        map.insert(query.value("Rank").toInt(), query.value("Name").toString());
     }
-    std::cout << ErrorDataType(DataTypeToString(type)).toLocal8Bit().data() << std::endl;
-    return QSharedPointer<Data>();
+    return map;
 }
 
 Comparison OMSQuery::stringToOperator(QString op)
