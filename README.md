@@ -2,7 +2,8 @@
 
 #### 介绍
 一个视频监控的软件，支持linux和windows
-windows:在编译目录git clone  https://gitee.com/ch593030323/ffmpeg4.2，把相关bin/x86/*.dll移到编译目录下 
+windows:在编译目录git clone https://gitee.com/ch593030323/ffmpeg4.2
+    把相关bin/x86/*.dll移到编译目录下 
 linux:需安装ffmpeg的库
 #### 软件架构
 软件架构说明
