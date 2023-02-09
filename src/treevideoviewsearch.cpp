@@ -1,4 +1,4 @@
-#include "treevideosearch.h"
+#include "treevideoviewsearch.h"
 #include "treevideoview.h"
 #include "treevideomodel.h"
 #include "json/json.h"
@@ -11,6 +11,9 @@
 #include <QComboBox>
 #include <QHeaderView>
 #include <QDialog>
+#include <QLineEdit>
+#include <QColorDialog>
+#include <QApplication>
 
 QPixmap getCameraStatePixmap(int state) {
     if(0 == state) {
@@ -28,21 +31,24 @@ QPixmap getCameraStatePixmap(int state) {
     return QPixmap();
 }
 
-TreeVideoSearch::TreeVideoSearch(QWidget *parent)
+TreeVideoViewSearch::TreeVideoViewSearch(QWidget *parent)
     : QWidget(parent)
+    , m_isShowUrlColumn(false)
 {
     QLabel *label = new QLabel;
     m_buttonClose = new QPushButton;
     m_lineEdit = new QLineEdit;
     m_comboBox = new QComboBox;
+
+    m_treeModel = new TreeVideoModel(this);
     m_treeView = new TreeVideoView;
     m_treeView->setHeaderHidden(true);
     m_treeView->header()->setStretchLastSection(true);
     m_treeView->expandAll();
     m_treeView->setDragEnabled(true);
-    m_treeView->setEditTriggers(QTreeView::NoEditTriggers);
-    m_treeModel = new TreeVideoModel(this);
+    m_treeView->setEditTriggers(QTreeView::AllEditTriggers);
     m_treeView->setModel(m_treeModel);
+    m_treeView->setDragEnabled(true);
 
     m_comboBox->setFixedSize(108, 30);
     m_comboBox->setProperty("outer_stylesheet", "search");
@@ -81,38 +87,48 @@ TreeVideoSearch::TreeVideoSearch(QWidget *parent)
     connect(m_treeView, SIGNAL(signalImportJson()), this, SLOT(slotImportJson()));
 }
 
-void TreeVideoSearch::setDataSource(DataSource *datasource)
+void TreeVideoViewSearch::setDataSource(DataSource *datasource)
 {
     m_datasource = datasource;
 }
 
-DataSource *TreeVideoSearch::dataSource()
+DataSource *TreeVideoViewSearch::dataSource()
 {
     return m_datasource;
 }
 
-QAbstractItemModel *TreeVideoSearch::model()
+QAbstractItemModel *TreeVideoViewSearch::model()
 {
     return m_treeModel;
 }
 
-QModelIndex TreeVideoSearch::currentIndex()
+QTreeView *TreeVideoViewSearch::view()
+{
+    return m_treeView;
+}
+
+QModelIndex TreeVideoViewSearch::currentIndex()
 {
     return m_treeView->currentIndex();
 }
 
-void TreeVideoSearch::hideMenu()
+void TreeVideoViewSearch::hideMenu()
 {
     m_treeView->hideMenu();
 }
 
-void TreeVideoSearch::slotInitAll()
+void TreeVideoViewSearch::setShowUrlColumn(bool isShowUrlColumn)
+{
+    m_isShowUrlColumn = isShowUrlColumn;
+}
+
+void TreeVideoViewSearch::slotInitAll()
 {
     slotInitSql();
     slotInitControl();
 }
 
-void TreeVideoSearch::slotInitSql()
+void TreeVideoViewSearch::slotInitSql()
 {
     QSqlQuery q;
     q.exec("delete from vw_location");
@@ -144,7 +160,7 @@ void TreeVideoSearch::slotInitSql()
     }
 }
 
-void TreeVideoSearch::slotInitControl()
+void TreeVideoViewSearch::slotInitControl()
 {
     m_comboBox->clear();
     m_comboBox->addItem(QString::fromUtf8("所有"), "%");
@@ -159,46 +175,77 @@ void TreeVideoSearch::slotInitControl()
     m_treeView->expand(m_treeModel->index(0, 0));
 }
 
-void TreeVideoSearch::slotSettings()
+void TreeVideoViewSearch::slotSettings()
 {
     QDialog d(this);
     d.setObjectName("Window");
-    QVBoxLayout *vlayout = new QVBoxLayout;
-    QLabel *label  = new QLabel;
-    QModelIndex index = m_treeView->currentIndex();
-    label->setText(index.data(VideoUrlRole).toString());
+    QGridLayout *vlayout = new QGridLayout;
+    QFile file("skin.qss");
+    file.open(QFile::ReadOnly);
+    int row = 0;
+    while(!file.atEnd()) {
+        QString line = file.readLine();
+        int index = line.indexOf("qproperty");
+        if(index >= 0) {
+            index = line.indexOf("-");
+            int index2 = line.indexOf(":");
+            QString name = line.mid(index + 1, index2 - index - 1);
+            QString color = line.mid(index2 + 1).trimmed();
+            color.chop(1);
 
-    settings_edit=new QLineEdit;
-    settings_edit->setText(QString("%1,%2 %3x%4")
-                           .arg(this->parentWidget()->parentWidget()->x())
-                           .arg(this->parentWidget()->parentWidget()->y())
-                           .arg(this->parentWidget()->parentWidget()->width())
-                           .arg(this->parentWidget()->parentWidget()->height())
-                           );
-    QPushButton *b = new QPushButton;
-    b->setText("AppTo");
-    connect(b, SIGNAL(clicked()), this, SLOT(slotAppSettings()));
+            QLabel *label = new QLabel;
+            QPushButton *button = new QPushButton;
+            button->setMinimumHeight(40);
 
-    vlayout->addWidget(label);
-    vlayout->addWidget(settings_edit);
-    vlayout->addWidget(b);
+            label->setText(name);
+            button->setText(color);
+            vlayout->addWidget(label, row, 0);
+            vlayout->addWidget(button, row, 1);
+            row ++;
+            connect(button, SIGNAL(clicked()), this, SLOT(slotSetColor()));
+        }
+    }
+    QPushButton *acceptButton = new QPushButton("OK");
+    acceptButton->setFixedHeight(40);
+    QPushButton *rejectButton = new QPushButton("Exit");
+    rejectButton->setFixedHeight(40);
+    vlayout->addWidget(acceptButton, row, 0);
+    vlayout->addWidget(rejectButton, row, 1);
+    connect(acceptButton, SIGNAL(clicked()), this, SLOT(slotAppSettings()));
+    connect(rejectButton, SIGNAL(clicked()), &d, SLOT(reject()));
+
     d.setLayout(vlayout);
+    d.resize(500, 400);
 
     d.exec();
 }
 
-void TreeVideoSearch::slotAppSettings()
+void TreeVideoViewSearch::slotAppSettings()
 {
-    QString xy = settings_edit->text().split(" ").value(0);
-    QString wh = settings_edit->text().split(" ").value(1);
-    int w = wh.split("x").value(0).toInt();
-    int h = wh.split("x").value(1).toInt();
-    int x = xy.split(",").value(0).toInt();
-    int y = xy.split(",").value(1).toInt();
-    this->parentWidget()->parentWidget()->setGeometry(x, y, w, h);
+    QPushButton *button = qobject_cast<QPushButton *>(sender());
+    QObject *w = button->parent();
+    QFile file("skin.qss");
+    file.open(QFile::ReadOnly);
+    QByteArray all = file.readAll();
+
+    for(QObject *o : w->children())
+    {
+        QString text = o->property("text").toString();
+        if(text.startsWith("#") && text.contains("->")) {
+            QString l = text.split("->").value(0);
+            QString r = text.split("->").value(1);
+            all.replace(l, r.toLocal8Bit());
+            qDebug() << l << r;
+        }
+    }
+    file.close();
+    file.open(QFile::WriteOnly);
+    file.write(all);
+    this->setStyleSheet(QString() + all);
+    this->update();
 }
 
-void TreeVideoSearch::slotExportJson()
+void TreeVideoViewSearch::slotExportJson()
 {
     QFile file("video.json");
     file.open(QFile::WriteOnly);
@@ -206,23 +253,23 @@ void TreeVideoSearch::slotExportJson()
     file.close();
 }
 
-void TreeVideoSearch::slotImportJson()
+void TreeVideoViewSearch::slotImportJson()
 {
     m_datasource->fromJson("video.json");
     slotInitAll();
 }
 
-void TreeVideoSearch::addToPlayThread(const QString &obid, const QString &url)
+void TreeVideoViewSearch::addToPlayThread(const QString &obid, const QString &url)
 {
 
 }
 
-void TreeVideoSearch::slotShowCloseButton(const QString &text)
+void TreeVideoViewSearch::slotShowCloseButton(const QString &text)
 {
     m_buttonClose->setVisible(text.count() > 0);
 }
 
-void TreeVideoSearch::slotSelectStation(int index)
+void TreeVideoViewSearch::slotSelectStation(int index)
 {
     QString location_obid = m_comboBox->itemData(index).toString();
     if("%" == location_obid) {
@@ -244,7 +291,7 @@ void TreeVideoSearch::slotSelectStation(int index)
     m_treeView->scrollTo(itemStation->index(), QTreeView::PositionAtTop);
 }
 
-void TreeVideoSearch::slotSearchCamera(const QString &text)
+void TreeVideoViewSearch::slotSearchCamera(const QString &text)
 {
     int camera_index = -1;
     int station_index = m_comboBox->currentIndex();
@@ -287,7 +334,7 @@ search_end:
     }
 }
 
-void TreeVideoSearch::updateCameraSqlAndItemListOnce(const QString &location_obid)
+void TreeVideoViewSearch::updateCameraSqlAndItemListOnce(const QString &location_obid)
 {
     if(1 == lds::selectValue("select state from vw_location where obid = '%1'", location_obid))
         return;
@@ -299,7 +346,7 @@ void TreeVideoSearch::updateCameraSqlAndItemListOnce(const QString &location_obi
     q.exec(QString("update vw_location set state = 1 where obid = '%1'").arg(location_obid));
 }
 
-void TreeVideoSearch::updateCameraSqlList(const QString &location_obid)
+void TreeVideoViewSearch::updateCameraSqlList(const QString &location_obid)
 {
     QSqlQuery q;
     q.exec(QString("delete from vw_device where location_obid = '%1' ").arg(location_obid));
@@ -313,13 +360,17 @@ void TreeVideoSearch::updateCameraSqlList(const QString &location_obid)
     }
 }
 
-void TreeVideoSearch::updateCameraTree()
+void TreeVideoViewSearch::updateCameraTree()
 {
     m_treeModel->clear();
 
     QStandardItem *itemRoot =  m_treeModel->invisibleRootItem();
-    QStandardItem *itemISCS = new QStandardItem(QString::fromUtf8("摄像头"));
-    itemRoot->appendRow(itemISCS);
+
+    QStandardItem *itemISCS = createItem(QString::fromUtf8("摄像头"), Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+    itemRoot->setChild(0, 0, itemISCS);
+    if(m_isShowUrlColumn)
+        itemRoot->setChild(0, 1, createItem(QString::fromUtf8("Url"), Qt::ItemIsEnabled | Qt::ItemIsSelectable));
+
     QSqlQuery query_location;
     query_location.exec("select obid, name from vw_location");
     while(query_location.next()) {
@@ -329,13 +380,21 @@ void TreeVideoSearch::updateCameraTree()
         item_location->setText(location_name);
         item_location->setData(VideoNodeStation, VideoNodeType);
         item_location->setData(location_obid,    VideoObidRole);
+        item_location->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         itemISCS->appendRow(item_location);
 
         updateCameraItemList(item_location);
     }
 }
 
-void TreeVideoSearch::updateCameraItemList(const QString &location_obid)
+QStandardItem *TreeVideoViewSearch::createItem(const QString &text, Qt::ItemFlags flags)
+{
+    QStandardItem *item = new QStandardItem(text);
+    item->setFlags(flags);
+    return item;
+}
+
+void TreeVideoViewSearch::updateCameraItemList(const QString &location_obid)
 {
     QStandardItem *itemRoot =  m_treeModel->invisibleRootItem();
     QStandardItem *item =  itemRoot->child(0);
@@ -351,7 +410,7 @@ void TreeVideoSearch::updateCameraItemList(const QString &location_obid)
     updateCameraItemList(item_location);
 }
 
-void TreeVideoSearch::updateCameraItemList(QStandardItem *item_location)
+void TreeVideoViewSearch::updateCameraItemList(QStandardItem *item_location)
 {
     item_location->removeRows(0, item_location->rowCount());
     QString location_obid = item_location->data(VideoObidRole).toString();
@@ -368,6 +427,7 @@ void TreeVideoSearch::updateCameraItemList(QStandardItem *item_location)
         QString stateName = m_datasource->getCameraStateName(state);
         QString typeName = m_datasource->getCameraTypeName(type);
 
+        int row = item_location->rowCount();
         QStandardItem *item_device = new QStandardItem;
         item_device->setText(name);
         item_device->setToolTip("[" + stateName+ "]" + "[" + typeName + "]" + name);
@@ -378,18 +438,38 @@ void TreeVideoSearch::updateCameraItemList(QStandardItem *item_location)
         item_device->setData(state,             VideoStateRole);
         item_device->setData(url,               VideoUrlRole);
         item_device->setData(getCameraStatePixmap(state),   Qt::DecorationRole);
+        item_device->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
 
-        item_location->appendRow(item_device);
+        item_location->setChild(row, 0, item_device);
+        if(m_isShowUrlColumn)
+            item_location->setChild(row, 1, new QStandardItem(url));
 
         //
         addToPlayThread(obid, url);
     }
 }
 
-void TreeVideoSearch::slotUpdateAndExpandNode(const QModelIndex &index)
+void TreeVideoViewSearch::slotUpdateAndExpandNode(const QModelIndex &index)
 {
     if(index.data(VideoNodeType).toInt() == VideoNodeStation) {
         QString obid = index.data(VideoObidRole).toString();
         updateCameraSqlAndItemListOnce(obid);
+    }
+}
+
+void TreeVideoViewSearch::slotSetColor()
+{
+    QPushButton *button = qobject_cast<QPushButton *>(sender());
+    QColorDialog dialog;
+    QString colorName = button->text();
+    QString colorOrg = colorName;
+    QString colorCur = colorOrg;
+    if(colorName.contains("->"))  {
+        colorOrg = colorName.split("->").value(0);
+        colorCur = colorName.split("->").value(1);
+    }
+    dialog.setCurrentColor(QColor(colorCur));
+    if(QDialog::Accepted ==  dialog.exec()) {
+        button->setText(colorOrg + "->" + dialog.currentColor().name());
     }
 }

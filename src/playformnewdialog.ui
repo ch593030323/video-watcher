@@ -130,7 +130,7 @@
     <string>5x5</string>
    </property>
   </widget>
-  <widget class="TreeVideoWidget" name="treeView" native="true">
+  <widget class="TreeVideoViewSearchUrl" name="treeView" native="true">
    <property name="geometry">
     <rect>
      <x>520</x>
@@ -143,9 +143,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TreeVideoWidget</class>
+   <class>TreeVideoViewSearchUrl</class>
    <extends>QWidget</extends>
-   <header>src/treevideowidget.h</header>
+   <header>src/treevideoviewsearchurl.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

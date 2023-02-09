@@ -1,5 +1,5 @@
-#ifndef TREEVIDEOSEARCH_H
-#define TREEVIDEOSEARCH_H
+#ifndef TREEVIDEOVIEWSEARCH_H
+#define TREEVIDEOVIEWSEARCH_H
 
 #include <QWidget>
 #include <QStandardItem>
@@ -12,25 +12,28 @@ class QComboBox;
 class QLineEdit;
 class QPushButton;
 class TreeVideoModel;
+class QTreeView;
 
 /**
- * @brief The TreeVideoSearch class
+ * @brief The TreeVideoViewSearch class
  * 支持多数据源搜索的树形控件
  */
-class TreeVideoSearch : public QWidget
+class TreeVideoViewSearch : public QWidget
 {
     Q_OBJECT
 public:
-    TreeVideoSearch(QWidget *parent = 0);
+    TreeVideoViewSearch(QWidget *parent = 0);
 
     void setDataSource(DataSource *datasource);
     DataSource *dataSource();
 
     QAbstractItemModel *model();
-
+    QTreeView *view();
     QModelIndex currentIndex();
 
     void hideMenu();
+
+    void setShowUrlColumn(bool isShowUrlColumn);
 
 public slots:
     void slotInitAll();
@@ -49,6 +52,7 @@ private slots:
     void slotSelectStation(int index);
     void slotSearchCamera(const QString &text);
     void slotUpdateAndExpandNode(const QModelIndex &index);
+    void slotSetColor();
 
 private:
     void updateCameraSqlAndItemListOnce(const QString &location_obid);
@@ -57,6 +61,7 @@ private:
     void updateCameraItemList(const QString &location_obid);
     void updateCameraTree();
 
+    QStandardItem *createItem(const QString &text, Qt::ItemFlags flags);
 public:
     TreeVideoView *m_treeView;
     QComboBox *m_comboBox;
@@ -66,6 +71,7 @@ public:
     TreeVideoModel *m_treeModel;
 
     QLineEdit *settings_edit;
+    bool m_isShowUrlColumn;
 };
 
-#endif // TREEVIDEOSEARCH_H
+#endif // TREEVIDEOVIEWSEARCH_H

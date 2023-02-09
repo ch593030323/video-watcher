@@ -11,7 +11,8 @@ QString lds::IconFontFamily;
 
 QColor lds::highlightColor;
 QColor lds::textColor;
-QColor lds::subwindowColor;
+QColor lds::borderColor;
+QColor lds::subToolColor;
 
 QString lds::styleSheetString;
 
@@ -41,16 +42,25 @@ QColor lds::gettextColor() const
     return textColor;
 }
 
-void lds::setsubwindowColor(const QColor &color)
+void lds::setborderColor(const QColor &color)
 {
-    subwindowColor = color;
+    borderColor = color;
 }
 
-QColor lds::getsubwindowColor() const
+QColor lds::getborderColor() const
 {
-    return subwindowColor;
+    return borderColor;
 }
 
+void lds::setsubToolColor(const QColor &color)
+{
+    subToolColor = color;
+}
+
+QColor lds::getsubToolColor() const
+{
+    return subToolColor;
+}
 QVariant lds::selectValue(const QString &sql, const QString &arg0, const QVariant &def)
 {
     QSqlQuery query;
@@ -141,7 +151,8 @@ void lds::init()
     qDebug() << "IconFontFamily:" << IconFontFamily << QFontDatabase::applicationFontFamilies(fontId) << fontId;
 
     //skin
-    QFile file(":/skin.qss");
+//    QFile file(":/skin.qss");
+    QFile file("skin.qss");
     if(!file.open(QFile::ReadOnly)) {
         qDebug() << "file open error:" << file.errorString();
     }

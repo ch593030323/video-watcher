@@ -28,7 +28,7 @@ HEADERS += \
     src/datasource.h \
     src/treevideomodel.h \
     src/treevideoview.h \
-    src/treevideosearch.h \
+    src/treevideoviewsearch.h \
     src/tableviewadd.h \
     src/lds.h
 
@@ -36,7 +36,7 @@ SOURCES += \
     src/datasource.cpp \
     src/treevideomodel.cpp \
     src/treevideoview.cpp \
-    src/treevideosearch.cpp \
+    src/treevideoviewsearch.cpp \
     src/tableviewadd.cpp \
     src/lds.cpp
 

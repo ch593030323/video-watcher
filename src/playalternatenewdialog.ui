@@ -26,7 +26,7 @@
         </widget>
        </item>
        <item>
-        <widget class="TreeVideoWidget" name="treeView" native="true"/>
+        <widget class="TreeVideoViewSearchUrl" name="treeView" native="true"/>
        </item>
       </layout>
      </item>
@@ -189,9 +189,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TreeVideoWidget</class>
+   <class>TreeVideoViewSearchUrl</class>
    <extends>QWidget</extends>
-   <header>src/treevideowidget.h</header>
+   <header>src/treevideoviewsearchurl.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

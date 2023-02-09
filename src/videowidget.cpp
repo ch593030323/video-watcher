@@ -193,7 +193,7 @@ void VideoWidget::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
     QRect paint_rect = this->rect().adjusted(lds::margin / 2, lds::margin / 2, -lds::margin / 2, -lds::margin / 2);
-    painter.fillRect(paint_rect, lds::subwindowColor);
+    painter.fillRect(paint_rect, lds::borderColor);
     if(m_ffmpegData.isNoError) {
         //后台播放，直接removePlayer会有残留图片，故增加obidIsValid参数
         QImage &image = m_ffmpegData.image;

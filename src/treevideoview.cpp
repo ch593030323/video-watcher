@@ -2,17 +2,34 @@
 
 #include <QMenu>
 #include <QContextMenuEvent>
+#include <QStandardItem>
 
 TreeVideoView::TreeVideoView(QWidget *parent)
     : QTreeView(parent)
     , m_hideMenu(false)
 {
-
 }
 
 void TreeVideoView::hideMenu()
 {
     m_hideMenu = true;
+}
+
+void TreeVideoView::toExpand()
+{
+	//直接调用expandAll会有崩溃的问题，故用新的方法
+    QStandardItemModel *m_treeModel = qobject_cast<QStandardItemModel *>(this->model());
+    QStandardItem *itemRoot     = m_treeModel->invisibleRootItem();
+    QStandardItem *itemISCS     = itemRoot ? itemRoot->child(0) : 0;
+    if(!itemISCS)
+        return;
+
+    for(int k = 0; k < itemISCS->rowCount(); k ++) {
+        QStandardItem *itemStation  = itemISCS->child(k);
+        if(!itemStation)
+            continue;
+        this->expand(itemStation->index());
+    }
 }
 
 void TreeVideoView::contextMenuEvent(QContextMenuEvent *event)
@@ -22,10 +39,11 @@ void TreeVideoView::contextMenuEvent(QContextMenuEvent *event)
 
     QMenu m(this);
     connect(m.addAction(QString::fromUtf8("刷新")),SIGNAL(triggered()),this,SIGNAL(signalRefresh()));
+    connect(m.addAction(QString::fromUtf8("全部展开")),SIGNAL(triggered()),this,SLOT(toExpand()));
     connect(m.addAction(QString::fromUtf8("折叠全部")),SIGNAL(triggered()),this,SLOT(collapseAll()));
-    connect(m.addAction(QString::fromUtf8("导出json文件")),SIGNAL(triggered()),this,SIGNAL(signalExportJson()));
-    connect(m.addAction(QString::fromUtf8("导入json文件")),SIGNAL(triggered()),this,SIGNAL(signalImportJson()));
-    //connect(m.addAction(QString::fromUtf8("设置")),SIGNAL(triggered()),this,SIGNAL(signalSettings()));
+    //connect(m.addAction(QString::fromUtf8("导出json文件")),SIGNAL(triggered()),this,SIGNAL(signalExportJson()));
+    //connect(m.addAction(QString::fromUtf8("导入json文件")),SIGNAL(triggered()),this,SIGNAL(signalImportJson()));
+    connect(m.addAction(QString::fromUtf8("设置")),SIGNAL(triggered()),this,SIGNAL(signalSettings()));
     m.move(this->mapToGlobal(event->pos()));
     m.exec();
 }

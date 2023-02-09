@@ -82,6 +82,10 @@ void VideoControlPanel::updateProgress(int cur, int total)
 
 void VideoControlPanel::paintEvent(QPaintEvent *event)
 {
+    QPainter paint(this);
+    QColor c = lds::subToolColor;
+    c.setAlpha(100);
+    paint.fillRect(this->rect(), c);
     QWidget::paintEvent(event);
 }
 

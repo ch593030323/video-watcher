@@ -10,6 +10,7 @@ namespace Ui {
 class mainWidget;
 }
 
+class QAbstractButton;
 class JsonDataSource : public DataSource {
 
     Q_OBJECT
@@ -38,9 +39,9 @@ public:
     ~mainWidget();
 
 private slots:
-    void slotUpdateInfo(const QModelIndex &current, const QModelIndex &previous);
     void toexit();
     void toreload();
+    void toSwitchPage(QAbstractButton *button, bool checked);
 
 private:
     Ui::mainWidget *ui;

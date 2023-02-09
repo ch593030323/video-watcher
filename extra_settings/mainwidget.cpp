@@ -1,7 +1,7 @@
 #include "mainwidget.h"
 #include "ui_mainwidget.h"
 #include "json/json.h"
-#include "src/treevideowidget.h"
+#include "src/treevideoviewsearchurl.h"
 #include "src/treevideomodel.h"
 #include "src/treevideoview.h"
 
@@ -10,6 +10,7 @@
 #include <QtDebug>
 #include <QTreeView>
 #include <QItemSelectionModel>
+#include <QButtonGroup>
 
 
 mainWidget::mainWidget(QWidget *parent) :
@@ -20,14 +21,24 @@ mainWidget::mainWidget(QWidget *parent) :
     this->setObjectName("Window");
 
     m_datasource = new JsonDataSource("D:/Users/Dy/Documents/qt_project/build-VideoWatcher-Desktop_Qt_5_9_6_MinGW_32bit-Debug/video.json", this);
-    ui->treeView->hideMenu();
+    //ui->treeView->hideMenu();
     ui->treeView->setDataSource(m_datasource);
+    ui->treeView->setShowUrlColumn(true);
 
-    connect(ui->treeView->m_treeView->selectionModel(), SIGNAL(currentChanged(QModelIndex, QModelIndex)), this, SLOT(slotUpdateInfo(QModelIndex, QModelIndex)));
+    ui->toolButton_basic->setCheckable(true);
+    ui->toolButton_camera->setCheckable(true);
+    QButtonGroup *buttonGroup = new QButtonGroup(this);
+    buttonGroup->addButton(ui->toolButton_basic);
+    buttonGroup->addButton(ui->toolButton_camera);
+    buttonGroup->setExclusive(true);
+    ui->toolButton_basic->setChecked(true);
+    ui->stackedWidget->setCurrentIndex(0);
+
+
     connect(ui->pushButton_exit, SIGNAL(clicked()), this, SLOT(toexit()));
-    connect(ui->pushButton_reload, SIGNAL(clicked()), this, SLOT(toreload()));
     connect(ui->pushButton_sub_defatult_video_url, SIGNAL(clicked()), ui->tableView, SLOT(toRemove()));
     connect(ui->pushButton_add_defatult_video_url, SIGNAL(clicked()), ui->tableView, SLOT(toAdd()));
+    connect(buttonGroup, SIGNAL(buttonToggled(QAbstractButton *, bool)), this, SLOT(toSwitchPage(QAbstractButton *, bool)));
 
     toreload();
 }
@@ -35,13 +46,6 @@ mainWidget::mainWidget(QWidget *parent) :
 mainWidget::~mainWidget()
 {
     delete ui;
-}
-
-void mainWidget::slotUpdateInfo(const QModelIndex &current, const QModelIndex &previous)
-{
-    ui->comboBox_state->setCurrentIndex(ui->comboBox_state->findData(current.data(VideoStateRole).toInt()));
-    ui->comboBox_type->setCurrentIndex(ui->comboBox_type->findData(current.data(VideoTypeRole).toInt()));
-    ui->plainTextEdit_url->setPlainText(current.data(VideoUrlRole).toString());
 }
 
 void mainWidget::toexit()
@@ -54,14 +58,19 @@ void mainWidget::toreload()
     if(!m_datasource->update())
         return;
     ui->treeView->slotInitAll();
+    ui->treeView->view()->setColumnWidth(0, 200);
+}
 
-    ui->comboBox_state->clear();
-    for(DataSource::CameraState state : m_datasource->getCameraStateList())
-        ui->comboBox_state->addItem(state.name, state.rank);
-
-    ui->comboBox_type->clear();
-    for(DataSource::CameraType state : m_datasource->getCameraTypeList())
-        ui->comboBox_type->addItem(state.name, state.rank);
+void mainWidget::toSwitchPage(QAbstractButton *button, bool checked)
+{
+    if(!checked)
+        return;
+    if(button == ui->toolButton_basic) {
+        ui->stackedWidget->setCurrentIndex(0);
+    }
+    if(button == ui->toolButton_camera) {
+        ui->stackedWidget->setCurrentIndex(1);
+    }
 }
 
 JsonDataSource::JsonDataSource(const QString &jsonPath, QObject *parent)
@@ -106,23 +115,25 @@ bool JsonDataSource::update()
 
     Json::Value station = value["station"];
     for(int k1 = 0; k1 < station.size(); k1 ++) {
+        Json::Value cameraArray = station[k1]["camera"];
         QString location_obid = station[k1]["obid"].asCString();
         QString location_name = station[k1]["name"].asCString();
+
         Location location_item;
         location_item.obid = location_obid;
         location_item.name = location_name;
-
+        location_item.state = 0;
+        location_item.camera_count = cameraArray.size();
         m_locationList << location_item;
 
-        Json::Value camera = station[k1]["camera"];
-        for(int k2 = 0; k2 < camera.size(); k2 ++) {
+        for(int k2 = 0; k2 < cameraArray.size(); k2 ++) {
             Camera camera_item;
             camera_item.location_obid = location_obid;
-            camera_item.obid = camera[k2]["obid"].asCString();
-            camera_item.name = camera[k2]["name"].asCString();
-            camera_item.type = camera[k2]["type"].asInt();
-            camera_item.state = camera[k2]["state"].asInt();
-            camera_item.url = camera[k2]["url"].asCString();
+            camera_item.obid = cameraArray[k2]["obid"].asCString();
+            camera_item.name = cameraArray[k2]["name"].asCString();
+            camera_item.type = cameraArray[k2]["type"].asInt();
+            camera_item.state = cameraArray[k2]["state"].asInt();
+            camera_item.url = cameraArray[k2]["url"].asCString();
 
             m_cameraList << camera_item;
         }
@@ -149,3 +160,4 @@ QList<DataSource::CameraState> JsonDataSource::getCameraStateList()
 {
     return m_cameraStateList;
 }
+

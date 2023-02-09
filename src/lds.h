@@ -29,7 +29,8 @@ class lds : public QWidget
     Q_OBJECT
     Q_PROPERTY(QColor highlightColor READ gethighlightColor WRITE sethighlightColor DESIGNABLE true)
     Q_PROPERTY(QColor textColor      READ gettextColor      WRITE settextColor      DESIGNABLE true)
-    Q_PROPERTY(QColor subwindowColor READ getsubwindowColor WRITE setsubwindowColor DESIGNABLE true)
+    Q_PROPERTY(QColor borderColor READ getborderColor WRITE setborderColor DESIGNABLE true)
+    Q_PROPERTY(QColor subToolColor READ getsubToolColor WRITE setsubToolColor DESIGNABLE true)
 public:
     void sethighlightColor(const QColor &color);
     QColor gethighlightColor() const;
@@ -39,9 +40,13 @@ public:
     QColor gettextColor() const;
     static QColor textColor;
 
-    void setsubwindowColor(const QColor &color);
-    QColor getsubwindowColor() const;
-    static QColor subwindowColor;
+    void setborderColor(const QColor &color);
+    QColor getborderColor() const;
+    static QColor borderColor;
+
+    void setsubToolColor(const QColor &color);
+    QColor getsubToolColor() const;
+    static QColor subToolColor;
 
     static QVariant selectValue(const QString &sql, const QString &arg0, const QVariant &def = QVariant());
     static QVariant selectValue(const QString &sql, int arg0, const QVariant &def = QVariant());

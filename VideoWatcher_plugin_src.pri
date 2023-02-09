@@ -11,12 +11,12 @@ HEADERS += \
     $$PWD/src/playformnewdialog.h \
     $$PWD/src/tableviewadd.h \
     $$PWD/src/treevideomodel.h \
-    $$PWD/src/treevideosearch.h \
+    $$PWD/src/treevideoviewsearch.h \
+    $$PWD/src/treevideoviewsearchurl.h \
     $$PWD/src/videowidget.h \
     $$PWD/src/lds.h \
     $$PWD/src/videocontrolpanel.h \
     $$PWD/src/treevideoview.h \
-    $$PWD/src/treevideowidget.h \
     $$PWD/src/datasource.h \
     $$PWD/src/playthread.h \
     $$PWD/src/videolayout.h
@@ -27,12 +27,12 @@ SOURCES += \
     $$PWD/src/playformnewdialog.cpp \
     $$PWD/src/tableviewadd.cpp \
     $$PWD/src/treevideomodel.cpp \
-    $$PWD/src/treevideosearch.cpp \
+    $$PWD/src/treevideoviewsearch.cpp \
+    $$PWD/src/treevideoviewsearchurl.cpp \
     $$PWD/src/videowidget.cpp \
     $$PWD/src/lds.cpp \
     $$PWD/src/videocontrolpanel.cpp \
     $$PWD/src/treevideoview.cpp \
-    $$PWD/src/treevideowidget.cpp \
     $$PWD/src/datasource.cpp \
     $$PWD/src/playthread.cpp \
     $$PWD/src/videolayout.cpp
