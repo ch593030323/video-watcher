@@ -190,13 +190,19 @@ void lds::init()
                                        "state int)"
                                        );
 
+    /*
+     * 软件treeviwe的节点展开采用动态记载的方式
+     * 因为treeview当没有child时，是无法显示节点图标的，这时要创建个【device_id为空的child作为占位用】（显示location的节点）
+     * 采用复合组件的方式PRIMARY KEY(obid, location_obid), obid+location_obid不重复即可，来实现【device_id为空的child作为占位用】
+     */
     qDebug() << __LINE__ << query.exec("create table vw_device ("
-                                       "obid varchar(20) primary key, "
+                                       "obid varchar(20) , "
                                        "name varchar(20), "
-                                       "location_obid varchar(20), "
+                                       "location_obid varchar(20) , "
                                        "type int,"
                                        "state int,"
-                                       "url varchar(20)"
+                                       "url varchar(20),"
+                                       "PRIMARY KEY(obid, location_obid)"
                                        ")"
                                        );
     qDebug() << __LINE__ << query.exec("create table vw_device_state ("

@@ -63,6 +63,7 @@ private:
     void updateCameraTree();
 
     QStandardItem *createItem(const QString &text, Qt::ItemFlags flags);
+    QStandardItem *getLocationItem(const QString &location_obid);
 public:
     TreeVideoView *m_treeView;
     QComboBox *m_comboBox;

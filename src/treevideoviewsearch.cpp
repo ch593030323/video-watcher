@@ -155,7 +155,7 @@ void TreeVideoViewSearch::slotInitSql()
         if(0 < count) {
             //占位用
             q.exec(QString("insert into vw_device(obid, name, location_obid, type, state, url) values('%1', '', '%2', 0, 0, '')")
-                   .arg(obid + "001")
+                   .arg("")
                    .arg(obid));
         }
     }
@@ -352,14 +352,12 @@ search_end:
 
 void TreeVideoViewSearch::updateCameraSqlAndItemListOnce(const QString &location_obid)
 {
-    if(1 == lds::selectValue("select state from vw_location where obid = '%1'", location_obid))
-        return;
-
-    updateCameraSqlList(location_obid);
-    updateCameraItemList(location_obid);
-
-    QSqlQuery q;
-    q.exec(QString("update vw_location set state = 1 where obid = '%1'").arg(location_obid));
+    QStandardItem *item = getLocationItem(location_obid);
+    //若第一个设备的obid为空，则需要加载数据
+    if(item && item->child(0) && item->child(0)->data(VideoObidRole).toString().isEmpty()) {
+        updateCameraSqlList(location_obid);
+        updateCameraItemList(location_obid);
+    }
 }
 
 void TreeVideoViewSearch::updateCameraSqlList(const QString &location_obid)
@@ -410,7 +408,7 @@ QStandardItem *TreeVideoViewSearch::createItem(const QString &text, Qt::ItemFlag
     return item;
 }
 
-void TreeVideoViewSearch::updateCameraItemList(const QString &location_obid)
+QStandardItem *TreeVideoViewSearch::getLocationItem(const QString &location_obid)
 {
     QStandardItem *itemRoot =  m_treeModel->invisibleRootItem();
     QStandardItem *item =  itemRoot->child(0);
@@ -418,9 +416,15 @@ void TreeVideoViewSearch::updateCameraItemList(const QString &location_obid)
     for(int k = 0; item && k < item->rowCount(); k ++) {
         item_location = item->child(k);
         if(item_location && item_location->data(VideoObidRole).toString() == location_obid) {
-            break;
+            return item_location;
         }
     }
+    return 0;
+}
+
+void TreeVideoViewSearch::updateCameraItemList(const QString &location_obid)
+{
+    QStandardItem *item_location = getLocationItem(location_obid);
     if(!item_location)
         return;
     updateCameraItemList(item_location);
