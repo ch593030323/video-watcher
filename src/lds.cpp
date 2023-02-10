@@ -151,8 +151,8 @@ void lds::init()
     qDebug() << "IconFontFamily:" << IconFontFamily << QFontDatabase::applicationFontFamilies(fontId) << fontId;
 
     //skin
-//    QFile file(":/skin.qss");
-    QFile file("skin.qss");
+    QFile file(":/skin_light.qss");
+//    QFile file("skin.qss");
     if(!file.open(QFile::ReadOnly)) {
         qDebug() << "file open error:" << file.errorString();
     }

@@ -11,8 +11,17 @@
         <file>skin_image/dark/find_15x15.png</file>
         <file>video.png</file>
         <file>skin_image/dark/circle_xmark_20x20.png</file>
-        <file>skin_image/dark/circle_xmark_pressed_20x20.png</file>
         <file>skin_image/dark/arrow_left.png</file>
         <file>skin_image/dark/arrow_right.png</file>
+        <file>skin_light.qss</file>
+        <file>skin_image/circle_xmark_pressed_20x20.png</file>
+        <file>skin_image/light/branch-closed.png</file>
+        <file>skin_image/light/branch-end.png</file>
+        <file>skin_image/light/branch-more.png</file>
+        <file>skin_image/light/branch-open.png</file>
+        <file>skin_image/light/circle_xmark_20x20.png</file>
+        <file>skin_image/light/down_arrow_15x15.png</file>
+        <file>skin_image/light/find_15x15.png</file>
+        <file>skin_image/light/vline.png</file>
     </qresource>
 </RCC>

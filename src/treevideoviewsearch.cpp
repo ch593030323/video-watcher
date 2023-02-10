@@ -14,6 +14,7 @@
 #include <QLineEdit>
 #include <QColorDialog>
 #include <QApplication>
+#include <QtDebug>
 
 QPixmap getCameraStatePixmap(int state) {
     if(0 == state) {
@@ -44,7 +45,6 @@ TreeVideoViewSearch::TreeVideoViewSearch(QWidget *parent)
     m_treeView = new TreeVideoView;
     m_treeView->setHeaderHidden(true);
     m_treeView->header()->setStretchLastSection(true);
-    m_treeView->expandAll();
     m_treeView->setDragEnabled(true);
     m_treeView->setEditTriggers(QTreeView::AllEditTriggers);
     m_treeView->setModel(m_treeModel);
@@ -85,6 +85,7 @@ TreeVideoViewSearch::TreeVideoViewSearch(QWidget *parent)
     connect(m_treeView, SIGNAL(signalSettings()), this, SLOT(slotSettings()));
     connect(m_treeView, SIGNAL(signalExportJson()), this, SLOT(slotExportJson()));
     connect(m_treeView, SIGNAL(signalImportJson()), this, SLOT(slotImportJson()));
+    connect(m_treeView, SIGNAL(clicked(QModelIndex)), this, SLOT(slotEditUrl(QModelIndex)));
 }
 
 void TreeVideoViewSearch::setDataSource(DataSource *datasource)
@@ -102,7 +103,7 @@ QAbstractItemModel *TreeVideoViewSearch::model()
     return m_treeModel;
 }
 
-QTreeView *TreeVideoViewSearch::view()
+TreeVideoView *TreeVideoViewSearch::view()
 {
     return m_treeView;
 }
@@ -126,6 +127,11 @@ void TreeVideoViewSearch::slotInitAll()
 {
     slotInitSql();
     slotInitControl();
+
+    if(m_isShowUrlColumn) {
+        m_treeView->setColumnWidth(0, 200);
+        m_treeView->slotExpandAll();
+    }
 }
 
 void TreeVideoViewSearch::slotInitSql()
@@ -257,6 +263,16 @@ void TreeVideoViewSearch::slotImportJson()
 {
     m_datasource->fromJson("video.json");
     slotInitAll();
+}
+
+void TreeVideoViewSearch::slotEditUrl(const QModelIndex &index)
+{
+    if(m_isShowUrlColumn) {
+        if(VideoNodeTrain == index.data(VideoNodeType).toInt()) {
+            //默认，第0列显示设备名，第1列是显示url
+            m_treeView->edit(index.sibling(index.row(), 1));
+        }
+    }
 }
 
 void TreeVideoViewSearch::addToPlayThread(const QString &obid, const QString &url)

@@ -15,7 +15,7 @@ void TreeVideoView::hideMenu()
     m_hideMenu = true;
 }
 
-void TreeVideoView::toExpand()
+void TreeVideoView::slotExpandAll()
 {
 	//直接调用expandAll会有崩溃的问题，故用新的方法
     QStandardItemModel *m_treeModel = qobject_cast<QStandardItemModel *>(this->model());
@@ -39,7 +39,7 @@ void TreeVideoView::contextMenuEvent(QContextMenuEvent *event)
 
     QMenu m(this);
     connect(m.addAction(QString::fromUtf8("刷新")),SIGNAL(triggered()),this,SIGNAL(signalRefresh()));
-    connect(m.addAction(QString::fromUtf8("全部展开")),SIGNAL(triggered()),this,SLOT(toExpand()));
+    connect(m.addAction(QString::fromUtf8("全部展开")),SIGNAL(triggered()),this,SLOT(slotExpandAll()));
     connect(m.addAction(QString::fromUtf8("折叠全部")),SIGNAL(triggered()),this,SLOT(collapseAll()));
     //connect(m.addAction(QString::fromUtf8("导出json文件")),SIGNAL(triggered()),this,SIGNAL(signalExportJson()));
     //connect(m.addAction(QString::fromUtf8("导入json文件")),SIGNAL(triggered()),this,SIGNAL(signalImportJson()));

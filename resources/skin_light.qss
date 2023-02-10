@@ -1,15 +1,15 @@
 #lds{
-    qproperty-highlightColor:#4e6ef2;
+    qproperty-highlightColor:#ff506b;
     qproperty-textColor:#171718;
-    qproperty-borderColor:#cbcbcb;
+    qproperty-borderColor:#acb9ff;
     /*视频播放顶部菜单栏*/
     qproperty-subToolColor:#ac888a;
 
     /*
-    qproperty-viewColor:#eeeeee;
+    qproperty-viewColor:#ffffff;
 
-    qproperty-windowColor:#e3e3e3;
-    qproperty-buttonColor:#7d7d7d;
+    qproperty-windowColor:#f7f7f7;
+    qproperty-buttonColor:#6091fa;
 
     qproperty-scrollBackgroudColor:#606060;
     qproperty-scrollHandleColor:#404040;
@@ -17,14 +17,14 @@
 }
 
 #Window{
-    background:#e3e3e3;
+    background:#f7f7f7;
 }
 QMenu{
     border-style:outset; /*边框风格*/
     border-width:1px;/*边框宽度*/
-    border-color:#cbcbcb; /*边框颜色*/
+    border-color:#acb9ff; /*边框颜色*/
     color:#171718;
-    background:#cbcbcb;
+    background:#acb9ff;
 }
 
 QMenu::item {
@@ -32,7 +32,7 @@ QMenu::item {
 }
 
 QMenu::item:selected {
-    background: #4e6ef2;
+    background: #ff506b;
     color:#171718;
 }
 
@@ -41,23 +41,23 @@ QLabel{
 }
 QPushButton,
 QToolButton{
-    border:2px outset #cbcbcb;
+    border:2px outset #acb9ff;
     border-radius:10px;
-    background:#7d7d7d;
+    background:#6091fa;
     color:#171718;
 }
 QPushButton:pressed,
 QToolButton:pressed{
-    background: #4e6ef2;
+    background: #ff506b;
     color:#171718;
     border-radius:10px;
     border-width:0px;
 }
 QPushButton:checked,
 QToolButton:checked{
-    border:2px outset #cbcbcb;
+    border:2px outset #acb9ff;
     border-radius:10px;
-    background:#4e6ef2;
+    background:#ff506b;
     color:#171718;
 }
 
@@ -70,7 +70,7 @@ QToolButton:checked{
 #buttonIcon:pressed{
     border-radius:0px;
     border-width:0px;
-    background: #4e6ef2;
+    background: #ff506b;
 }
 
 /*======================================树状图 样式begin====================================*/
@@ -78,8 +78,8 @@ QToolButton:checked{
 QTableView,
 QTreeView,
 QListView{
-    border:1px solid #cbcbcb;
-    background:#eeeeee;
+    border:1px solid #acb9ff;
+    background:#ffffff;
     color:#171718;
 }
 QTreeView {
@@ -95,7 +95,7 @@ QTableView::item:selected,
 QTreeView::item:selected,
 QTreeView::branch:selected,
 QListView::item:selected{
-    background: #4e6ef2;
+    background: #ff506b;
     color:#171718;
 }
 
@@ -106,32 +106,32 @@ QListView::item:!selected{
 }
 
 QTreeView::branch:has-siblings:!adjoins-item {
-    border-image: url(:/skin_image/dark/vline.png) 0;
+    border-image: url(:/skin_image/light/vline.png) 0;
 }
 
 QTreeView::branch:has-siblings:adjoins-item {
-    border-image: url(:/skin_image/dark/branch-more.png) 0;
+    border-image: url(:/skin_image/light/branch-more.png) 0;
 }
 
 QTreeView::branch:!has-children:!has-siblings:adjoins-item {
-    border-image: url(:/skin_image/dark/branch-end.png) 0;
+    border-image: url(:/skin_image/light/branch-end.png) 0;
 }
 
 QTreeView::branch:has-children:!has-siblings:closed,
 QTreeView::branch:closed:has-children:has-siblings {
     border-image: none;
-    image: url(:/skin_image/dark/branch-closed.png);
+    image: url(:/skin_image/light/branch-closed.png);
 }
 
 QTreeView::branch:open:has-children:!has-siblings,
 QTreeView::branch:open:has-children:has-siblings  {
     border-image: none;
-    image: url(:/skin_image/dark/branch-open.png);
+    image: url(:/skin_image/light/branch-open.png);
 }
 QHeaderView::section,
 QHeaderView,
 QTableView QTableCornerButton::section{
-background-color: #7d7d7d;
+background-color: #6091fa;
 }
 QTableView QTableCornerButton,
 QHeaderView::section{
@@ -140,16 +140,16 @@ color:#171718;
 
 QScrollBar:horizontal{background:#606060;padding:0px;border-radius:6px;max-height:12px;}
 QScrollBar::handle:horizontal{background:#404040;min-width:120px;border-radius:6px;}
-QScrollBar::handle:horizontal:hover{background:#4e6ef2;}
-QScrollBar::handle:horizontal:pressed{background:#4e6ef2;}
+QScrollBar::handle:horizontal:hover{background:#ff506b;}
+QScrollBar::handle:horizontal:pressed{background:#ff506b;}
 QScrollBar::add-page:horizontal{background:none;}
 QScrollBar::sub-page:horizontal{background:none;}
 QScrollBar::add-line:horizontal{background:none;}
 QScrollBar::sub-line:horizontal{background:none;}
 QScrollBar:vertical{background:#606060;padding:0px;border-radius:6px;max-width:12px;}
 QScrollBar::handle:vertical{background:#404040;min-height:120px;border-radius:6px;}
-QScrollBar::handle:vertical:hover{background:#4e6ef2;}
-QScrollBar::handle:vertical:pressed{background:#4e6ef2;}
+QScrollBar::handle:vertical:hover{background:#ff506b;}
+QScrollBar::handle:vertical:pressed{background:#ff506b;}
 QScrollBar::add-page:vertical{background:none;}
 QScrollBar::sub-page:vertical{background:none;}
 QScrollBar::add-line:vertical{background:none;}
@@ -160,28 +160,28 @@ QScrollBar::sub-line:vertical{background:none;}
 /*======================================搜索的三个控件begin====================================*/
 QLineEdit,
 QPlainTextEdit{
-    border:1px solid #cbcbcb; /*边框风格*/
-    background:#cbcbcb;
+    border:1px solid #acb9ff; /*边框风格*/
+    background:#acb9ff;
     color:#171718;
 }
 
 QLabel[outer_stylesheet="search"]{
-    background:#cbcbcb;
-    image: url(:/skin_image/dark/find_15x15.png);
+    background:#acb9ff;
+    image: url(:/skin_image/light/find_15x15.png);
 }
 
 
 QComboBox {
-    border:1px solid #cbcbcb; /*边框风格*/
-    background:#7d7d7d;
+    border:1px solid #acb9ff; /*边框风格*/
+    background:#6091fa;
     color:#171718;
 }
 
 QComboBox QAbstractItemView {
-    border:1px solid #cbcbcb; /*边框风格*/
-    background: #cbcbcb;
+    border:1px solid #acb9ff; /*边框风格*/
+    background: #acb9ff;
     border-radius:0px;
-    selection-background-color: #4e6ef2;/*hover color*/
+    selection-background-color: #ff506b;/*hover color*/
 }
 
 QComboBox:on { /* shift the text when the popup opens */
@@ -197,24 +197,24 @@ QComboBox::drop-down {
 }
 
 QComboBox::down-arrow {
-    image: url(:/skin_image/dark/down_arrow_15x15.png);
+    image: url(:/skin_image/light/down_arrow_15x15.png);
 }
 
 QPushButton[outer_stylesheet="button_xmark"] {
-    image: url(:/skin_image/dark/circle_xmark_20x20.png);
+    image: url(:/skin_image/light/circle_xmark_20x20.png);
     border-width:0px;
-    background: #cbcbcb;
+    background: #acb9ff;
     border-radius:0px; /*边框倒角*/
 }
 QPushButton[outer_stylesheet="button_xmark"]:pressed {
-    image: url(:/skin_image/dark/circle_xmark_pressed_20x20.png);
+    image: url(:/skin_image/circle_xmark_pressed_20x20.png);
     border-width:0px;
 }
 /*======================================搜索的三个控件end====================================*/
 
 *[outer_stylesheet="line"] {
-    background: #cbcbcb;
+    background: #acb9ff;
 }
 *[outer_stylesheet="window_title"] {
-    background:#7d7d7d;
+    background:#165ebc;
 }

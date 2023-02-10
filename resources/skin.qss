@@ -207,7 +207,7 @@ QPushButton[outer_stylesheet="button_xmark"] {
     border-radius:0px; /*边框倒角*/
 }
 QPushButton[outer_stylesheet="button_xmark"]:pressed {
-    image: url(:/skin_image/dark/circle_xmark_pressed_20x20.png);
+    image: url(:/skin_image/circle_xmark_pressed_20x20.png);
     border-width:0px;
 }
 /*======================================搜索的三个控件end====================================*/

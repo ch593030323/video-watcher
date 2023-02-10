@@ -19,6 +19,14 @@ mainWidget::mainWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setObjectName("Window");
+    conf = new QSettings("setting.ini", QSettings::IniFormat, this);
+    ui->lineEdit_default_rowcount->setText(conf->value("global/default_rowcount", 2).toString());
+    ui->lineEdit_default_columncount->setText(conf->value("global/default_columncount", 2).toString());
+    ui->tableView_defatul_playlist->setStringList(conf->value("global/default_playlist", QStringList()
+                                                          <<""
+                                                          <<""
+                                                          <<""
+                                                          <<"").toStringList());
 
     m_datasource = new JsonDataSource("D:/Users/Dy/Documents/qt_project/build-VideoWatcher-Desktop_Qt_5_9_6_MinGW_32bit-Debug/video.json", this);
     //ui->treeView->hideMenu();
@@ -36,8 +44,6 @@ mainWidget::mainWidget(QWidget *parent) :
 
 
     connect(ui->pushButton_exit, SIGNAL(clicked()), this, SLOT(toexit()));
-    connect(ui->pushButton_sub_defatult_video_url, SIGNAL(clicked()), ui->tableView, SLOT(toRemove()));
-    connect(ui->pushButton_add_defatult_video_url, SIGNAL(clicked()), ui->tableView, SLOT(toAdd()));
     connect(buttonGroup, SIGNAL(buttonToggled(QAbstractButton *, bool)), this, SLOT(toSwitchPage(QAbstractButton *, bool)));
 
     toreload();
@@ -58,7 +64,6 @@ void mainWidget::toreload()
     if(!m_datasource->update())
         return;
     ui->treeView->slotInitAll();
-    ui->treeView->view()->setColumnWidth(0, 200);
 }
 
 void mainWidget::toSwitchPage(QAbstractButton *button, bool checked)
@@ -71,6 +76,11 @@ void mainWidget::toSwitchPage(QAbstractButton *button, bool checked)
     if(button == ui->toolButton_camera) {
         ui->stackedWidget->setCurrentIndex(1);
     }
+}
+
+void mainWidget::tosave()
+{
+
 }
 
 JsonDataSource::JsonDataSource(const QString &jsonPath, QObject *parent)

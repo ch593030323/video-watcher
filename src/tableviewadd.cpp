@@ -27,6 +27,14 @@ QStringList TableViewAdd::result()
     return list;
 }
 
+void TableViewAdd::setStringList(const QStringList &list)
+{
+    m_tableModel->removeRows(0, m_tableModel->rowCount());
+    for(int row = 0; row < list.count(); row ++) {
+        m_tableModel->insertRow(row, new QStandardItem(list[row]));
+    }
+}
+
 void TableViewAdd::toCheckTable(QWidget *editor, QAbstractItemDelegate::EndEditHint hint)
 {
     if(editor && editor->property("text").toString().trimmed().isEmpty()) {

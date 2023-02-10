@@ -28,7 +28,7 @@ public:
     DataSource *dataSource();
 
     QAbstractItemModel *model();
-    QTreeView *view();
+    TreeVideoView *view();
     QModelIndex currentIndex();
 
     void hideMenu();
@@ -43,6 +43,7 @@ public slots:
     void slotAppSettings();
     void slotExportJson();
     void slotImportJson();
+    void slotEditUrl(const QModelIndex &index);
 
 protected:
     virtual void addToPlayThread(const QString &obid, const QString &url);

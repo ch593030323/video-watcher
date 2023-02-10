@@ -11,6 +11,7 @@ public:
     TableViewAdd(QWidget *parent = 0);
 
     QStringList result();
+    void setStringList(const QStringList &list);
 public slots:
     void toCheckTable(QWidget *editor, QAbstractItemDelegate::EndEditHint hint);
 
