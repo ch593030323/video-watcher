@@ -177,7 +177,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="lineEdit_default_rowcount"/>
+          <widget class="LineEditX" name="lineEdit_default_rowcount"/>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="label_5">
@@ -187,7 +187,7 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QLineEdit" name="lineEdit_default_columncount"/>
+          <widget class="LineEditX" name="lineEdit_default_columncount"/>
          </item>
         </layout>
        </item>
@@ -258,15 +258,20 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TableViewAdd</class>
-   <extends>QTableView</extends>
-   <header>src/tableviewadd.h</header>
-  </customwidget>
-  <customwidget>
    <class>TreeVideoViewSearch</class>
    <extends>QWidget</extends>
-   <header>src/treevideoviewsearch.h</header>
+   <header>treevideoviewsearch.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TableViewAdd</class>
+   <extends>QTableView</extends>
+   <header>tableviewadd.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LineEditX</class>
+   <extends>QLineEdit</extends>
+   <header>lineeditx.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

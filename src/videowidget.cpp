@@ -4,6 +4,7 @@
 #include "mainwindow.h"
 #include "playformnewdialog.h"
 #include "videocontrolpanel.h"
+#include "propertycolor.h"
 
 #include <QPainter>
 #include <QtDebug>
@@ -193,7 +194,7 @@ void VideoWidget::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
     QRect paint_rect = this->rect().adjusted(lds::margin / 2, lds::margin / 2, -lds::margin / 2, -lds::margin / 2);
-    painter.fillRect(paint_rect, lds::borderColor);
+    painter.fillRect(paint_rect, PropertyColor::borderColor);
     if(m_ffmpegData.isNoError) {
         //后台播放，直接removePlayer会有残留图片，故增加obidIsValid参数
         QImage &image = m_ffmpegData.image;
@@ -205,7 +206,7 @@ void VideoWidget::paintEvent(QPaintEvent *)
     } else {
         //绘制异常报错
         painter.save();
-        painter.setPen(lds::textColor);
+        painter.setPen(PropertyColor::buttonTextColor);
         painter.drawText(this->rect(), Qt::AlignCenter | Qt::TextWordWrap, m_ffmpegData.errorString);
         painter.restore();
     }
@@ -218,7 +219,7 @@ void VideoWidget::paintEvent(QPaintEvent *)
         paintBorder = true;
     }
     if(paintBorder) {
-        painter.setPen(QPen(lds::highlightColor, 2));
+        painter.setPen(QPen(PropertyColor::highlightColor, 2));
         painter.drawRect(paint_rect);
     }
 }

@@ -33,9 +33,9 @@ MainFrame::MainFrame(QWidget *parent)
     : QFrame(parent)
     , ui(new Ui::MainWidget)
 {
+    lds::init();
     ui->setupUi(this);
 
-    lds::init();
     this->setStyleSheet(lds::styleSheetString);
     setObjectName("Window");
     setFocusPolicy(Qt::StrongFocus);

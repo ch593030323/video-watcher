@@ -1,6 +1,7 @@
 #include "videocontrolpanel.h"
 #include "lds.h"
 #include "videowidget.h"
+#include "propertycolor.h"
 
 VideoControlPanel::VideoControlPanel(VideoWidget *parent)
     : QWidget(parent)
@@ -48,7 +49,7 @@ QPushButton * VideoControlPanel::createPanelButton(const QString &objectName, co
     QPushButton *b = new QPushButton;
     b->setFocusPolicy(Qt::NoFocus);
     b->setFlat(true);
-    b->setIcon(lds::getFontPixmap(icon, lds::textColor, size));
+    b->setIcon(lds::getFontPixmap(icon, PropertyColor::buttonTextColor, size));
     b->setObjectName(objectName);
     return b;
 }
@@ -83,7 +84,7 @@ void VideoControlPanel::updateProgress(int cur, int total)
 void VideoControlPanel::paintEvent(QPaintEvent *event)
 {
     QPainter paint(this);
-    QColor c = lds::subToolColor;
+    QColor c = PropertyColor::subToolColor;
     c.setAlpha(100);
     paint.fillRect(this->rect(), c);
     QWidget::paintEvent(event);

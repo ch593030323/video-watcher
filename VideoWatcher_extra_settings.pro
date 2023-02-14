@@ -25,24 +25,33 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 include(extra_settings/extra_settings.pri)
 
 HEADERS += \
+    src/widget/lineeditfind.h \
+    src/widget/lineeditx.h \
+    src/widget/propertycolor.h \
+    src/widget/tableviewadd.h \
     src/datasource.h \
     src/treevideomodel.h \
     src/treevideoview.h \
     src/treevideoviewsearch.h \
-    src/tableviewadd.h \
     src/lds.h
 
 SOURCES += \
+    src/widget/lineeditfind.cpp \
+    src/widget/lineeditx.cpp \
+    src/widget/propertycolor.cpp \
+    src/widget/tableviewadd.cpp \
     src/datasource.cpp \
     src/treevideomodel.cpp \
     src/treevideoview.cpp \
     src/treevideoviewsearch.cpp \
-    src/tableviewadd.cpp \
     src/lds.cpp
 
 include(jsoncpp/jsoncpp.pri)
 
 RESOURCES += \
     resources/res.qrc
+
+INCLUDEPATH += src/widget
+INCLUDEPATH += src
 
 

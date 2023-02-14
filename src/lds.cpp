@@ -1,5 +1,6 @@
 #include "lds.h"
 #include "json/json.h"
+#include "propertycolor.h"
 
 #include <QFont>
 #include <QApplication>
@@ -7,13 +8,7 @@
 #include <QFontDatabase>
 
 //QRect lds::AppBoundingRect;
-QString lds::IconFontFamily;
-
-QColor lds::highlightColor;
-QColor lds::textColor;
-QColor lds::borderColor;
-QColor lds::subToolColor;
-
+QString lds::iconFontFamily;
 QString lds::styleSheetString;
 
 const int lds::margin = 10;
@@ -22,45 +17,6 @@ const int lds::border_width = 2;
 const int lds::videoAreaRight = 280;
 const int lds::videoAreaBottom = 50;
 
-void lds::sethighlightColor(const QColor &color)
-{
-    highlightColor = color;
-}
-
-QColor lds::gethighlightColor() const
-{
-    return highlightColor;
-}
-
-void lds::settextColor(const QColor &color)
-{
-    textColor = color;
-}
-
-QColor lds::gettextColor() const
-{
-    return textColor;
-}
-
-void lds::setborderColor(const QColor &color)
-{
-    borderColor = color;
-}
-
-QColor lds::getborderColor() const
-{
-    return borderColor;
-}
-
-void lds::setsubToolColor(const QColor &color)
-{
-    subToolColor = color;
-}
-
-QColor lds::getsubToolColor() const
-{
-    return subToolColor;
-}
 QVariant lds::selectValue(const QString &sql, const QString &arg0, const QVariant &def)
 {
     QSqlQuery query;
@@ -84,7 +40,7 @@ lds::lds(QWidget *parent) : QWidget(parent)
     setObjectName("lds");
 }
 
-QRect lds::MoveToCenter(QWidget *widget, QRect rect)
+QRect lds::moveToCenter(QWidget *widget, QRect rect)
 {
     int w = qMin(widget->width(), rect.width());
     int h = qMin(widget->height(), rect.height());
@@ -93,19 +49,7 @@ QRect lds::MoveToCenter(QWidget *widget, QRect rect)
 
 QPixmap lds::getFontPixmap(QChar ch, const QColor &color, const QSize &size)
 {
-    QFont font = qApp->font();
-    font.setFamily(lds::IconFontFamily);
-    font.setPixelSize(size.height());
-
-    QPixmap pix(size);
-    pix.fill(Qt::transparent);
-
-    QPainter painter(&pix);
-    painter.setFont(font);
-    painter.setPen(color);
-    painter.drawText(pix.rect(), Qt::AlignCenter, ch);
-
-    return pix;
+    return PropertyColor::getFontPixmap(ch, color, size);
 }
 
 QPixmap lds::getLayoutPixmap(int count)
@@ -122,7 +66,7 @@ QPixmap lds::getLayoutPixmap(int count)
     QPixmap pixmap(100, 100);
     pixmap.fill(Qt::transparent);
     QPainter paint(&pixmap);
-    paint.fillPath(path, lds::textColor);
+    paint.fillPath(path, PropertyColor::buttonTextColor);
 
     return pixmap;
 }
@@ -146,11 +90,12 @@ void lds::init()
 
     //icon font
     int fontId = QFontDatabase::addApplicationFont(":/Awesome.otf");
-    IconFontFamily = QFontDatabase::applicationFontFamilies(fontId).value(0);
+    iconFontFamily = QFontDatabase::applicationFontFamilies(fontId).value(0);
 
-    qDebug() << "IconFontFamily:" << IconFontFamily << QFontDatabase::applicationFontFamilies(fontId) << fontId;
+    qDebug() << "iconFontFamily:" << iconFontFamily << QFontDatabase::applicationFontFamilies(fontId) << fontId;
 
     //skin
+//    QFile file(":/skin.qss");
     QFile file(":/skin_light.qss");
 //    QFile file("skin.qss");
     if(!file.open(QFile::ReadOnly)) {
@@ -160,9 +105,7 @@ void lds::init()
     styleSheetString = file.readAll();
     //    qApp->setStyleSheet(styleSheetString);
 
-    lds qsswidget;
-    qsswidget.setStyleSheet(styleSheetString);
-    qsswidget.style()->polish(&qsswidget);
+    PropertyColor::init(iconFontFamily, styleSheetString);
 
     //font
     //    QFont font = qApp->font();

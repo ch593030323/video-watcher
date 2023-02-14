@@ -3,6 +3,7 @@
 #include "treevideomodel.h"
 #include "json/json.h"
 #include "lds.h"
+#include "lineeditfind.h"
 
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -36,9 +37,7 @@ TreeVideoViewSearch::TreeVideoViewSearch(QWidget *parent)
     : QWidget(parent)
     , m_isShowUrlColumn(false)
 {
-    QLabel *label = new QLabel;
-    m_buttonClose = new QPushButton;
-    m_lineEdit = new QLineEdit;
+    m_lineEdit = new LineEditFind;
     m_comboBox = new QComboBox;
 
     m_treeModel = new TreeVideoModel(this);
@@ -52,20 +51,12 @@ TreeVideoViewSearch::TreeVideoViewSearch(QWidget *parent)
 
     m_comboBox->setFixedSize(108, 30);
     m_comboBox->setProperty("outer_stylesheet", "search");
-    label->setFixedSize(30, 30);
-    label->setProperty("outer_stylesheet", "search");
-    m_lineEdit->setProperty("outer_stylesheet", "search");
     m_lineEdit->setFixedHeight(30);
     m_lineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    m_buttonClose->setFixedSize(30, 30);
-    m_buttonClose->setProperty("outer_stylesheet", "button_xmark");
-    m_buttonClose->hide();
 
     QHBoxLayout *hlayout = new QHBoxLayout;
     hlayout->addWidget(m_comboBox);
-    hlayout->addWidget(label);
-    hlayout->addWidget(m_lineEdit, 10);
-    hlayout->addWidget(m_buttonClose);
+    hlayout->addWidget(m_lineEdit, 1);
     hlayout->setSpacing(0);
 
     QVBoxLayout *vlayout = new QVBoxLayout;
@@ -76,10 +67,8 @@ TreeVideoViewSearch::TreeVideoViewSearch(QWidget *parent)
 
     setLayout(vlayout);
 
-    connect(m_lineEdit, SIGNAL(textChanged(QString)), this, SLOT(slotShowCloseButton(QString)));
-    connect(m_buttonClose, SIGNAL(clicked()), m_lineEdit, SLOT(clear()));
     connect(m_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSelectStation(int)));
-    connect(m_lineEdit, SIGNAL(textChanged(QString)), this, SLOT(slotSearchCamera(QString)));
+    connect(m_lineEdit->lineEdit(), SIGNAL(textChanged(QString)), this, SLOT(slotSearchCamera(QString)));
     connect(m_treeView, SIGNAL(expanded(QModelIndex)), this, SLOT(slotUpdateAndExpandNode(QModelIndex)));
     connect(m_treeView, SIGNAL(signalRefresh()), this, SLOT(slotInitAll()));
     connect(m_treeView, SIGNAL(signalSettings()), this, SLOT(slotSettings()));
@@ -234,14 +223,31 @@ void TreeVideoViewSearch::slotAppSettings()
     file.open(QFile::ReadOnly);
     QByteArray all = file.readAll();
 
+    QSet<QString> colorSet;
+    for(QObject *o : w->children())
+    {
+        QString text = o->property("text").toString();
+        if(text.startsWith("#")) {
+            colorSet.insert(text.mid(0, 7));
+        }
+    }
+    //
     for(QObject *o : w->children())
     {
         QString text = o->property("text").toString();
         if(text.startsWith("#") && text.contains("->")) {
             QString l = text.split("->").value(0);
             QString r = text.split("->").value(1);
+            while(colorSet.contains(r)) {
+                int value = QColor(r).value();
+                if(value == 255)
+                    value --;
+                else
+                    value ++;
+                r = QColor::fromHsv(QColor(r).hue(), QColor(r).saturation(), value).name();
+            }
+            colorSet.insert(r);
             all.replace(l, r.toLocal8Bit());
-            qDebug() << l << r;
         }
     }
     file.close();
@@ -278,11 +284,6 @@ void TreeVideoViewSearch::slotEditUrl(const QModelIndex &index)
 void TreeVideoViewSearch::addToPlayThread(const QString &obid, const QString &url)
 {
 
-}
-
-void TreeVideoViewSearch::slotShowCloseButton(const QString &text)
-{
-    m_buttonClose->setVisible(text.count() > 0);
 }
 
 void TreeVideoViewSearch::slotSelectStation(int index)

@@ -27,27 +27,7 @@ struct AlterPlayFrame {
 class lds : public QWidget
 {
     Q_OBJECT
-    Q_PROPERTY(QColor highlightColor READ gethighlightColor WRITE sethighlightColor DESIGNABLE true)
-    Q_PROPERTY(QColor textColor      READ gettextColor      WRITE settextColor      DESIGNABLE true)
-    Q_PROPERTY(QColor borderColor READ getborderColor WRITE setborderColor DESIGNABLE true)
-    Q_PROPERTY(QColor subToolColor READ getsubToolColor WRITE setsubToolColor DESIGNABLE true)
 public:
-    void sethighlightColor(const QColor &color);
-    QColor gethighlightColor() const;
-    static QColor highlightColor;
-
-    void settextColor(const QColor &color);
-    QColor gettextColor() const;
-    static QColor textColor;
-
-    void setborderColor(const QColor &color);
-    QColor getborderColor() const;
-    static QColor borderColor;
-
-    void setsubToolColor(const QColor &color);
-    QColor getsubToolColor() const;
-    static QColor subToolColor;
-
     static QVariant selectValue(const QString &sql, const QString &arg0, const QVariant &def = QVariant());
     static QVariant selectValue(const QString &sql, int arg0, const QVariant &def = QVariant());
 
@@ -62,9 +42,9 @@ public:
     static void init();
 
 //    static QRect AppBoundingRect;
-    static QRect MoveToCenter(QWidget *widget, QRect rect);
+    static QRect moveToCenter(QWidget *widget, QRect rect);
 
-    static QString IconFontFamily;
+    static QString iconFontFamily;
     static QPixmap getFontPixmap(QChar ch, const QColor &color = QColor("#f6f5fb"), const QSize &size = QSize(40, 40));
 
     static QPixmap getLayoutPixmap(int count);

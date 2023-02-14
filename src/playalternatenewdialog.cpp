@@ -2,6 +2,7 @@
 #include "ui_playalternatenewdialog.h"
 #include "lds.h"
 #include "treevideomodel.h"
+#include "propertycolor.h"
 
 #include <QStandardItemModel>
 
@@ -12,6 +13,10 @@ PlayAlternateNewDialog::PlayAlternateNewDialog(QWidget *parent) :
     ui->setupUi(this);
     setObjectName("Window");
     ui->spinBox->setMinimum(1);
+
+    ui->pushButton_add->setIcon(lds::getFontPixmap(0xbb, PropertyColor::buttonTextColor));
+    ui->pushButton_del->setIcon(lds::getFontPixmap(0xbb, PropertyColor::buttonTextColor));
+    ui->pushButton_add_gap->setIcon(lds::getFontPixmap(0xbb, PropertyColor::buttonTextColor));
 
     connect(ui->pushButton_ok, SIGNAL(clicked()), this, SLOT(took()));
     connect(ui->pushButton_exit, SIGNAL(clicked()), this, SLOT(toexit()));

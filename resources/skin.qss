@@ -1,15 +1,17 @@
-#lds{
+*[outer_stylesheet="PropertyColor"]{
     qproperty-highlightColor:#ff506b;
     qproperty-textColor:#f6f5fb;
     qproperty-borderColor:#282828;
     /*视频播放顶部菜单栏*/
     qproperty-subToolColor:#202325;
+    /*按钮*/
+    qproperty-buttonColor:#464646;
+    qproperty-buttonTextColor:#ffffff;
 
     /*
     qproperty-viewColor:#353535;
 
     qproperty-windowColor:#3a3a3a;
-    qproperty-buttonColor:#464646;
 
     qproperty-scrollBackgroudColor:#606060;
     qproperty-scrollHandleColor:#404040;
@@ -157,19 +159,12 @@ QScrollBar::sub-line:vertical{background:none;}
 
 /*======================================树状图 样式end====================================*/
 
-/*======================================搜索的三个控件begin====================================*/
 QLineEdit,
 QPlainTextEdit{
     border:1px solid #282828; /*边框风格*/
     background:#282828;
     color:#f6f5fb;
 }
-
-QLabel[outer_stylesheet="search"]{
-    background:#282828;
-    image: url(:/skin_image/dark/find_15x15.png);
-}
-
 
 QComboBox {
     border:1px solid #282828; /*边框风格*/
@@ -209,6 +204,19 @@ QPushButton[outer_stylesheet="button_xmark"] {
 QPushButton[outer_stylesheet="button_xmark"]:pressed {
     image: url(:/skin_image/circle_xmark_pressed_20x20.png);
     border-width:0px;
+}
+/*======================================搜索的三个控件begin====================================*/
+QFrame[outer_stylesheet="search"]{
+    border:1px solid #282828;
+    background:#282828;
+}
+QPushButton[outer_stylesheet="search"]{
+    background:#282828;
+    border-width: 0px;
+}
+QLineEdit[outer_stylesheet="search"]{
+    border-width: 0px;
+    background:transparent;
 }
 /*======================================搜索的三个控件end====================================*/
 

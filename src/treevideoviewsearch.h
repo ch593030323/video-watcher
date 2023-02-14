@@ -13,6 +13,7 @@ class QLineEdit;
 class QPushButton;
 class TreeVideoModel;
 class QTreeView;
+class LineEditFind;
 
 /**
  * @brief The TreeVideoViewSearch class
@@ -49,7 +50,6 @@ protected:
     virtual void addToPlayThread(const QString &obid, const QString &url);
 
 private slots:
-    void slotShowCloseButton(const QString &text);
     void slotSelectStation(int index);
     void slotSearchCamera(const QString &text);
     void slotUpdateAndExpandNode(const QModelIndex &index);
@@ -67,8 +67,7 @@ private:
 public:
     TreeVideoView *m_treeView;
     QComboBox *m_comboBox;
-    QLineEdit *m_lineEdit;
-    QPushButton *m_buttonClose;
+    LineEditFind *m_lineEdit;
     DataSource *m_datasource;
     TreeVideoModel *m_treeModel;
 
