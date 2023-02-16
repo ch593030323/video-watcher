@@ -12,6 +12,7 @@ class PropertyColor : public QWidget
     Q_PROPERTY(QColor subToolColor READ getsubToolColor WRITE setsubToolColor DESIGNABLE true)
     Q_PROPERTY(QColor buttonColor READ getbuttonColor WRITE setbuttonColor DESIGNABLE true)
     Q_PROPERTY(QColor buttonTextColor READ getbuttonTextColor WRITE setbuttonTextColor DESIGNABLE true)
+    Q_PROPERTY(QColor viewColor READ getviewColor WRITE setviewColor DESIGNABLE true)
 
 public:
     void sethighlightColor(const QColor &color);
@@ -38,8 +39,12 @@ public:
     QColor getbuttonTextColor() const;
     static QColor buttonTextColor;
 
+    void setviewColor(const QColor &color);
+    QColor getviewColor() const;
+    static QColor viewColor;
+
     static void init(const QString &iconFontFamily, const QString &styleSheetString);
-    static QPixmap getFontPixmap(QChar ch, const QColor &color = QColor("#f6f5fb"), const QSize &size = QSize(40, 40));
+    static QPixmap getFontPixmap(QChar ch, const QColor &color = QColor("#f6f5fb"), const QSize &size = QSize(40, 40), qreal rotate = 0);
 
 private:
     explicit PropertyColor(QWidget *parent = 0);

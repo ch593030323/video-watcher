@@ -1,9 +1,9 @@
 #include "videocontrolpanel.h"
 #include "lds.h"
-#include "videowidget.h"
+#include "videocell.h"
 #include "propertycolor.h"
 
-VideoControlPanel::VideoControlPanel(VideoWidget *parent)
+VideoControlPanel::VideoControlPanel(VideoCell *parent)
     : QWidget(parent)
     , m_isFullScreen(false)
     , m_processCur(0)

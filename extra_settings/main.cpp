@@ -8,9 +8,6 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-        QFont font = qApp->font();
-        font.setPixelSize(25);
-        qApp->setFont(font);
 
     lds::init();
 

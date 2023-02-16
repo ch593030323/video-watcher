@@ -5,7 +5,7 @@
 #include <QPushButton>
 #include <QLabel>
 
-class VideoWidget;
+class VideoCell;
 class VideoControlPanel : public QWidget
 {
     Q_OBJECT
@@ -17,7 +17,7 @@ public:
         VideoNormalScreen
     };
 public:
-    explicit VideoControlPanel(VideoWidget *parent);
+    explicit VideoControlPanel(VideoCell *parent);
 
 
     void showAutoHide(int timeout);

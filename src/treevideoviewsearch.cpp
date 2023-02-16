@@ -35,7 +35,6 @@ QPixmap getCameraStatePixmap(int state) {
 
 TreeVideoViewSearch::TreeVideoViewSearch(QWidget *parent)
     : QWidget(parent)
-    , m_isShowUrlColumn(false)
 {
     m_lineEdit = new LineEditFind;
     m_comboBox = new QComboBox;
@@ -74,7 +73,6 @@ TreeVideoViewSearch::TreeVideoViewSearch(QWidget *parent)
     connect(m_treeView, SIGNAL(signalSettings()), this, SLOT(slotSettings()));
     connect(m_treeView, SIGNAL(signalExportJson()), this, SLOT(slotExportJson()));
     connect(m_treeView, SIGNAL(signalImportJson()), this, SLOT(slotImportJson()));
-    connect(m_treeView, SIGNAL(clicked(QModelIndex)), this, SLOT(slotEditUrl(QModelIndex)));
 }
 
 void TreeVideoViewSearch::setDataSource(DataSource *datasource)
@@ -107,20 +105,9 @@ void TreeVideoViewSearch::hideMenu()
     m_treeView->hideMenu();
 }
 
-void TreeVideoViewSearch::setShowUrlColumn(bool isShowUrlColumn)
-{
-    m_isShowUrlColumn = isShowUrlColumn;
-}
-
 void TreeVideoViewSearch::slotInitAll()
 {
-    slotInitSql();
-    slotInitControl();
-
-    if(m_isShowUrlColumn) {
-        m_treeView->setColumnWidth(0, 200);
-        m_treeView->slotExpandAll();
-    }
+    initAll();
 }
 
 void TreeVideoViewSearch::slotInitSql()
@@ -271,19 +258,23 @@ void TreeVideoViewSearch::slotImportJson()
     slotInitAll();
 }
 
-void TreeVideoViewSearch::slotEditUrl(const QModelIndex &index)
-{
-    if(m_isShowUrlColumn) {
-        if(VideoNodeTrain == index.data(VideoNodeType).toInt()) {
-            //默认，第0列显示设备名，第1列是显示url
-            m_treeView->edit(index.sibling(index.row(), 1));
-        }
-    }
-}
-
 void TreeVideoViewSearch::addToPlayThread(const QString &obid, const QString &url)
 {
 
+}
+
+void TreeVideoViewSearch::initAll()
+{
+    slotInitSql();
+    slotInitControl();
+}
+
+void TreeVideoViewSearch::appendHeaderHorizontalItem(QStandardItem *itemRoot)
+{
+}
+
+void TreeVideoViewSearch::appendDeviceHorizontalItem(QStandardItem *item_location, int row, const QString &device_obid)
+{
 }
 
 void TreeVideoViewSearch::slotSelectStation(int index)
@@ -383,8 +374,7 @@ void TreeVideoViewSearch::updateCameraTree()
 
     QStandardItem *itemISCS = createItem(QString::fromUtf8("摄像头"), Qt::ItemIsEnabled | Qt::ItemIsSelectable);
     itemRoot->setChild(0, 0, itemISCS);
-    if(m_isShowUrlColumn)
-        itemRoot->setChild(0, 1, createItem(QString::fromUtf8("Url"), Qt::ItemIsEnabled | Qt::ItemIsSelectable));
+    appendHeaderHorizontalItem(itemRoot);
 
     QSqlQuery query_location;
     query_location.exec("select obid, name from vw_location");
@@ -436,7 +426,6 @@ void TreeVideoViewSearch::updateCameraItemList(QStandardItem *item_location)
     item_location->removeRows(0, item_location->rowCount());
     QString location_obid = item_location->data(VideoObidRole).toString();
     QSqlQuery query_device;
-
     query_device.exec(QString("select * from vw_device where location_obid = '%1' ").arg(location_obid));
     while(query_device.next()) {
         QString obid = query_device.record().value("obid").toString();
@@ -462,10 +451,8 @@ void TreeVideoViewSearch::updateCameraItemList(QStandardItem *item_location)
         item_device->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
 
         item_location->setChild(row, 0, item_device);
-        if(m_isShowUrlColumn)
-            item_location->setChild(row, 1, new QStandardItem(url));
-
         //
+        appendDeviceHorizontalItem(item_location, row, obid);
         addToPlayThread(obid, url);
     }
 }

@@ -13,6 +13,6 @@ void TreeVideoViewSearchUrl::addToPlayThread(const QString &obid, const QString 
 {
     if(!PlayThread::PlayThreadMap.contains(obid) && !url.isEmpty()) {
         PlayThread *thread = new PlayThread(url, this);
-        PlayThread::PlayThreadMap.insert(obid,thread);
+        PlayThread::PlayThreadMap.insert(obid, thread);
     }
 }

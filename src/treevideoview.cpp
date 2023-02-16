@@ -23,7 +23,7 @@ void TreeVideoView::slotExpandAll()
     QStandardItem *itemISCS     = itemRoot ? itemRoot->child(0) : 0;
     if(!itemISCS)
         return;
-
+    this->expand(itemISCS->index());
     for(int k = 0; k < itemISCS->rowCount(); k ++) {
         QStandardItem *itemStation  = itemISCS->child(k);
         if(!itemStation)
@@ -43,7 +43,7 @@ void TreeVideoView::contextMenuEvent(QContextMenuEvent *event)
     connect(m.addAction(QString::fromUtf8("折叠全部")),SIGNAL(triggered()),this,SLOT(collapseAll()));
     //connect(m.addAction(QString::fromUtf8("导出json文件")),SIGNAL(triggered()),this,SIGNAL(signalExportJson()));
     //connect(m.addAction(QString::fromUtf8("导入json文件")),SIGNAL(triggered()),this,SIGNAL(signalImportJson()));
-    connect(m.addAction(QString::fromUtf8("设置")),SIGNAL(triggered()),this,SIGNAL(signalSettings()));
+//    connect(m.addAction(QString::fromUtf8("设置")),SIGNAL(triggered()),this,SIGNAL(signalSettings()));
     m.move(this->mapToGlobal(event->pos()));
     m.exec();
 }

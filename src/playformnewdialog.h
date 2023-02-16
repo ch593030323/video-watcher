@@ -8,7 +8,7 @@
 #include <QDialog>
 #include <QMap>
 
-class VideoWidget;
+class VideoCell;
 
 namespace Ui {
 class playformnewdialog;
@@ -32,7 +32,7 @@ protected:
     void resizeEvent(QResizeEvent *event);
 
 private:
-    QList<VideoWidget *> selectedWidgetList();
+    QList<VideoCell *> selectedWidgetList();
 
 private slots:
     void toVideoLayout1x1();
@@ -51,7 +51,7 @@ private slots:
     void tounselectedall();
 private:
     Ui::playformnewdialog               *ui;
-    QMap<LayoutPos, VideoWidget *>      m_videoMap;
+    QMap<LayoutPos, VideoCell *>      m_videoMap;
     LayoutInfo                          m_layoutInfo;
 };
 

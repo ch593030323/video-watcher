@@ -11,22 +11,26 @@ QColor PropertyColor::borderColor;
 QColor PropertyColor::subToolColor;
 QColor PropertyColor::buttonColor;
 QColor PropertyColor::buttonTextColor;
+QColor PropertyColor::viewColor;
 
 QString PropertyColor::iconFontFamily;
 
-QPixmap PropertyColor::getFontPixmap(QChar ch, const QColor &color, const QSize &size)
+QPixmap PropertyColor::getFontPixmap(QChar ch, const QColor &color, const QSize &size, qreal rotate)
 {
     QFont font = qApp->font();
-    font.setFamily(iconFontFamily);
+    font.setFamily(PropertyColor::iconFontFamily);
     font.setPixelSize(size.height());
 
     QPixmap pix(size);
     pix.fill(Qt::transparent);
 
     QPainter painter(&pix);
+    QRect rect(-pix.width() / 2, -pix.height() / 2, pix.width(), pix.height());
+    painter.setWindow(rect);
     painter.setFont(font);
     painter.setPen(color);
-    painter.drawText(pix.rect(), Qt::AlignCenter, ch);
+    painter.rotate(rotate);
+    painter.drawText(rect, Qt::AlignCenter, ch);
 
     return pix;
 }
@@ -91,6 +95,15 @@ QColor PropertyColor::getbuttonTextColor() const
     return buttonTextColor;
 }
 
+void PropertyColor::setviewColor(const QColor &color)
+{
+    viewColor = color;
+}
+
+QColor PropertyColor::getviewColor() const
+{
+    return viewColor;
+}
 void PropertyColor::init(const QString &iconFontFamily, const QString &styleSheetString)
 {
     PropertyColor::iconFontFamily = iconFontFamily;

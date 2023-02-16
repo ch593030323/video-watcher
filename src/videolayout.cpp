@@ -1,6 +1,6 @@
 #include "videolayout.h"
 #include "json/json.h"
-#include "videowidget.h"
+#include "videocell.h"
 
 #include <QSqlQuery>
 #include <QSqlRecord>
@@ -81,11 +81,11 @@ LayoutInfo LayoutInfo::readFrom(const QByteArray &json)
     return info;
 }
 
-void LayoutInfo::update(const QMap<LayoutPos, VideoWidget *> &map)
+void LayoutInfo::update(const QMap<LayoutPos, VideoCell *> &map)
 {
     //将videoWidget的摄像头id保存到layoutinfo里
-    for(QMap<LayoutPos, VideoWidget *>::const_iterator k = map.begin(); k != map.end(); k ++) {
-        VideoWidget *w = k.value();
+    for(QMap<LayoutPos, VideoCell *>::const_iterator k = map.begin(); k != map.end(); k ++) {
+        VideoCell *w = k.value();
         QString obid = w->device_obid();
         if(w->isVisible() && obid != "") {
             QList<LayoutCell> &cells = this->cells;

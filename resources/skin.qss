@@ -8,8 +8,9 @@
     qproperty-buttonColor:#464646;
     qproperty-buttonTextColor:#ffffff;
 
+    qproperty-viewColor:#303030;
+
     /*
-    qproperty-viewColor:#353535;
 
     qproperty-windowColor:#3a3a3a;
 
@@ -63,6 +64,10 @@ QToolButton:checked{
     color:#f6f5fb;
 }
 
+QPushButton::menu-indicator {
+    image: none;
+    width:0px;
+}
 
 #buttonIcon{
     border-radius:0px;
@@ -81,7 +86,7 @@ QTableView,
 QTreeView,
 QListView{
     border:1px solid #282828;
-    background:#353535;
+    background:#303030;
     color:#f6f5fb;
 }
 QTreeView {
@@ -221,7 +226,7 @@ QLineEdit[outer_stylesheet="search"]{
 /*======================================搜索的三个控件end====================================*/
 
 *[outer_stylesheet="line"] {
-    background: #282828;
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #282828, stop:1 #3a3a3a);
 }
 *[outer_stylesheet="window_title"] {
     background:#464646;

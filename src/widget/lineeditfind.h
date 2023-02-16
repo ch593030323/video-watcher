@@ -17,6 +17,8 @@ public:
     void hideFindButton();
 
     void setText(const QString &text);
+    QString text();
+
 private slots:
     void slotShowCloseButton(const QString &text);
 

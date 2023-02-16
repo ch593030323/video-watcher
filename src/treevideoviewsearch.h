@@ -34,8 +34,6 @@ public:
 
     void hideMenu();
 
-    void setShowUrlColumn(bool isShowUrlColumn);
-
 public slots:
     void slotInitAll();
     void slotInitSql();
@@ -44,18 +42,20 @@ public slots:
     void slotAppSettings();
     void slotExportJson();
     void slotImportJson();
-    void slotEditUrl(const QModelIndex &index);
 
 protected:
     virtual void addToPlayThread(const QString &obid, const QString &url);
+    virtual void initAll();
+    virtual void appendHeaderHorizontalItem(QStandardItem *itemRoot);
+    virtual void appendDeviceHorizontalItem(QStandardItem *item_location, int row, const QString &device_obid);
 
-private slots:
+protected slots:
     void slotSelectStation(int index);
     void slotSearchCamera(const QString &text);
     void slotUpdateAndExpandNode(const QModelIndex &index);
     void slotSetColor();
 
-private:
+protected:
     void updateCameraSqlAndItemListOnce(const QString &location_obid);
     void updateCameraSqlList(const QString &location_obid);
     void updateCameraItemList(QStandardItem *item_location);
@@ -70,9 +70,6 @@ public:
     LineEditFind *m_lineEdit;
     DataSource *m_datasource;
     TreeVideoModel *m_treeModel;
-
-    QLineEdit *settings_edit;
-    bool m_isShowUrlColumn;
 };
 
 #endif // TREEVIDEOVIEWSEARCH_H

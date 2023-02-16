@@ -8,10 +8,11 @@
     qproperty-buttonColor:#4e6ef2;
     qproperty-buttonTextColor:#fefefe;
 
-    /*
     qproperty-viewColor:#ffffff;
 
-    qproperty-windowColor:#f7f7f7;
+    /*
+
+    qproperty-windowColor:#e0e0e0;
 
     qproperty-scrollBackgroudColor:#4e6ff3;
     qproperty-scrollHandleColor:#a2b1bc;
@@ -19,14 +20,14 @@
 }
 
 #Window{
-    background:#f7f7f7;
+    background:#e0e0e0;
 }
 QMenu{
     border-style:outset; /*边框风格*/
     border-width:1px;/*边框宽度*/
     border-color:#a1b0bb; /*边框颜色*/
     color:#171718;
-    background:#f7f7f7;
+    background:#e0e0e0;
 }
 
 QMenu::item {
@@ -61,6 +62,10 @@ QToolButton:checked{
     border-radius:10px;
     background:#ff506b;
     color:#fefefe;
+}
+QPushButton::menu-indicator {
+    image: none;
+    width:0px;
 }
 
 
@@ -133,7 +138,7 @@ QTreeView::branch:open:has-children:has-siblings  {
 QHeaderView::section,
 QHeaderView,
 QTableView QTableCornerButton::section{
-background-color: #f7f7f7;
+background-color: #e0e0e0;
 }
 QTableView QTableCornerButton,
 QHeaderView::section{
@@ -162,7 +167,7 @@ QScrollBar::sub-line:vertical{background:none;}
 QLineEdit,
 QPlainTextEdit{
     border:1px solid #a1b0bb;
-    background:#f7f7f7;
+    background:#e0e0e0;
     color:#171718;
 }
 
@@ -174,7 +179,7 @@ QComboBox {
 
 QComboBox QAbstractItemView {
     border:1px solid #a1b0bb; /*边框风格*/
-    background: #f7f7f7;
+    background: #e0e0e0;
     border-radius:0px;
     selection-background-color: #ff506b;/*hover color*/
 }
@@ -198,10 +203,10 @@ QComboBox::down-arrow {
 /*======================================搜索的三个控件begin====================================*/
 QFrame[outer_stylesheet="search"]{
     border:1px solid #a1b0bb;
-    background:#f7f7f7;
+    background:#ffffff;
 }
 QPushButton[outer_stylesheet="search"]{
-    background:#f7f7f7;
+    background:transparent;
     border-width: 0px;
 }
 QLineEdit[outer_stylesheet="search"]{
@@ -211,8 +216,8 @@ QLineEdit[outer_stylesheet="search"]{
 /*======================================搜索的三个控件end====================================*/
 
 *[outer_stylesheet="line"] {
-    background: #a1b0bb;
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #a1b0bb, stop:1 #e0e0e0);
 }
 *[outer_stylesheet="window_title"] {
-    background:#4e6ef2;
+    background:#e0e0e0;
 }

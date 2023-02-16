@@ -10,8 +10,10 @@ public:
     TreeVideoView(QWidget *parent = 0);
 
     void hideMenu();
+
 public slots:
     void slotExpandAll();
+
 signals:
     void signalRefresh();
     void signalSettings();

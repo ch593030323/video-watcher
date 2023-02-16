@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "videowidget.h"
+#include "videocell.h"
 #include "ffmpeg.h"
 #include "datasource.h"
 
@@ -40,23 +40,6 @@ private slots:
     void toVideoLayout3x3();
     void toVideoLayout4x4();
 
-    /**
-     * @brief toControlCamera
-     * 摄像头的控制，l:left，t:top,r:right,b:bottom
-     */
-    void toControlCamera_lt();
-    void toControlCamera_t();
-    void toControlCamera_rt();
-    void toControlCamera_l();
-    void toControlCamera_c();
-    void toControlCamera_r();
-    void toControlCamera_lb();
-    void toControlCamera_b();
-    void toControlCamera_rb();
-
-    void cameraMove(int dx, int dy);
-    void cameraMoveRestore();
-
     //新增组播表单
     void toPlayFormNew();
     void toPlayFormOK();
@@ -66,12 +49,15 @@ private slots:
     void toHoldVideoFocus();
     void toReleaseVideoFocus();
 
+    void toexit();
+
+    void toVideoShowMax();
+    void toVideoShowNormal();
+
 protected:
     void resizeEvent(QResizeEvent *event);
 
 protected:
     Ui::MainWidget *ui;
-    QMap<LayoutPos, VideoWidget *> m_videoMap;
-    LayoutInfo m_layoutInfo;
 };
 #endif // MAINWINDOW_H

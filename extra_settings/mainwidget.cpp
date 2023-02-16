@@ -19,20 +19,24 @@ mainWidget::mainWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setObjectName("Window");
+    ui->lineEdit_default_rowcount->enableOnlyNumberInput();
+    ui->lineEdit_default_columncount->enableOnlyNumberInput();
+
     conf = new QSettings("setting.ini", QSettings::IniFormat, this);
     ui->lineEdit_default_rowcount->setText(conf->value("global/default_rowcount", 2).toString());
     ui->lineEdit_default_columncount->setText(conf->value("global/default_columncount", 2).toString());
     ui->tableView_defatul_playlist->setStringList(conf->value("global/default_playlist", QStringList()
-                                                          <<""
-                                                          <<""
-                                                          <<""
-                                                          <<"").toStringList());
+                                                          <<"http://vfx.mtime.cn/Video/2019/03/14/mp4/190314223540373995.mp4"
+                                                          <<"http://vfx.mtime.cn/Video/2021/01/07/mp4/210107172407759182_1080.mp4"
+                                                          <<"http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4"
+                                                          <<"http://vfx.mtime.cn/Video/2019/03/17/mp4/190317150237409904.mp")
+                                                  .toStringList());
 
     m_datasource = new JsonDataSource("D:/Users/Dy/Documents/qt_project/build-VideoWatcher-Desktop_Qt_5_9_6_MinGW_32bit-Debug/video.json", this);
     //ui->treeView->hideMenu();
     ui->treeView->setDataSource(m_datasource);
-    ui->treeView->setShowUrlColumn(true);
 
+    //buttongroup
     ui->toolButton_basic->setCheckable(true);
     ui->toolButton_camera->setCheckable(true);
     QButtonGroup *buttonGroup = new QButtonGroup(this);
@@ -45,6 +49,8 @@ mainWidget::mainWidget(QWidget *parent) :
 
     connect(ui->pushButton_exit, SIGNAL(clicked()), this, SLOT(toexit()));
     connect(buttonGroup, SIGNAL(buttonToggled(QAbstractButton *, bool)), this, SLOT(toSwitchPage(QAbstractButton *, bool)));
+    connect(ui->pushButton_add_defatult_video_url, SIGNAL(clicked()), ui->tableView_defatul_playlist, SLOT(toAdd()));
+    connect(ui->pushButton_sub_defatult_video_url, SIGNAL(clicked()), ui->tableView_defatul_playlist, SLOT(toRemove()));
 
     toreload();
 }
@@ -80,7 +86,9 @@ void mainWidget::toSwitchPage(QAbstractButton *button, bool checked)
 
 void mainWidget::tosave()
 {
-
+    conf->setValue("global/default_rowcount", ui->lineEdit_default_rowcount->text());
+    conf->setValue("global/default_columncount", ui->lineEdit_default_columncount->text());
+    conf->setValue("global/default_playlist", ui->tableView_defatul_playlist->result());
 }
 
 JsonDataSource::JsonDataSource(const QString &jsonPath, QObject *parent)

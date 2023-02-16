@@ -9,6 +9,9 @@ HEADERS += \
     $$PWD/src/mainwindow.h \
     $$PWD/src/playalternatenewdialog.h \
     $$PWD/src/playformnewdialog.h \
+    $$PWD/src/videocell.h \
+    $$PWD/src/videowidget.h \
+    $$PWD/src/widget/cameracontrolpanel.h \
     $$PWD/src/widget/lineeditfind.h \
     $$PWD/src/widget/lineeditx.h \
     $$PWD/src/widget/propertycolor.h \
@@ -16,7 +19,6 @@ HEADERS += \
     $$PWD/src/treevideomodel.h \
     $$PWD/src/treevideoviewsearch.h \
     $$PWD/src/treevideoviewsearchurl.h \
-    $$PWD/src/videowidget.h \
     $$PWD/src/lds.h \
     $$PWD/src/videocontrolpanel.h \
     $$PWD/src/treevideoview.h \
@@ -28,6 +30,9 @@ SOURCES += \
     $$PWD/src/mainwindow.cpp \
     $$PWD/src/playalternatenewdialog.cpp \
     $$PWD/src/playformnewdialog.cpp \
+    $$PWD/src/videocell.cpp \
+    $$PWD/src/videowidget.cpp \
+    $$PWD/src/widget/cameracontrolpanel.cpp \
     $$PWD/src/widget/lineeditfind.cpp \
     $$PWD/src/widget/lineeditx.cpp \
     $$PWD/src/widget/propertycolor.cpp \
@@ -35,7 +40,6 @@ SOURCES += \
     $$PWD/src/treevideomodel.cpp \
     $$PWD/src/treevideoviewsearch.cpp \
     $$PWD/src/treevideoviewsearchurl.cpp \
-    $$PWD/src/videowidget.cpp \
     $$PWD/src/lds.cpp \
     $$PWD/src/videocontrolpanel.cpp \
     $$PWD/src/treevideoview.cpp \

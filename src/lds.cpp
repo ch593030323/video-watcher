@@ -55,15 +55,16 @@ QPixmap lds::getFontPixmap(QChar ch, const QColor &color, const QSize &size)
 QPixmap lds::getLayoutPixmap(int count)
 {
     //默认绘制区域是size(100, 100)
+    int size = 100;
     int c = count * 2 + 1;
-    int w = 100 / c;
+    int w = size / c;
     QPainterPath path;
     for(int k = 0; k < count; k ++) {
         for(int k2 = 0; k2 < count; k2 ++) {
             path.addEllipse((2 * k + 1) * w, (2 * k2 + 1) *w, w, w);
         }
     }
-    QPixmap pixmap(100, 100);
+    QPixmap pixmap(size, size);
     pixmap.fill(Qt::transparent);
     QPainter paint(&pixmap);
     paint.fillPath(path, PropertyColor::buttonTextColor);

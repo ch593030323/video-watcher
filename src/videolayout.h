@@ -6,7 +6,7 @@
 #include <QList>
 #include <QMap>
 
-class VideoWidget;
+class VideoCell;
 
 /**
  * @brief The LayoutPos struct
@@ -79,7 +79,7 @@ struct LayoutInfo{
     QByteArray toJson();
     static LayoutInfo readFrom(const QByteArray &json);
 
-    void update(const QMap<LayoutPos, VideoWidget *> &map);
+    void update(const QMap<LayoutPos, VideoCell *> &map);
 };
 
 #endif // VIDEOLAYOUT_H

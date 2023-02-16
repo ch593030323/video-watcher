@@ -6,6 +6,7 @@
 #include "playalternatenewdialog.h"
 #include "lds.h"
 #include "treevideoview.h"
+#include "propertycolor.h"
 
 #include <QTreeView>
 #include <QStandardItemModel>
@@ -42,11 +43,7 @@ MainFrame::MainFrame(QWidget *parent)
 
     ui->frame_play_alternate->setObjectName("Window");
     ui->frame_play_form->setObjectName("Window");
-    ui->widget_cameraIns->layout()->setMargin(0);
-    ui->widget_cameraIns->hide();
 
-    //VideoWidget
-    m_layoutInfo = LayoutInfo(3, 3);
     //
     {
         ui->frame_play_form->setFixedSize(500, 60);
@@ -89,31 +86,40 @@ MainFrame::MainFrame(QWidget *parent)
         }
     }
 
+    //buttongroup
     ui->pushButton_1x1->setIcon(lds::getLayoutPixmap(1));
     ui->pushButton_1x1->setText("");
+    ui->pushButton_1x1->setCheckable(true);
     ui->pushButton_2x2->setIcon(lds::getLayoutPixmap(2));
     ui->pushButton_2x2->setText("");
+    ui->pushButton_2x2->setCheckable(true);
     ui->pushButton_3x3->setIcon(lds::getLayoutPixmap(3));
     ui->pushButton_3x3->setText("");
+    ui->pushButton_3x3->setCheckable(true);
     ui->pushButton_test->setIcon(lds::getLayoutPixmap(4));
     ui->pushButton_test->setText("");
+    ui->pushButton_test->setCheckable(true);
+
+    QButtonGroup *buttonGroup = new QButtonGroup(this);
+    buttonGroup->addButton(ui->pushButton_1x1);
+    buttonGroup->addButton(ui->pushButton_2x2);
+    buttonGroup->addButton(ui->pushButton_3x3);
+    buttonGroup->addButton(ui->pushButton_test);
+    buttonGroup->setExclusive(true);
+
+    //checked
+    ui->widget_video->updateLayout(LayoutInfo(3, 3));
+    ui->pushButton_3x3->setChecked(true);
+
+    ui->pushButton_fullscreen->setIcon(lds::getFontPixmap(0xf424, PropertyColor::buttonTextColor, QSize(15, 15)));
+    ui->pushButton_fullscreen_exit->setIcon(lds::getFontPixmap(0xf422, PropertyColor::buttonTextColor, QSize(15, 15)));
+    ui->pushButton_fullscreen_exit->hide();
+
     //connect
     connect(ui->pushButton_1x1, SIGNAL(clicked()), this, SLOT(toVideoLayout1x1()));
     connect(ui->pushButton_2x2, SIGNAL(clicked()), this, SLOT(toVideoLayout2x2()));
     connect(ui->pushButton_3x3, SIGNAL(clicked()), this, SLOT(toVideoLayout3x3()));
     connect(ui->pushButton_test, SIGNAL(clicked()), this, SLOT(toVideoLayout4x4()));
-
-    connect(ui->pushButton_cameraIns_lt, SIGNAL(clicked()), this, SLOT(toControlCamera_lt()));
-    connect(ui->pushButton_cameraIns_t, SIGNAL(clicked()), this, SLOT(toControlCamera_t()));
-    connect(ui->pushButton_cameraIns_rt, SIGNAL(clicked()), this, SLOT(toControlCamera_rt()));
-
-    connect(ui->pushButton_cameraIns_l, SIGNAL(clicked()), this, SLOT(toControlCamera_l()));
-    connect(ui->pushButton_cameraIns_c, SIGNAL(clicked()), this, SLOT(toControlCamera_c()));
-    connect(ui->pushButton_cameraIns_r, SIGNAL(clicked()), this, SLOT(toControlCamera_r()));
-
-    connect(ui->pushButton_cameraIns_lb, SIGNAL(clicked()), this, SLOT(toControlCamera_lb()));
-    connect(ui->pushButton_cameraIns_b, SIGNAL(clicked()), this, SLOT(toControlCamera_b()));
-    connect(ui->pushButton_cameraIns_rb, SIGNAL(clicked()), this, SLOT(toControlCamera_rb()));
 
     connect(ui->pushButton_form_new, SIGNAL(clicked()), this, SLOT(toPlayFormNew()));
     connect(ui->pushButton_form_ok, SIGNAL(clicked()), this, SLOT(toPlayFormOK()));
@@ -121,6 +127,9 @@ MainFrame::MainFrame(QWidget *parent)
     connect(ui->pushButton_alternate_ok, SIGNAL(clicked()), this, SLOT(toPlayAlternateOK()));
     connect(ui->pushButton_play_alternate->menu(), SIGNAL(aboutToShow()), this, SLOT(toHoldVideoFocus()));
     connect(ui->pushButton_play_alternate->menu(), SIGNAL(aboutToHide()), this, SLOT(toReleaseVideoFocus()));
+    connect(ui->pushButton_exit, SIGNAL(clicked()), this, SLOT(toexit()));
+    connect(ui->pushButton_fullscreen, SIGNAL(clicked()), this, SLOT(toVideoShowMax()));
+    connect(ui->pushButton_fullscreen_exit, SIGNAL(clicked()), this, SLOT(toVideoShowNormal()));
 }
 
 MainFrame::~MainFrame()
@@ -130,32 +139,13 @@ MainFrame::~MainFrame()
 
 void MainFrame::resizeEvent(QResizeEvent *event)
 {
-    updateLayout();
+    //updateLayout();
     QWidget::resizeEvent(event);
 }
 
 void MainFrame::updateLayout()
 {
-    int videoAreaWidth = this->width() - lds::videoAreaRight - lds::margin;
-    int videoAreaHeight = this->height() - lds::videoAreaBottom - lds::margin;
-    int treeHeight = videoAreaHeight - lds::margin;
-    int treeLeft = this->width() - lds::videoAreaRight;
-    int treeWidth = lds::videoAreaRight - lds::margin;
-    //treeView
-    ui->treeView->setGeometry(treeLeft, lds::margin, treeWidth,  treeHeight);
-    //widget_cameraIns
-    ui->widget_cameraIns->setGeometry(treeLeft, lds::marginX2 + treeHeight, treeWidth, treeWidth);
-
-    //按钮布局
-    int buttonTop = this->height() - lds::videoAreaBottom;// + (lds::videoAreaBottom - b40) / 2;
-    ui->pushButton_1x1->setGeometry(lds::margin + 0,    buttonTop, 80, b40);
-    ui->pushButton_2x2->setGeometry(lds::margin + 100,  buttonTop, 80, b40);
-    ui->pushButton_3x3->setGeometry(lds::margin + 200,  buttonTop, 80, b40);
-    ui->pushButton_test->setGeometry(lds::margin + 300, buttonTop, 80, b40);
-    ui->pushButton_play_form->setGeometry(lds::margin + 400, buttonTop, 80, b40);
-    ui->pushButton_play_alternate->setGeometry(lds::margin + 500, buttonTop, 80, b40);
-    //videoWidget
-    VideoWidget::parseVideoArea(m_layoutInfo, this, QRect(lds::margin / 2, lds::margin / 2 + lds::border_width, videoAreaWidth, videoAreaHeight), m_videoMap);
+    ui->widget_video->updateLayout();
 }
 
 void MainFrame::setDataSource(DataSource *datasource)
@@ -166,87 +156,22 @@ void MainFrame::setDataSource(DataSource *datasource)
 
 void MainFrame::toVideoLayout1x1()
 {
-    m_layoutInfo = LayoutInfo(1, 1);
-    updateLayout();
+    ui->widget_video->updateLayout(LayoutInfo(1, 1));
 }
 
 void MainFrame::toVideoLayout2x2()
 {
-    m_layoutInfo = LayoutInfo(2, 2);
-    updateLayout();
+    ui->widget_video->updateLayout(LayoutInfo(2, 2));
 }
 
 void MainFrame::toVideoLayout3x3()
 {
-    m_layoutInfo = LayoutInfo(3, 3);
-    updateLayout();
+    ui->widget_video->updateLayout(LayoutInfo(3, 3));
 }
 
 void MainFrame::toVideoLayout4x4()
 {
-    m_layoutInfo = LayoutInfo(4, 4);
-    updateLayout();
-}
-
-void MainFrame::toControlCamera_lt()
-{
-    cameraMove(-1, -1);
-}
-
-void MainFrame::toControlCamera_t()
-{
-    cameraMove(0, -1);
-}
-
-void MainFrame::toControlCamera_rt()
-{
-    cameraMove(1, -1);
-}
-
-void MainFrame::toControlCamera_l()
-{
-    cameraMove(-1, 0);
-}
-
-void MainFrame::toControlCamera_c()
-{
-    cameraMoveRestore();
-}
-
-void MainFrame::toControlCamera_r()
-{
-    cameraMove(1, 0);
-}
-
-void MainFrame::toControlCamera_lb()
-{
-    cameraMove(-1, 1);
-}
-
-void MainFrame::toControlCamera_b()
-{
-    cameraMove(0, 1);
-}
-
-void MainFrame::toControlCamera_rb()
-{
-    cameraMove(1, 1);
-}
-
-void MainFrame::cameraMove(int dx, int dy)
-{
-    VideoWidget *w = qobject_cast<VideoWidget *>(this->focusWidget());
-    if(!w)
-        return;
-    //    w->move(dx, dy);
-}
-
-void MainFrame::cameraMoveRestore()
-{
-    VideoWidget *w = qobject_cast<VideoWidget *>(this->focusWidget());
-    if(!w)
-        return;
-    //    w->moveRestore();
+    ui->widget_video->updateLayout(LayoutInfo(4, 4));
 }
 
 void MainFrame::toPlayFormNew()
@@ -266,8 +191,8 @@ void MainFrame::toPlayFormOK()
     if(!file.open(QFile::ReadOnly)) {
         qDebug() << file.errorString();
     }
-    m_layoutInfo = LayoutInfo::readFrom(file.readAll());
-    updateLayout();
+    LayoutInfo info =  LayoutInfo::readFrom(file.readAll());
+    ui->widget_video->updateLayout(info);
 }
 
 void MainFrame::toPlayAlternateNew()
@@ -280,28 +205,54 @@ void MainFrame::toPlayAlternateNew()
 
 void MainFrame::toPlayAlternateOK()
 {
-    if(!VideoWidget::lastFocusWidget)
+    if(!VideoCell::lastFocusWidget)
         return;
     int row = ui->comboBox_alternate->currentIndex();
     if(row < 0)
         return;
 
-    VideoWidget::lastFocusWidget->addPlayerList(AlterPlayFrame::readFrom(ui->comboBox_alternate->itemData(row).toString()));
+    VideoCell::lastFocusWidget->addPlayerList(AlterPlayFrame::readFrom(ui->comboBox_alternate->itemData(row).toString()));
 }
 
 void MainFrame::toHoldVideoFocus()
 {
-    if(!VideoWidget::lastFocusWidget)
+    if(!VideoCell::lastFocusWidget)
         return;
-    VideoWidget::lastFocusWidget->setCheckable(true);
-    VideoWidget::lastFocusWidget->setChecked(true);
+    VideoCell::lastFocusWidget->setCheckable(true);
+    VideoCell::lastFocusWidget->setChecked(true);
 }
 
 void MainFrame::toReleaseVideoFocus()
 {
-    if(!VideoWidget::lastFocusWidget)
+    if(!VideoCell::lastFocusWidget)
         return;
-    VideoWidget::lastFocusWidget->setCheckable(false);
-    VideoWidget::lastFocusWidget->setChecked(false);
-    VideoWidget::lastFocusWidget = NULL;
+    VideoCell::lastFocusWidget->setCheckable(false);
+    VideoCell::lastFocusWidget->setChecked(false);
+    VideoCell::lastFocusWidget = NULL;
+}
+
+void MainFrame::toexit()
+{
+    this->close();
+    qApp->quit();
+}
+
+void MainFrame::toVideoShowMax()
+{
+    ui->frame_title->hide();
+    ui->treeView->hide();
+    this->layout()->update();
+
+    ui->pushButton_fullscreen_exit->show();
+    ui->pushButton_fullscreen->hide();
+}
+
+void MainFrame::toVideoShowNormal()
+{
+    ui->frame_title->show();
+    ui->treeView->show();
+    this->layout()->update();
+
+    ui->pushButton_fullscreen_exit->hide();
+    ui->pushButton_fullscreen->show();
 }

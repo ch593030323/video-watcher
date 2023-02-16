@@ -1,6 +1,6 @@
 #include "playformnewdialog.h"
 #include "ui_playformnewdialog.h"
-#include "videowidget.h"
+#include "videocell.h"
 #include "lds.h"
 
 #include <QStandardItemModel>
@@ -63,33 +63,6 @@ void playformnewdialog::resizeEvent(QResizeEvent *event)
     updateLayout();
 }
 
-/*
- * 界面相关
-----------------------
-    margin / 2
-----------------------
-    border_width
-------------|---------------------------------------------        ---
-                                    margin / 2                     |
-------------|-----------|----------------|----------------|--------|
-                        |                |                |        |
-                        |                |                |        |
-                        |                |                |        |
-                        |                |                |        |
---margin/2--|--margin/2-|--------------video--------------|     treeView
-                        |                |                |        |
-                        |                |                |        |
-                        |                |                |        |
-                        |                |                |        |
-                        |----------------|----------------|--------|
-                                    margin / 2                     |
-----------------------------------------------------------|       ---
-    border_width
-----------------------
-    margin / 2
-----------------------
-
-    */
 void playformnewdialog::updateLayout(bool isRemovePlayer)
 {
     int videoAreaWidth = this->width() - lds::videoAreaRight - lds::margin;
@@ -113,10 +86,10 @@ void playformnewdialog::updateLayout(bool isRemovePlayer)
     ui->pushButton_ok->setGeometry(this->width() - 200,     buttonTop, 80, b40);
     ui->pushButton_exit->setGeometry(this->width() - 100,   buttonTop, 80, b40);
     //videoWidget
-    VideoWidget::parseVideoArea(m_layoutInfo, this, QRect(videoAreaX, videoAreaY, videoAreaWidth, videoAreaHeight), m_videoMap);
+    VideoCell::parseVideoArea(m_layoutInfo, this, QRect(videoAreaX, videoAreaY, videoAreaWidth, videoAreaHeight), m_videoMap);
 
     //videoWidget设置成选区模式
-    for(QMap<LayoutPos, VideoWidget *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
+    for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
         k.value()->setCheckable(true);
         disconnect(k.value(), SIGNAL(signalRelease()), this, SLOT(toselected()));
         connect(k.value(), SIGNAL(signalRelease()), this, SLOT(toselected()));
@@ -125,25 +98,25 @@ void playformnewdialog::updateLayout(bool isRemovePlayer)
     tounselectedall();
     //是否会移除播放器
     if(isRemovePlayer) {
-        for(QMap<LayoutPos, VideoWidget *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
+        for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
             k.value()->removePlayer();
         }
     }
     //添加右键菜单栏
-    for(QMap<LayoutPos, VideoWidget *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
-        QList<VideoWidget::ContextMenuData> pairList;
-        pairList << VideoWidget::ContextMenuData(QString::fromUtf8("合并"), this, SLOT(tomerge()));
-        pairList << VideoWidget::ContextMenuData(QString::fromUtf8("清除"), this, SLOT(toclear()));
-        pairList << VideoWidget::ContextMenuData(QString::fromUtf8("还原"), this, SLOT(torestore()));
+    for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
+        QList<VideoCell::ContextMenuData> pairList;
+        pairList << VideoCell::ContextMenuData(QString::fromUtf8("合并"), this, SLOT(tomerge()));
+        pairList << VideoCell::ContextMenuData(QString::fromUtf8("清除"), this, SLOT(toclear()));
+        pairList << VideoCell::ContextMenuData(QString::fromUtf8("还原"), this, SLOT(torestore()));
         k.value()->setContextMenuDataList(pairList);
 
     }
 }
 
-QList<VideoWidget *> playformnewdialog::selectedWidgetList()
+QList<VideoCell *> playformnewdialog::selectedWidgetList()
 {
-    QList<VideoWidget *> r;
-    for(QMap<LayoutPos, VideoWidget *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
+    QList<VideoCell *> r;
+    for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
         if(k.value()->isChecked())
             r << k.value();
     }
@@ -207,7 +180,7 @@ void playformnewdialog::toexit()
 
 void playformnewdialog::tomerge()
 {
-    QList<VideoWidget *> selectedList = selectedWidgetList();
+    QList<VideoCell *> selectedList = selectedWidgetList();
     if(selectedList.count() == 0)
         return;
     //合并单元格
@@ -261,18 +234,18 @@ void playformnewdialog::torestore()
 
 void playformnewdialog::toselected()
 {
-    VideoWidget *w = qobject_cast<VideoWidget *>(sender());
+    VideoCell *w = qobject_cast<VideoCell *>(sender());
     if(!w)
         return;
 
 
-    QList<VideoWidget *> selectedList = selectedWidgetList();
+    QList<VideoCell *> selectedList = selectedWidgetList();
     QRect rect;
     for(int k = 0; k < selectedList.count(); k ++) {
         rect = rect.united(selectedList[k]->geometry());
     }
 
-    for(QMap<LayoutPos, VideoWidget *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); ) {
+    for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); ) {
 
         if(!k.value()->isVisible()) {
             //没有显示的跳过处理
@@ -293,7 +266,7 @@ void playformnewdialog::toselected()
 
 void playformnewdialog::tounselectedall()
 {
-    for(QMap<LayoutPos, VideoWidget *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
+    for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
         k.value()->setChecked(false);
     }
 }

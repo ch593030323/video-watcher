@@ -10,7 +10,7 @@ TableViewAdd::TableViewAdd(QWidget *parent)
     this->setModel(m_tableModel);
     this->horizontalHeader()->hide();
     this->horizontalHeader()->setStretchLastSection(true);
-    this->setEditTriggers(QTableView::SelectedClicked);
+    this->setEditTriggers(QTableView::AllEditTriggers);
 
     connect(this->itemDelegate(), SIGNAL(closeEditor(QWidget *, QAbstractItemDelegate::EndEditHint)),
             this, SLOT(toCheckTable(QWidget *, QAbstractItemDelegate::EndEditHint)));

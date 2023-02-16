@@ -28,7 +28,7 @@ LineEditFind::LineEditFind(QWidget *parent) : QFrame(parent)
     buttonClose->setProperty("outer_stylesheet", "search");
 
     buttonFind->setIcon(PropertyColor::getFontPixmap(0xf002, PropertyColor::textColor, QSize(20, 20)));
-    buttonClose->setIcon(PropertyColor::getFontPixmap(0xf057, PropertyColor::textColor));
+    buttonClose->setIcon(PropertyColor::getFontPixmap(0xf057, PropertyColor::textColor, QSize(20, 20)));
 
 
     connect(edit, SIGNAL(textChanged(QString)), this, SLOT(slotShowCloseButton(QString)));
@@ -50,6 +50,11 @@ void LineEditFind::hideFindButton()
 void LineEditFind::setText(const QString &text)
 {
     edit->setText(text);
+}
+
+QString LineEditFind::text()
+{
+    return edit->text();
 }
 
 void LineEditFind::slotShowCloseButton(const QString &text)
