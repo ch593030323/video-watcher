@@ -5,7 +5,6 @@
 #include <QWidget>
 #include <QChar>
 #include <QPixmap>
-#include <QtSql>
 
 #define b40 40
 
@@ -14,7 +13,7 @@
  * 轮播的播放信息
  */
 struct AlterPlayFrame {
-    QString device_obid;
+    QString url;
     int timeout;
 
     static QList<AlterPlayFrame> readFrom(const QString &filepath);
@@ -28,9 +27,6 @@ class lds : public QWidget
 {
     Q_OBJECT
 public:
-    static QVariant selectValue(const QString &sql, const QString &arg0, const QVariant &def = QVariant());
-    static QVariant selectValue(const QString &sql, int arg0, const QVariant &def = QVariant());
-
     static const int margin;
     static const int marginX2;
     static const int border_width;

@@ -9,14 +9,14 @@ TreeVideoViewSearchSettings::TreeVideoViewSearchSettings(QWidget *parent)
     connect(m_treeView, SIGNAL(clicked(QModelIndex)), this, SLOT(slotEditUrl(QModelIndex)));
 }
 
-void TreeVideoViewSearchSettings::addToPlayThread(const QString &obid, const QString &url)
+void TreeVideoViewSearchSettings::addToPlayThread(const QString &url)
 {
 
 }
 
-void TreeVideoViewSearchSettings::initAll()
+void TreeVideoViewSearchSettings::initTree()
 {
-    TreeVideoViewSearch::initAll();
+    TreeVideoViewSearch::initTree();
     m_treeView->setColumnWidth(0, 200);
     m_treeView->slotExpandAll();
 }
@@ -26,10 +26,9 @@ void TreeVideoViewSearchSettings::appendHeaderHorizontalItem(QStandardItem *item
     itemRoot->setChild(0, 1, createItem(QString::fromUtf8("Url"), Qt::ItemIsEnabled | Qt::ItemIsSelectable));
 }
 
-void TreeVideoViewSearchSettings::appendDeviceHorizontalItem(QStandardItem *item_location, int row, const QString &device_obid)
+void TreeVideoViewSearchSettings::appendDeviceHorizontalItem(QStandardItem *item_location, int row, QStandardItem *item_device)
 {
-    QString url = lds::selectValue("select url from vw_device where obid = '%1' ", device_obid).toString();
-    item_location->setChild(row, 1, new QStandardItem(url));
+    item_location->setChild(row, 1, new QStandardItem(item_device->data(VideoUrlRole).toString()));
 }
 
 void TreeVideoViewSearchSettings::slotEditUrl(const QModelIndex &index)

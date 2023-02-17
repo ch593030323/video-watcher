@@ -63,15 +63,15 @@ void CameraControlPanel::mouseReleaseEvent(QMouseEvent *event)
 
 void CameraControlPanel::resizeEvent(QResizeEvent *event)
 {
-    m_paintInfo.update(this->width(), this->height());
+    m_paintInfo.update(this->rect());
 }
 
-void CameraControlPanel::PaintInfo::update(int width, int height)
+void CameraControlPanel::PaintInfo::update(QRect rect)
 {
     //可控变量
-    bgColor = QColor(50, 69, 106);
+    bgColor = PropertyColor::buttonColor;
     highlightColor = PropertyColor::highlightColor;
-    this->width = qMin(width, height);
+    this->width = qMin(rect.width(), rect.height());
 
     radius = this->width / 2;
     gap = radius / 5;
@@ -82,19 +82,22 @@ void CameraControlPanel::PaintInfo::update(int width, int height)
     sweepLength = 360.0 / 8;
     offAngle = sweepLength / 2.0;
     startAngle = offAngle;
+
+    qreal xoff = (rect.width() - width) / 2.0;
+    qreal yoff = (rect.height() - width) / 2.0;
     //draw pie
     for(int k = TopRight; k <= Right; k ++) {
         qreal start = startAngle + sweepLength * k;
         qreal sweep = sweepLength;
 
         //painter为Antialiasing模式时，会有白线，略微增加start、start可解决
-        QPainterPath path = getPiePath(QPointF(radius, radius), radius/2, radius, start - 0.3, sweep + 0.6);
+        QPainterPath path = getPiePath(QPointF(xoff + radius, yoff + radius), radius/2, radius, start - 0.3, sweep + 0.6);
         pathMap[k]= path;
     }
 
     //draw circle
     {
-        QPainterPath path = getCirclePath(QPointF(radius, radius), radius_inner);
+        QPainterPath path = getCirclePath(QPointF(xoff + radius, yoff + radius), radius_inner);
         pathMap[Center]= path;
     }
 }
@@ -116,7 +119,7 @@ void CameraControlPanel::PaintInfo::draw(QPainter *painter)
         QColor curColor =  (isPressed && path.contains(pressedPoint)) ? highlightColor: bgColor;
         painter->fillPath(path, curColor);
 
-        QPixmap pixmap = PropertyColor::getFontPixmap(0xf0da, Qt::white, QSize(pixmapWidth, pixmapWidth), (start + offAngle) * -1);
+        QPixmap pixmap = PropertyColor::getFontPixmap(0xf0da, PropertyColor::buttonTextColor, QSize(pixmapWidth, pixmapWidth), (start + offAngle) * -1);
         painter->drawPixmap(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, pixmap.size(), path.boundingRect().toRect()),
                            pixmap);
     }
@@ -127,8 +130,8 @@ void CameraControlPanel::PaintInfo::draw(QPainter *painter)
         QColor curColor =  (isPressed && path.contains(pressedPoint)) ? highlightColor: bgColor;
         painter->fillPath(path, curColor);
 
-        QRect rect = getSquareRect(QPointF(radius, radius), radius_inner).toRect();
-        QPixmap pixmap = PropertyColor::getFontPixmap(0xf2f9, Qt::white, QSize(pixmapWidthInner, pixmapWidthInner));
+        QRect rect = path.boundingRect().toRect();
+        QPixmap pixmap = PropertyColor::getFontPixmap(0xf2f9, PropertyColor::buttonTextColor, QSize(pixmapWidthInner, pixmapWidthInner));
         painter->drawPixmap(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, pixmap.size(), rect),
                            pixmap);
     }

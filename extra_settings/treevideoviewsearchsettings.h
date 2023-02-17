@@ -13,10 +13,10 @@ public slots:
     void slotEditUrl(const QModelIndex &index);
 
 protected:
-    virtual void addToPlayThread(const QString &obid, const QString &url);
-    virtual void initAll();
+    virtual void addToPlayThread(const QString &url);
+    virtual void initTree();
     virtual void appendHeaderHorizontalItem(QStandardItem *itemRoot);
-    virtual void appendDeviceHorizontalItem(QStandardItem *item_location, int row, const QString &device_obid);
+    virtual void appendDeviceHorizontalItem(QStandardItem *item_location, int row, QStandardItem *item_device);
 
 };
 

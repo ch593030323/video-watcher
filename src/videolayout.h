@@ -49,10 +49,7 @@ struct LayoutCell{
     LayoutPos pos;
     int row_spans;
     int column_spans;
-    QString device_obid;
-
-    QString url() const;
-    static QString url(QString device_obid);
+    QString url;
 
     static int indexOf(QRect rect, const QList<LayoutCell> &list);
 

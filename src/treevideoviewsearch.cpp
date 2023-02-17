@@ -16,6 +16,7 @@
 #include <QColorDialog>
 #include <QApplication>
 #include <QtDebug>
+#include <QFile>
 
 QPixmap getCameraStatePixmap(int state) {
     if(0 == state) {
@@ -107,53 +108,35 @@ void TreeVideoViewSearch::hideMenu()
 
 void TreeVideoViewSearch::slotInitAll()
 {
-    initAll();
+    initTree();
 }
 
-void TreeVideoViewSearch::slotInitSql()
-{
-    QSqlQuery q;
-    q.exec("delete from vw_location");
-    q.exec("delete from vw_device");
-    q.exec("delete from vw_device_state");
-    for(DataSource::Location location : m_datasource->getLocationList()) {
-        QString obid = location.obid;
-        QString name = location.name;
-        int count = location.camera_count;
-
-        q.exec(QString("insert into vw_location(obid, name, type, state) values('%1', '%2', %3, %4)")
-               .arg(obid)
-               .arg(name)
-               .arg(location.type)
-               .arg(location.state));
-
-
-        if(0 < count) {
-            //占位用
-            q.exec(QString("insert into vw_device(obid, name, location_obid, type, state, url) values('%1', '', '%2', 0, 0, '')")
-                   .arg("")
-                   .arg(obid));
-        }
-    }
-    for(DataSource::CameraState state : m_datasource->getCameraStateList()) {
-        q.exec(QString("insert into vw_device_state(rank, name) values(%1, '%2')")
-               .arg(state.rank)
-               .arg(state.name));
-    }
-}
-
-void TreeVideoViewSearch::slotInitControl()
+void TreeVideoViewSearch::slotInitTree()
 {
     m_comboBox->clear();
     m_comboBox->addItem(QString::fromUtf8("所有"), "%");
-    QSqlQuery query_location;
-    query_location.exec(QString("select obid, name from vw_location"));
-    while(query_location.next()) {
-        QString obid = query_location.record().value("obid").toString();
-        QString name = query_location.record().value("name").toString();
-        m_comboBox->addItem(name, obid);
+
+    m_treeModel->clear();
+    QStandardItem *itemRoot =  m_treeModel->invisibleRootItem();
+    QStandardItem *itemISCS = createItem(QString::fromUtf8("摄像头"), Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+    itemRoot->setChild(0, 0, itemISCS);
+    appendHeaderHorizontalItem(itemRoot);
+
+    for(const DataSource::Location &d : m_datasource->getLocationList()) {
+        m_comboBox->addItem(d.name, d.obid);
+
+        QStandardItem *item_location = new QStandardItem;
+        item_location->setText(d.name);
+        item_location->setData(VideoNodeStation, VideoNodeType);
+        item_location->setData(d.obid,    VideoObidRole);
+        item_location->setData(d.name,    VideoNameRole);
+        item_location->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+        itemISCS->appendRow(item_location);
+
+        //占位用
+        item_location->setChild(0, 0, new QStandardItem);
     }
-    this->updateCameraTree();
+    //
     m_treeView->expand(m_treeModel->index(0, 0));
 }
 
@@ -246,34 +229,27 @@ void TreeVideoViewSearch::slotAppSettings()
 
 void TreeVideoViewSearch::slotExportJson()
 {
-    QFile file("video.json");
-    file.open(QFile::WriteOnly);
-    file.write(m_datasource->toJson());
-    file.close();
 }
 
 void TreeVideoViewSearch::slotImportJson()
 {
-    m_datasource->fromJson("video.json");
-    slotInitAll();
 }
 
-void TreeVideoViewSearch::addToPlayThread(const QString &obid, const QString &url)
+void TreeVideoViewSearch::addToPlayThread(const QString &url)
 {
 
 }
 
-void TreeVideoViewSearch::initAll()
+void TreeVideoViewSearch::initTree()
 {
-    slotInitSql();
-    slotInitControl();
+    slotInitTree();
 }
 
 void TreeVideoViewSearch::appendHeaderHorizontalItem(QStandardItem *itemRoot)
 {
 }
 
-void TreeVideoViewSearch::appendDeviceHorizontalItem(QStandardItem *item_location, int row, const QString &device_obid)
+void TreeVideoViewSearch::appendDeviceHorizontalItem(QStandardItem *item_location, int row, QStandardItem *item_device)
 {
 }
 
@@ -285,7 +261,7 @@ void TreeVideoViewSearch::slotSelectStation(int index)
         return;
     }
 
-    updateCameraSqlAndItemListOnce(location_obid);
+    updateCameraItemListOnce(location_obid);
 
     int station_index = index - 1;
     QStandardItem *itemRoot     = m_treeModel->invisibleRootItem();
@@ -301,94 +277,33 @@ void TreeVideoViewSearch::slotSelectStation(int index)
 
 void TreeVideoViewSearch::slotSearchCamera(const QString &text)
 {
-    int camera_index = -1;
-    int station_index = m_comboBox->currentIndex();
-    QString obid = m_comboBox->itemData(station_index).toString();
-    QSqlQuery query_location;
-    QSqlQuery query_camera;
-    QString location_obid;
+    QStandardItem *itemRoot     = m_treeModel->invisibleRootItem();
+    QStandardItem *itemISCS     = itemRoot->child(0);
+    for(int location_row = 0; location_row < itemISCS->rowCount(); location_row ++) {
+        QStandardItem *item_location = itemISCS->child(location_row);
+        for(int camera_row = 0; camera_row < item_location->rowCount(); camera_row ++) {
+            QStandardItem *item_camera = item_location->child(camera_row);
+            //未展开的节点
+            if(item_camera->data(VideoObidRole).toString() == "") {
+                camera_row --;
+                updateCameraItemList(item_location);
+                continue;
+            }
 
-    //移除 "所有" combobox item
-    if("%" != obid)
-        station_index --;
-    query_location.exec(QString("select obid from vw_location where obid like '%1' ").arg(obid));
-    while(query_location.next()) {
-
-        location_obid = query_location.record().value("obid").toString();
-        updateCameraSqlAndItemListOnce(location_obid);
-
-        query_camera.exec(QString("select obid, name, location_obid from vw_device where location_obid = '%1' ")
-                          .arg(location_obid));
-        while(query_camera.next()) {
-            if(query_camera.record().value("name").toString().contains(text, Qt::CaseInsensitive)) {
-                goto search_end;
+            if(item_camera->data(VideoNameRole).toString().contains(text)) {
+                m_treeView->setCurrentIndex(item_camera->index());
+                return;
             }
         }
     }
-
-    //没有找到
-    return;
-
-search_end:
-    //定位treeview的节点
-    station_index = station_index + query_location.at();
-    camera_index = query_camera.at();
-    if(camera_index >= 0 && station_index >= 0) {
-        QStandardItem *itemRoot     = m_treeModel->invisibleRootItem();
-        QStandardItem *itemISCS     = itemRoot ? itemRoot->child(0) : 0;
-        QStandardItem *itemStation  = itemISCS ? itemISCS->child(station_index) : 0;
-        QStandardItem *itemCamera   = itemStation ? itemStation->child(camera_index) : 0;
-        m_treeView->setCurrentIndex(itemCamera ? itemCamera->index() : QModelIndex());
-    }
 }
 
-void TreeVideoViewSearch::updateCameraSqlAndItemListOnce(const QString &location_obid)
+void TreeVideoViewSearch::updateCameraItemListOnce(const QString &location_obid)
 {
     QStandardItem *item = getLocationItem(location_obid);
     //若第一个设备的obid为空，则需要加载数据
     if(item && item->child(0) && item->child(0)->data(VideoObidRole).toString().isEmpty()) {
-        updateCameraSqlList(location_obid);
         updateCameraItemList(location_obid);
-    }
-}
-
-void TreeVideoViewSearch::updateCameraSqlList(const QString &location_obid)
-{
-    QSqlQuery q;
-    q.exec(QString("delete from vw_device where location_obid = '%1' ").arg(location_obid));
-    for(DataSource::Camera c : m_datasource->getCameraList(location_obid)) {
-        q.exec(QString("insert into vw_device values('%1', '%2', '%3', 1, %4, '%5')")
-               .arg(c.obid)
-               .arg(c.name)
-               .arg(location_obid)
-               .arg(c.state)
-               .arg(c.url));
-    }
-}
-
-void TreeVideoViewSearch::updateCameraTree()
-{
-    m_treeModel->clear();
-
-    QStandardItem *itemRoot =  m_treeModel->invisibleRootItem();
-
-    QStandardItem *itemISCS = createItem(QString::fromUtf8("摄像头"), Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-    itemRoot->setChild(0, 0, itemISCS);
-    appendHeaderHorizontalItem(itemRoot);
-
-    QSqlQuery query_location;
-    query_location.exec("select obid, name from vw_location");
-    while(query_location.next()) {
-        QStandardItem *item_location = new QStandardItem;
-        QString location_obid = query_location.record().value("obid").toString();
-        QString location_name = query_location.record().value("name").toString();
-        item_location->setText(location_name);
-        item_location->setData(VideoNodeStation, VideoNodeType);
-        item_location->setData(location_obid,    VideoObidRole);
-        item_location->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-        itemISCS->appendRow(item_location);
-
-        updateCameraItemList(item_location);
     }
 }
 
@@ -425,14 +340,12 @@ void TreeVideoViewSearch::updateCameraItemList(QStandardItem *item_location)
 {
     item_location->removeRows(0, item_location->rowCount());
     QString location_obid = item_location->data(VideoObidRole).toString();
-    QSqlQuery query_device;
-    query_device.exec(QString("select * from vw_device where location_obid = '%1' ").arg(location_obid));
-    while(query_device.next()) {
-        QString obid = query_device.record().value("obid").toString();
-        QString name = QString::fromUtf8(query_device.record().value("name").toByteArray());
-        int state = query_device.record().value("state").toInt();
-        int type = query_device.record().value("type").toInt();
-        QString url = query_device.record().value("url").toString();
+    for(const DataSource::Camera &d : m_datasource->getCameraList(location_obid)) {
+        QString obid = d.obid;
+        QString name = d.name;
+        int state = d.state;
+        int type = d.type;
+        QString url = d.url;
 
         QString stateName = m_datasource->getCameraStateName(state);
         QString typeName = m_datasource->getCameraTypeName(type);
@@ -452,8 +365,8 @@ void TreeVideoViewSearch::updateCameraItemList(QStandardItem *item_location)
 
         item_location->setChild(row, 0, item_device);
         //
-        appendDeviceHorizontalItem(item_location, row, obid);
-        addToPlayThread(obid, url);
+        appendDeviceHorizontalItem(item_location, row, item_device);
+        addToPlayThread(url);
     }
 }
 
@@ -461,7 +374,7 @@ void TreeVideoViewSearch::slotUpdateAndExpandNode(const QModelIndex &index)
 {
     if(index.data(VideoNodeType).toInt() == VideoNodeStation) {
         QString obid = index.data(VideoObidRole).toString();
-        updateCameraSqlAndItemListOnce(obid);
+        updateCameraItemListOnce(obid);
     }
 }
 

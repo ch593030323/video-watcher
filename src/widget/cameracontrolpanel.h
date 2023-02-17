@@ -26,7 +26,7 @@ public:
         void draw(QPainter *painter);
 
         //更新参数
-        void update(int width, int height);
+        void update(QRect rect);//int width, int height);
 
         //下面变量通过upadte获取
         QColor bgColor;//背景色

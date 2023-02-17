@@ -6,7 +6,6 @@
 #include "ui_mainwindow.h"
 #include "src/treevideomodel.h"
 
-#include <QSqlQuery>
 #include <QSqlError>
 
 ////////////////////////////////////////////////////////////////////////////////

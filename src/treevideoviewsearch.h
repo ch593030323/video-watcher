@@ -36,18 +36,17 @@ public:
 
 public slots:
     void slotInitAll();
-    void slotInitSql();
-    void slotInitControl();
+    void slotInitTree();
     void slotSettings();
     void slotAppSettings();
     void slotExportJson();
     void slotImportJson();
 
 protected:
-    virtual void addToPlayThread(const QString &obid, const QString &url);
-    virtual void initAll();
+    virtual void addToPlayThread(const QString &url);
+    virtual void initTree();
     virtual void appendHeaderHorizontalItem(QStandardItem *itemRoot);
-    virtual void appendDeviceHorizontalItem(QStandardItem *item_location, int row, const QString &device_obid);
+    virtual void appendDeviceHorizontalItem(QStandardItem *item_location, int row, QStandardItem *item_device);
 
 protected slots:
     void slotSelectStation(int index);
@@ -56,11 +55,9 @@ protected slots:
     void slotSetColor();
 
 protected:
-    void updateCameraSqlAndItemListOnce(const QString &location_obid);
-    void updateCameraSqlList(const QString &location_obid);
+    void updateCameraItemListOnce(const QString &location_obid);
     void updateCameraItemList(QStandardItem *item_location);
     void updateCameraItemList(const QString &location_obid);
-    void updateCameraTree();
 
     QStandardItem *createItem(const QString &text, Qt::ItemFlags flags);
     QStandardItem *getLocationItem(const QString &location_obid);

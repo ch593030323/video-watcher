@@ -2,19 +2,7 @@
 #include "json/json.h"
 #include "videocell.h"
 
-#include <QSqlQuery>
-#include <QSqlRecord>
 #include <QtDebug>
-
-QString LayoutCell::url() const
-{
-    return url(device_obid);
-}
-
-QString LayoutCell::url(QString device_obid)
-{
-    return lds::selectValue("select url from wx_device where obid = '%1'", device_obid).toString();
-}
 
 int LayoutCell::indexOf(QRect rect, const QList<LayoutCell> &list)
 {
@@ -45,7 +33,7 @@ QByteArray LayoutInfo::toJson()
         json_cell["y"] = cells[k].y();
         json_cell["column_spans"] = cells[k].column_spans;
         json_cell["row_spans"] = cells[k].row_spans;
-        json_cell["device_obid"] = cells[k].device_obid.toStdString();
+        json_cell["url"] = cells[k].url.toStdString();
 
         json_cells.append(json_cell);
     }
@@ -74,7 +62,7 @@ LayoutInfo LayoutInfo::readFrom(const QByteArray &json)
         cell.pos.y = cells[k]["y"].asInt();
         cell.column_spans   = cells[k]["column_spans"].asInt();
         cell.row_spans      = cells[k]["row_spans"].asInt();
-        cell.device_obid    = cells[k]["device_obid"].asCString();
+        cell.url            = cells[k]["url"].asCString();
 
         info.cells.append(cell);
     }
@@ -86,12 +74,12 @@ void LayoutInfo::update(const QMap<LayoutPos, VideoCell *> &map)
     //将videoWidget的摄像头id保存到layoutinfo里
     for(QMap<LayoutPos, VideoCell *>::const_iterator k = map.begin(); k != map.end(); k ++) {
         VideoCell *w = k.value();
-        QString obid = w->device_obid();
-        if(w->isVisible() && obid != "") {
+        QString url = w->getInfo().url;
+        if(w->isVisible() && url != "") {
             QList<LayoutCell> &cells = this->cells;
             int index = LayoutCell::indexOf(w->rectX(), cells);
             if(index >= 0) {
-                cells[index].device_obid = obid;
+                cells[index].url = url;
             } else {
                 cells << w->getInfo();
             }

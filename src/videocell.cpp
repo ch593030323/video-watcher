@@ -84,7 +84,7 @@ void VideoCell::parseVideoArea(const LayoutInfo &info, QWidget *parentWidget, QR
             cacheMap.insert(pos, new VideoCell(pos, parentWidget));
         }
         VideoCell *w = cacheMap.value(pos);
-        w->addPlayer(cell.device_obid);
+        w->addPlayer(cell.url);
 
         unused_video_widget_list.removeOne(w);
 
@@ -124,7 +124,7 @@ void VideoCell::updateImage(const FFmpegData &d)
         FFmpegThread *thread = qobject_cast<FFmpegThread *>(sender());
         if(!thread)
             return;
-        if(PlayThread::PlayThreadMap.value(m_playListObid, NULL) != thread)
+        if(PlayThread::PlayThreadMap.value(m_playListUrl, NULL) != thread)
             return;
     }
     m_ffmpegData = d;
@@ -134,7 +134,7 @@ void VideoCell::updateImage(const FFmpegData &d)
 
 void VideoCell::toControlPlay()
 {
-    PlayThread *thread = PlayThread::PlayThreadMap.value(m_info.device_obid, NULL);
+    PlayThread *thread = PlayThread::PlayThreadMap.value(m_info.url, NULL);
     if(!thread)
         return;
     thread->play();
@@ -144,7 +144,7 @@ void VideoCell::toControlPlay()
 
 void VideoCell::toControlPause()
 {
-    PlayThread *thread = PlayThread::PlayThreadMap.value(m_info.device_obid, NULL);
+    PlayThread *thread = PlayThread::PlayThreadMap.value(m_info.url, NULL);
     if(!thread)
         return;
     thread->pause();
@@ -195,7 +195,7 @@ void VideoCell::updatePlayListDevice()
 
     if(m_playListIndex < 0 || m_playListIndex >= m_playList.count())
         return;
-    m_playListObid = m_playList[m_playListIndex].device_obid;
+    m_playListUrl = m_playList[m_playListIndex].url;
     m_playListTimer->setInterval(m_playList[m_playListIndex].timeout * 1000);
 }
 
@@ -207,7 +207,7 @@ void VideoCell::paintEvent(QPaintEvent *)
     if(m_ffmpegData.isNoError) {
         //后台播放，直接removePlayer会有残留图片，故增加obidIsValid参数
         QImage &image = m_ffmpegData.image;
-        bool obidIsValid = (m_info.device_obid != "" || m_playListObid != "");
+        bool obidIsValid = (m_info.url != "" || m_playListUrl != "");
         if(!image.isNull() && obidIsValid) {
             image = image.scaled(paint_rect.size(), Qt::KeepAspectRatio);
             painter.drawImage((this->rect().width() - image.width()) / 2, (this->rect().height() - image.height()) / 2, image);
@@ -243,11 +243,11 @@ void VideoCell::dragEnterEvent(QDragEnterEvent *event)
 {
     const QMimeData *mimedata = event->mimeData();
     mimedata->formats();//这里起刷新formats的作用
-    if (mimedata->hasFormat("camera/obid")) {
+    if (mimedata->hasFormat("camera/url")) {
         event->accept();
         return;
     }
-    if (mimedata->hasFormat("VideoCell/obid") && mimedata->data("VideoCell/pos").toInt() != m_info.pos.value()) {
+    if (mimedata->hasFormat("VideoCell/url") && mimedata->data("VideoCell/pos").toInt() != m_info.pos.value()) {
         event->accept();
         return;
     }
@@ -265,11 +265,11 @@ void VideoCell::dragMoveEvent(QDragMoveEvent *event)
 {
     const QMimeData *mimedata = event->mimeData();
     mimedata->formats();//这里起刷新formats的作用
-    if (mimedata->hasFormat("camera/obid")) {
+    if (mimedata->hasFormat("camera/url")) {
         event->accept();
         return;
     }
-    if (mimedata->hasFormat("VideoCell/obid") && mimedata->data("VideoCell/pos").toInt() != m_info.pos.value()) {
+    if (mimedata->hasFormat("VideoCell/url") && mimedata->data("VideoCell/pos").toInt() != m_info.pos.value()) {
         event->accept();
         return;
     }
@@ -281,21 +281,23 @@ void VideoCell::dropEvent(QDropEvent *event)
 {
     //event->mimeData()->formats()起到刷新的作用，此处不删除
     QStringList formats = event->mimeData()->formats();
-    if (event->mimeData()->hasFormat("camera/obid")) {
-        QString obid = event->mimeData()->data("camera/obid");
-        addPlayer(obid);
+    if (event->mimeData()->hasFormat("camera/url")) {
+        QString url = event->mimeData()->data("camera/url");
+        addPlayer(url);
         event->setDropAction(Qt::CopyAction);
         event->accept();
         return;
     }
 
-    if (event->mimeData()->hasFormat("VideoCell/obid")) {
-        QByteArray obid = event->mimeData()->data("VideoCell/obid");
-        this->addPlayer(obid);
+    if (event->mimeData()->hasFormat("VideoCell/url")) {
+        QByteArray url = event->mimeData()->data("VideoCell/url");
+        // add new
+        this->addPlayer(url);
         this->setFocus();
         event->setDropAction(Qt::CopyAction);
         event->accept();
 
+        //remove old
         VideoCell *videocell = qobject_cast<VideoCell *>(event->source());
         videocell->removePlayer();
         return;
@@ -319,7 +321,7 @@ void VideoCell::mouseMoveEvent(QMouseEvent *event)
      * 但是VideoControlPanel上move时，会先触发自己的moveEvent然后再触发VideoWidget的moveEvent，导致自动隐藏功一直生效
      * 这里加个geometry().contains的判断来规避上述情况
     */
-    if(m_info.device_obid.isEmpty()) {
+    if(m_info.url.isEmpty()) {
         //obid无效
     } else if(m_controlPanel->isVisible() && !m_controlPanel->geometry().contains(event->pos())) {
         //面板显示且光标不在面板上
@@ -333,7 +335,7 @@ void VideoCell::mouseMoveEvent(QMouseEvent *event)
     if((event->pos() - m_pressPos).manhattanLength() < qApp->startDragDistance()
             || m_pressMoving
             || !m_isPressed
-            || m_info.device_obid.isEmpty()) {
+            || m_info.url.isEmpty()) {
 
     } else {
         m_pressMoving = true;
@@ -341,7 +343,7 @@ void VideoCell::mouseMoveEvent(QMouseEvent *event)
         //此处必须是new QDrag
         QDrag *drag = new QDrag(this);
         QMimeData *m = new QMimeData;
-        m->setData("VideoCell/obid", m_info.device_obid.toLocal8Bit());
+        m->setData("VideoCell/url", m_info.url.toLocal8Bit());
         m->setData("VideoCell/pos", QByteArray::number(m_info.pos.value()));
 
         QPixmap pix = QPixmap::grabWidget(this, this->rect()).scaled(50, 50);
@@ -389,18 +391,18 @@ void VideoCell::removePlayer()
     //移除轮播
     if(m_playListTimer->isActive()) {
         for(int k = 0; k < m_playList.count(); k ++) {
-            removeThread(m_playList[k].device_obid);
+            removeThread(m_playList[k].url);
         }
         m_playListTimer->stop();
         m_playList.clear();
-        m_playListObid = "";
+        m_playListUrl = "";
         m_playListIndex = 0;
     }
     //close cur thread
-    removeThread(m_info.device_obid);
+    removeThread(m_info.url);
 
     //还原菜单栏
-    m_info.device_obid = "";
+    m_info.url = "";
     if(m_controlPanel->isFullScreen())
         toControlFullScreenExit();
 
@@ -410,9 +412,9 @@ void VideoCell::removePlayer()
     update();
 }
 
-void VideoCell::removeThread(QString device_obid)
+void VideoCell::removeThread(QString url)
 {
-    PlayThread *thread = PlayThread::PlayThreadMap.value(device_obid, NULL);
+    PlayThread *thread = PlayThread::PlayThreadMap.value(url, NULL);
     if(!thread)
         return;
     disconnect(thread, SIGNAL(receiveImage(FFmpegData)), this, SLOT(updateImage(FFmpegData)));
@@ -422,9 +424,9 @@ void VideoCell::removeThread(QString device_obid)
     }
 }
 
-void VideoCell::addThread(QString device_obid)
+void VideoCell::addThread(QString url)
 {
-    PlayThread *thread = PlayThread::PlayThreadMap.value(device_obid, NULL);
+    PlayThread *thread = PlayThread::PlayThreadMap.value(url, NULL);
     if(!thread)
         return;
     thread->open();
@@ -433,19 +435,21 @@ void VideoCell::addThread(QString device_obid)
 
 }
 
-void VideoCell::addPlayer(const QString &deviceObid)
+void VideoCell::addPlayer(const QString &url)
 {
-    if(m_info.device_obid == deviceObid)
+    if(m_info.url == url)
         return;
 
-    PlayThread *thread = PlayThread::PlayThreadMap.value(deviceObid);
-    if(!thread)
-        return;
+    PlayThread *thread = PlayThread::PlayThreadMap.value(url, NULL);
+    if(thread == NULL) {
+        thread = new PlayThread(url, this);
+        PlayThread::PlayThreadMap.insert(url, thread);
+    }
 
     removePlayer();
 
-    m_info.device_obid = deviceObid;
-    addThread(m_info.device_obid);
+    m_info.url = url;
+    addThread(m_info.url);
     //
     toControlPlay();
 }
@@ -456,7 +460,7 @@ void VideoCell::addPlayerList(const QList<AlterPlayFrame> &playList)
 
     m_playList = playList;
     for(int k = 0; k < playList.count(); k ++) {
-        addThread(playList[k].device_obid);
+        addThread(playList[k].url);
     }
     //
     toControlPlay();
@@ -520,11 +524,6 @@ void VideoCell::setGeometryX(int column_spans, int row_spans, QRect area, int co
 QRect VideoCell::rectX()
 {
     return m_info.rect();
-}
-
-QString VideoCell::device_obid()
-{
-    return m_info.device_obid;
 }
 
 const LayoutCell &VideoCell::getInfo()

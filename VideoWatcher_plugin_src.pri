@@ -24,7 +24,8 @@ HEADERS += \
     $$PWD/src/treevideoview.h \
     $$PWD/src/datasource.h \
     $$PWD/src/playthread.h \
-    $$PWD/src/videolayout.h
+    $$PWD/src/videolayout.h \
+    $$PWD/src/videoinspanel.h
 
 SOURCES += \
     $$PWD/src/mainwindow.cpp \
@@ -45,13 +46,14 @@ SOURCES += \
     $$PWD/src/treevideoview.cpp \
     $$PWD/src/datasource.cpp \
     $$PWD/src/playthread.cpp \
-    $$PWD/src/videolayout.cpp
-
+    $$PWD/src/videolayout.cpp \
+    $$PWD/src/videoinspanel.cpp
 
 FORMS += \
     $$PWD/src/mainwindow.ui \
     $$PWD/src/playalternatenewdialog.ui \
-    $$PWD/src/playformnewdialog.ui
+    $$PWD/src/playformnewdialog.ui \
+    $$PWD/src/videoinspanel.ui
 
 RESOURCES += \
     resources/res.qrc

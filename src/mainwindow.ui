@@ -322,13 +322,39 @@
       </widget>
      </item>
      <item>
-      <widget class="TreeVideoViewSearchUrl" name="treeView" native="true">
+      <widget class="QFrame" name="frame">
        <property name="maximumSize">
         <size>
          <width>300</width>
          <height>16777215</height>
         </size>
        </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,1">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="TreeVideoViewSearchUrl" name="treeView" native="true"/>
+        </item>
+        <item>
+         <widget class="VideoInsPanel" name="widget_2" native="true"/>
+        </item>
+       </layout>
       </widget>
      </item>
     </layout>
@@ -472,6 +498,12 @@
    <class>VideoWidget</class>
    <extends>QWidget</extends>
    <header>videowidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>VideoInsPanel</class>
+   <extends>QWidget</extends>
+   <header>videoinspanel.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

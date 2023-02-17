@@ -17,7 +17,7 @@ class PlayAlternateNewDialog : public QDialog
     Q_OBJECT
 
     enum AlterType{
-        CameraType = 0,
+        CameraUrlType = 0,
         TimeGapType
     };
 

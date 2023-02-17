@@ -5,6 +5,9 @@
 #include "propertycolor.h"
 
 #include <QStandardItemModel>
+#include <QDir>
+#include <QFile>
+#include <QtDebug>
 
 PlayAlternateNewDialog::PlayAlternateNewDialog(QWidget *parent) :
     QDialog(parent),
@@ -34,7 +37,7 @@ PlayAlternateNewDialog::~PlayAlternateNewDialog()
 void PlayAlternateNewDialog::setDataSource(DataSource *datasource)
 {
     ui->treeView->setDataSource(datasource);
-    ui->treeView->slotInitControl();
+    ui->treeView->slotInitTree();
 }
 
 void PlayAlternateNewDialog::toadd()
@@ -42,12 +45,13 @@ void PlayAlternateNewDialog::toadd()
     QModelIndex index = ui->treeView->currentIndex();
     if(!index.isValid())
         return;
-    QString name = index.data(VideoNameRole).toString();
-    QString obid = index.data(VideoObidRole).toString();
+    if(index.data(VideoNodeType).toInt() != VideoNodeTrain)
+        return;
+    QString url = index.data(VideoUrlRole).toString();
     QListWidgetItem *item = new QListWidgetItem;
-    item->setText(name);
-    item->setData(AlterTypeRole, CameraType);
-    item->setData(AlterValueRole, obid);
+    item->setText("url:" + url);
+    item->setData(AlterTypeRole, CameraUrlType);
+    item->setData(AlterValueRole, url);
 
     int row_next = ui->listWidget->currentRow() < 0 ? ui->listWidget->count() : (ui->listWidget->currentRow() + 1);
     ui->listWidget->insertItem(row_next, item);
@@ -64,7 +68,7 @@ void PlayAlternateNewDialog::todel()
 void PlayAlternateNewDialog::toaddgap()
 {
     QListWidgetItem *item = new QListWidgetItem;
-    item->setText("间隔" + QString::number(ui->spinBox->value()) + "s");
+    item->setText(QString::fromUtf8("间隔:") + QString::number(ui->spinBox->value()) + "s");
     item->setData(AlterTypeRole, TimeGapType);
     item->setData(AlterValueRole, ui->spinBox->value());
 
@@ -119,7 +123,7 @@ void PlayAlternateNewDialog::toadjust()
             line.value = QString::number(line.value.toInt() + line2.value.toInt());
             continue;
         }
-        if(line2.type == CameraType && line.type == CameraType) {
+        if(line2.type == CameraUrlType && line.type == CameraUrlType) {
             line.value = line2.value;
             continue;
         }
@@ -130,7 +134,7 @@ void PlayAlternateNewDialog::toadjust()
         if(lineList[0].type == TimeGapType) {
             lineList.append(lineList.takeFirst());
         }
-        if(lineList[0].type == CameraType && lineList.last().type == CameraType) {
+        if(lineList[0].type == CameraUrlType && lineList.last().type == CameraUrlType) {
             lineList.removeLast();
         }
     }
@@ -141,16 +145,12 @@ void PlayAlternateNewDialog::toadjust()
         QListWidgetItem *item = new QListWidgetItem;
 
         if(line.type == TimeGapType) {
-            item->setText("间隔" + line.value + "s");
+            item->setText(QString::fromUtf8("间隔:") + line.value + "s");
             item->setData(AlterTypeRole, line.type);
             item->setData(AlterValueRole, line.value);
         }
-        if(line.type == CameraType) {
-            QSqlQuery query;
-            query.exec(QString("select name from vw_device where obid = '%1' ").arg(line.value));
-            query.next();
-            QString name = query.record().value("name").toString();
-            item->setText(name);
+        if(line.type == CameraUrlType) {
+            item->setText("url:" + line.value);
             item->setData(AlterTypeRole, line.type);
             item->setData(AlterValueRole, line.value);
         }

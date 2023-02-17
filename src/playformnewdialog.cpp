@@ -55,7 +55,7 @@ playformnewdialog::~playformnewdialog()
 void playformnewdialog::setDataSource(DataSource *datasource)
 {
     ui->treeView->setDataSource(datasource);
-    ui->treeView->slotInitControl();
+    ui->treeView->slotInitTree();
 }
 
 void playformnewdialog::resizeEvent(QResizeEvent *event)

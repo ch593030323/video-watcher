@@ -38,10 +38,6 @@ public:
     };
     DataSource(QObject *parent = 0);
 
-    //只有在json时会用到
-    QByteArray toJson();
-    void fromJson(const QString &filepath);
-
     QString getCameraStateName(int rank);
     QString getCameraTypeName(int rank);
     //

@@ -14,7 +14,7 @@ public:
     TreeVideoViewSearchUrl(QWidget *parent = 0);
 
 protected:
-    virtual void addToPlayThread(const QString &obid, const QString &url);
+    virtual void addToPlayThread(const QString &url);
 
 };
 

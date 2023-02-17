@@ -39,10 +39,10 @@ public:
     static void parseVideoArea(const LayoutInfo &info, QWidget *parentWidget, QRect area, QMap<LayoutPos, VideoCell *> &cacheMap);
 
     void removePlayer();
-    void addPlayer(const QString &deviceObid);
+    void addPlayer(const QString &url);
 
-    void removeThread(QString device_obid);
-    void addThread(QString device_obid);
+    void removeThread(QString url);
+    void addThread(QString url);
 
     void updateControlPanelGeometry();
 
@@ -57,7 +57,6 @@ public:
      */
     void  setGeometryX(int column_spans, int row_spans, QRect area, int column_count, int row_count);
     QRect rectX();
-    QString device_obid();
     const LayoutCell &getInfo();
     //=====================PlayList begin=====================
 public:
@@ -65,7 +64,7 @@ public:
     void runPlayerList();
 
     QList<AlterPlayFrame>   m_playList;//播放列表
-    QString                 m_playListObid;//播放列表，当前播放的deviceobid
+    QString                 m_playListUrl;//播放列表，当前播放的deviceobid
     QTimer                  *m_playListTimer;//播放列表的定时器
     int                     m_playListIndex;//播放列表的序号
 private slots:
