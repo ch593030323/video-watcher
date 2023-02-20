@@ -13,6 +13,7 @@ class PropertyColor : public QWidget
     Q_PROPERTY(QColor buttonColor READ getbuttonColor WRITE setbuttonColor DESIGNABLE true)
     Q_PROPERTY(QColor buttonTextColor READ getbuttonTextColor WRITE setbuttonTextColor DESIGNABLE true)
     Q_PROPERTY(QColor viewColor READ getviewColor WRITE setviewColor DESIGNABLE true)
+    Q_PROPERTY(QColor buttonHoverColor READ getbuttonHoverColor WRITE setbuttonHoverColor DESIGNABLE true)
 
 public:
     void sethighlightColor(const QColor &color);
@@ -42,6 +43,10 @@ public:
     void setviewColor(const QColor &color);
     QColor getviewColor() const;
     static QColor viewColor;
+
+    void setbuttonHoverColor(const QColor &color);
+    QColor getbuttonHoverColor() const;
+    static QColor buttonHoverColor;
 
     static void init(const QString &iconFontFamily, const QString &styleSheetString);
     static QPixmap getFontPixmap(QChar ch, const QColor &color = QColor("#f6f5fb"), const QSize &size = QSize(40, 40), qreal rotate = 0);

@@ -25,7 +25,14 @@ HEADERS += \
     $$PWD/src/datasource.h \
     $$PWD/src/playthread.h \
     $$PWD/src/videolayout.h \
-    $$PWD/src/videoinspanel.h
+    $$PWD/src/videoinspanel.h \
+    $$PWD/src/widget/iconbutton.h \
+    $$PWD/src/widget/tipslider.h \
+    $$PWD/src/mainvideowidget.h \
+    $$PWD/src/mainplayback.h \
+    $$PWD/src/mainsystemsetingsalter.h \
+    $$PWD/src/mainsystemsetingsform.h \
+    $$PWD/src/mainsystemsetings.h
 
 SOURCES += \
     $$PWD/src/mainwindow.cpp \
@@ -47,16 +54,29 @@ SOURCES += \
     $$PWD/src/datasource.cpp \
     $$PWD/src/playthread.cpp \
     $$PWD/src/videolayout.cpp \
-    $$PWD/src/videoinspanel.cpp
+    $$PWD/src/videoinspanel.cpp \
+    $$PWD/src/widget/iconbutton.cpp \
+    $$PWD/src/widget/tipslider.cpp \
+    $$PWD/src/mainvideowidget.cpp \
+    $$PWD/src/mainplayback.cpp \
+    $$PWD/src/mainsystemsetingsalter.cpp \
+    $$PWD/src/mainsystemsetingsform.cpp \
+    $$PWD/src/mainsystemsetings.cpp
 
 FORMS += \
     $$PWD/src/mainwindow.ui \
     $$PWD/src/playalternatenewdialog.ui \
     $$PWD/src/playformnewdialog.ui \
-    $$PWD/src/videoinspanel.ui
+    $$PWD/src/videoinspanel.ui \
+    $$PWD/src/mainvideowidget.ui \
+    $$PWD/src/mainplayback.ui \
+    $$PWD/src/mainsystemsetingsalter.ui \
+    $$PWD/src/mainsystemsetingsform.ui \
+    $$PWD/src/mainsystemsetings.ui
 
 RESOURCES += \
     resources/res.qrc
 
 INCLUDEPATH += $$PWD/src/widget/
 INCLUDEPATH += $$PWD/src
+

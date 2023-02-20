@@ -30,7 +30,7 @@ public:
 
         //下面变量通过upadte获取
         QColor bgColor;//背景色
-        QColor highlightColor;//高亮色
+        QColor mouseColor;
         qreal width;//矩形画布边长
 
         qreal radius;//外圈半径
@@ -60,8 +60,11 @@ protected:
 
     virtual void mousePressEvent(QMouseEvent *event);
     virtual void mouseReleaseEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
     virtual void resizeEvent(QResizeEvent *event);
 
+    void enterEvent(QEvent *event);
+    void leaveEvent(QEvent *event);
 private:
     PaintInfo m_paintInfo;
 };

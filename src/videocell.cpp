@@ -14,6 +14,7 @@
 #include <QMimeData>
 #include <QMenu>
 #include <QLineF>
+#include "mainvideowidget.h"
 
 VideoCell *VideoCell::lastFocusWidget = 0;
 
@@ -173,8 +174,7 @@ void VideoCell::toControlFullScreenExit()
     if(playformnewdialog *w = qobject_cast<playformnewdialog *>(this->parent())) {
         m_controlPanel->setFullSreen(false);
         w->updateLayout();
-    } else if(MainFrame *w = qobject_cast<MainFrame *>(this->parent())) {
-
+    } else if(MainVideoWidget *w = this->parent()->findChild<MainVideoWidget *>()) {
         QWidget *pw = w->findChild<QWidget *>("widget_video");
         if(!pw)
             Q_ASSERT(pw);
@@ -229,7 +229,7 @@ void VideoCell::paintEvent(QPaintEvent *)
     }
     if(paintBorder) {
         painter.setPen(QPen(PropertyColor::highlightColor, 2));
-        painter.drawRect(paint_rect);
+        painter.drawRect(paint_rect.adjusted(1, 1, -1, -1));
     }
 }
 

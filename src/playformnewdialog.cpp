@@ -21,6 +21,7 @@ playformnewdialog::playformnewdialog(QWidget *parent) :
 {
     ui->setupUi(this);
     setObjectName("Window");
+    setDataSource(new DataSource(this));
     ui->pushButton_1x1->setIcon(lds::getLayoutPixmap(1));
     ui->pushButton_1x1->setText("");
     ui->pushButton_2x2->setIcon(lds::getLayoutPixmap(2));
@@ -44,6 +45,9 @@ playformnewdialog::playformnewdialog(QWidget *parent) :
     connect(ui->pushButton_merge, SIGNAL(clicked()), this, SLOT(tomerge()));
     connect(ui->pushButton_clear, SIGNAL(clicked()), this, SLOT(toclear()));
     toVideoLayout3x3();
+
+    ui->pushButton_clear->hide();
+    ui->pushButton_merge->hide();
 }
 
 playformnewdialog::~playformnewdialog()
@@ -65,52 +69,53 @@ void playformnewdialog::resizeEvent(QResizeEvent *event)
 
 void playformnewdialog::updateLayout(bool isRemovePlayer)
 {
-    int videoAreaWidth = this->width() - lds::videoAreaRight - lds::margin;
-    int videoAreaHeight = this->height() - lds::videoAreaBottom - lds::margin;
-    int videoAreaX = lds::margin / 2;
-    int videoAreaY = lds::margin / 2 + lds::border_width;
-    int treeHeight = videoAreaHeight - lds::margin / 2 - lds::border_width;
+    ui->widget_video->updateLayout(m_layoutInfo);
+//    int videoAreaWidth = this->width() - lds::videoAreaRight - lds::margin;
+//    int videoAreaHeight = this->height() - lds::videoAreaBottom - lds::margin;
+//    int videoAreaX = lds::margin / 2;
+//    int videoAreaY = lds::margin / 2 + lds::border_width;
+//    int treeHeight = videoAreaHeight - lds::margin / 2 - lds::border_width;
 
-    //treeView
-    ui->treeView->setGeometry(this->width() - lds::videoAreaRight, lds::margin, lds::videoAreaRight - lds::margin, treeHeight);
-    //videoType
-    int buttonTop = this->height() - lds::videoAreaBottom;// + (lds::videoAreaBottom - b40) / 2;
-    ui->pushButton_1x1->setGeometry(lds::margin + 0,   buttonTop, 80, b40);
-    ui->pushButton_2x2->setGeometry(lds::margin + 100, buttonTop, 80, b40);
-    ui->pushButton_3x3->setGeometry(lds::margin + 200, buttonTop, 80, b40);
-    ui->pushButton_4x4->setGeometry(lds::margin + 300, buttonTop, 80, b40);
-    ui->pushButton_5x5->setGeometry(lds::margin + 400, buttonTop, 80, b40);
+//    //treeView
+//    ui->treeView->setGeometry(this->width() - lds::videoAreaRight, lds::margin, lds::videoAreaRight - lds::margin, treeHeight);
+//    //videoType
+//    int buttonTop = this->height() - lds::videoAreaBottom;// + (lds::videoAreaBottom - b40) / 2;
+//    ui->pushButton_1x1->setGeometry(lds::margin + 0,   buttonTop, 50, b40);
+//    ui->pushButton_2x2->setGeometry(lds::margin + 70,  buttonTop, 50, b40);
+//    ui->pushButton_3x3->setGeometry(lds::margin + 140, buttonTop, 50, b40);
+//    ui->pushButton_4x4->setGeometry(lds::margin + 210, buttonTop, 50, b40);
+//    ui->pushButton_5x5->setGeometry(lds::margin + 280, buttonTop, 50, b40);
 
-    ui->pushButton_merge->setGeometry(this->width() - 400,  buttonTop, 80, b40);
-    ui->pushButton_clear->setGeometry(this->width() - 300,  buttonTop, 80, b40);
-    ui->pushButton_ok->setGeometry(this->width() - 200,     buttonTop, 80, b40);
-    ui->pushButton_exit->setGeometry(this->width() - 100,   buttonTop, 80, b40);
-    //videoWidget
-    VideoCell::parseVideoArea(m_layoutInfo, this, QRect(videoAreaX, videoAreaY, videoAreaWidth, videoAreaHeight), m_videoMap);
+//    ui->pushButton_merge->setGeometry(this->width() - 400,  buttonTop, 80, b40);
+//    ui->pushButton_clear->setGeometry(this->width() - 300,  buttonTop, 80, b40);
+//    ui->pushButton_ok->setGeometry(this->width() - 200,     buttonTop, 80, b40);
+//    ui->pushButton_exit->setGeometry(this->width() - 100,   buttonTop, 80, b40);
+//    //videoWidget
+//    VideoCell::parseVideoArea(m_layoutInfo, this, QRect(videoAreaX, videoAreaY, videoAreaWidth, videoAreaHeight), m_videoMap);
 
-    //videoWidget设置成选区模式
-    for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
-        k.value()->setCheckable(true);
-        disconnect(k.value(), SIGNAL(signalRelease()), this, SLOT(toselected()));
-        connect(k.value(), SIGNAL(signalRelease()), this, SLOT(toselected()));
-    }
-    //清理选区
-    tounselectedall();
-    //是否会移除播放器
-    if(isRemovePlayer) {
-        for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
-            k.value()->removePlayer();
-        }
-    }
-    //添加右键菜单栏
-    for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
-        QList<VideoCell::ContextMenuData> pairList;
-        pairList << VideoCell::ContextMenuData(QString::fromUtf8("合并"), this, SLOT(tomerge()));
-        pairList << VideoCell::ContextMenuData(QString::fromUtf8("清除"), this, SLOT(toclear()));
-        pairList << VideoCell::ContextMenuData(QString::fromUtf8("还原"), this, SLOT(torestore()));
-        k.value()->setContextMenuDataList(pairList);
+//    //videoWidget设置成选区模式
+//    for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
+//        k.value()->setCheckable(true);
+//        disconnect(k.value(), SIGNAL(signalRelease()), this, SLOT(toselected()));
+//        connect(k.value(), SIGNAL(signalRelease()), this, SLOT(toselected()));
+//    }
+//    //清理选区
+//    tounselectedall();
+//    //是否会移除播放器
+//    if(isRemovePlayer) {
+//        for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
+//            k.value()->removePlayer();
+//        }
+//    }
+//    //添加右键菜单栏
+//    for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
+//        QList<VideoCell::ContextMenuData> pairList;
+//        pairList << VideoCell::ContextMenuData(QString::fromUtf8("合并"), this, SLOT(tomerge()));
+//        pairList << VideoCell::ContextMenuData(QString::fromUtf8("清除"), this, SLOT(toclear()));
+//        pairList << VideoCell::ContextMenuData(QString::fromUtf8("还原"), this, SLOT(torestore()));
+//        k.value()->setContextMenuDataList(pairList);
 
-    }
+//    }
 }
 
 QList<VideoCell *> playformnewdialog::selectedWidgetList()

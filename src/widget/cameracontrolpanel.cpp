@@ -33,6 +33,7 @@ static QPainterPath getPiePath(QPointF center, qreal r1, qreal r2, qreal startAn
 CameraControlPanel::CameraControlPanel(QWidget *parent)
     : QWidget(parent)
 {
+    setMouseTracking(true);
 }
 
 void CameraControlPanel::paintEvent(QPaintEvent *event)
@@ -46,6 +47,7 @@ void CameraControlPanel::paintEvent(QPaintEvent *event)
 
 void CameraControlPanel::mousePressEvent(QMouseEvent *event)
 {
+    m_paintInfo.mouseColor = PropertyColor::highlightColor;
     m_paintInfo.isPressed = true;
     m_paintInfo.pressedPoint = event->pos();
     update();
@@ -53,6 +55,7 @@ void CameraControlPanel::mousePressEvent(QMouseEvent *event)
 
 void CameraControlPanel::mouseReleaseEvent(QMouseEvent *event)
 {
+    m_paintInfo.mouseColor = PropertyColor::buttonHoverColor;
     m_paintInfo.isPressed = false;
     update();
     for(int k = TopRight; k <= Center; k ++) {
@@ -61,16 +64,38 @@ void CameraControlPanel::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
+void CameraControlPanel::mouseMoveEvent(QMouseEvent *event)
+{
+    if(!m_paintInfo.isPressed) {
+        m_paintInfo.mouseColor = PropertyColor::buttonHoverColor;
+        m_paintInfo.pressedPoint = event->pos();
+        update();
+    }
+}
+
+void CameraControlPanel::enterEvent(QEvent *event)
+{
+    m_paintInfo.mouseColor = PropertyColor::buttonHoverColor;
+    update();
+}
+
+void CameraControlPanel::leaveEvent(QEvent *event)
+{
+    m_paintInfo.mouseColor = PropertyColor::buttonColor;
+    update();
+}
+
 void CameraControlPanel::resizeEvent(QResizeEvent *event)
 {
+    QWidget::resizeEvent(event);
     m_paintInfo.update(this->rect());
+    this->update();
 }
 
 void CameraControlPanel::PaintInfo::update(QRect rect)
 {
     //可控变量
     bgColor = PropertyColor::buttonColor;
-    highlightColor = PropertyColor::highlightColor;
     this->width = qMin(rect.width(), rect.height());
 
     radius = this->width / 2;
@@ -116,8 +141,8 @@ void CameraControlPanel::PaintInfo::draw(QPainter *painter)
 
         //painter为Antialiasing模式时，会有白线，略微增加start、start可解决
         QPainterPath path = pathMap[k];
-        QColor curColor =  (isPressed && path.contains(pressedPoint)) ? highlightColor: bgColor;
-        painter->fillPath(path, curColor);
+        QColor color =  (path.contains(pressedPoint)) ? mouseColor: bgColor;
+        painter->fillPath(path, color);
 
         QPixmap pixmap = PropertyColor::getFontPixmap(0xf0da, PropertyColor::buttonTextColor, QSize(pixmapWidth, pixmapWidth), (start + offAngle) * -1);
         painter->drawPixmap(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, pixmap.size(), path.boundingRect().toRect()),
@@ -127,11 +152,11 @@ void CameraControlPanel::PaintInfo::draw(QPainter *painter)
     //draw circle
     {
         QPainterPath path = pathMap[Center];
-        QColor curColor =  (isPressed && path.contains(pressedPoint)) ? highlightColor: bgColor;
-        painter->fillPath(path, curColor);
+        QColor color =  (path.contains(pressedPoint)) ? mouseColor: bgColor;
+        painter->fillPath(path, color);
 
         QRect rect = path.boundingRect().toRect();
-        QPixmap pixmap = PropertyColor::getFontPixmap(0xf2f9, PropertyColor::buttonTextColor, QSize(pixmapWidthInner, pixmapWidthInner));
+        QPixmap pixmap = PropertyColor::getFontPixmap(0xf2f1, PropertyColor::buttonTextColor, QSize(pixmapWidthInner, pixmapWidthInner));
         painter->drawPixmap(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, pixmap.size(), rect),
                            pixmap);
     }

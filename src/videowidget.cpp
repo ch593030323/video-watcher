@@ -1,6 +1,8 @@
 #include "videowidget.h"
 #include "lds.h"
 
+#include <QPainter>
+
 VideoWidget::VideoWidget(QWidget *parent) : QWidget(parent)
 {
 
@@ -14,7 +16,10 @@ void VideoWidget::updateLayout(const LayoutInfo &info)
 
 void VideoWidget::updateLayout()
 {
-    VideoCell::parseVideoArea(m_layoutInfo, this, this->rect(), m_videoMap);
+    VideoCell::parseVideoArea(m_layoutInfo,
+                              this,
+                              this->rect().adjusted(-lds::margin/2, -lds::margin/2, lds::margin/2, lds::margin/2),
+                              m_videoMap);
 }
 
 void VideoWidget::resizeEvent(QResizeEvent *event)

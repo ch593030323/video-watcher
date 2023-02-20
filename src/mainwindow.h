@@ -7,10 +7,6 @@
 
 #include <QWidget>
 #include <QStandardItemModel>
-#include <QtGui>
-//#include "QJsonDocument.h"
-//#include "QJsonObject.h"
-//#include "QJsonArray.h"
 
 
 class TreeVideoModel;
@@ -26,37 +22,11 @@ public:
     MainFrame(QWidget *parent = 0);
     ~MainFrame();
 
-    void updateLayout();
-    void setDataSource(DataSource *datasource);
-
-private slots:
-
-    /**
-     * @brief toVideoLayout1x1
-     * 三种video的布局
-     */
-    void toVideoLayout1x1();
-    void toVideoLayout2x2();
-    void toVideoLayout3x3();
-    void toVideoLayout4x4();
-
-    //新增组播表单
-    void toPlayFormNew();
-    void toPlayFormOK();
-    //新增轮播表单
-    void toPlayAlternateNew();
-    void toPlayAlternateOK();
-    void toHoldVideoFocus();
-    void toReleaseVideoFocus();
-
+protected slots:
     void toexit();
-
-    void toVideoShowMax();
-    void toVideoShowNormal();
-
-protected:
-    void resizeEvent(QResizeEvent *event);
-
+    void tovideo_widget();
+    void tovideo_playback();
+    void tovideo_system_setting();
 protected:
     Ui::MainWidget *ui;
 };

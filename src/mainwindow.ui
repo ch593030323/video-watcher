@@ -13,7 +13,10 @@
   <property name="windowTitle">
    <string>MainWidget</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout_3">
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -23,17 +26,23 @@
    <property name="rightMargin">
     <number>0</number>
    </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QFrame" name="frame_title">
      <property name="outer_stylesheet" stdset="0">
       <string>window_title</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
       <property name="leftMargin">
        <number>0</number>
       </property>
       <property name="topMargin">
-       <number>11</number>
+       <number>0</number>
       </property>
       <property name="rightMargin">
        <number>0</number>
@@ -43,11 +52,20 @@
       </property>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <property name="spacing">
+         <number>11</number>
+        </property>
         <property name="leftMargin">
+         <number>11</number>
+        </property>
+        <property name="topMargin">
          <number>11</number>
         </property>
         <property name="rightMargin">
          <number>11</number>
+        </property>
+        <property name="bottomMargin">
+         <number>7</number>
         </property>
         <item>
          <spacer name="horizontalSpacer">
@@ -63,7 +81,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_video_main">
+         <widget class="QPushButton" name="pushButton_video_widget">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -120,45 +138,13 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_play_form">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>90</width>
-            <height>60</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>组播</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_play_alternate">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>90</width>
-            <height>60</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>轮播</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QPushButton" name="pushButton_exit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
             <width>90</width>
@@ -190,7 +176,7 @@
          <string/>
         </property>
         <property name="outer_stylesheet" stdset="0">
-         <string>line</string>
+         <string>horizontal_line</string>
         </property>
        </widget>
       </item>
@@ -198,312 +184,25 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="2,1">
-     <property name="leftMargin">
-      <number>11</number>
-     </property>
-     <property name="rightMargin">
-      <number>11</number>
-     </property>
-     <item>
-      <widget class="QWidget" name="widget" native="true">
-       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="VideoWidget" name="widget_video" native="true"/>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QPushButton" name="pushButton_1x1">
-            <property name="minimumSize">
-             <size>
-              <width>50</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>1x1</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_2x2">
-            <property name="minimumSize">
-             <size>
-              <width>50</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>2x2</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_3x3">
-            <property name="minimumSize">
-             <size>
-              <width>50</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>3x3</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_test">
-            <property name="minimumSize">
-             <size>
-              <width>50</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>test</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_fullscreen_exit">
-            <property name="minimumSize">
-             <size>
-              <width>50</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_fullscreen">
-            <property name="minimumSize">
-             <size>
-              <width>50</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QFrame" name="frame">
-       <property name="maximumSize">
-        <size>
-         <width>300</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,1">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="TreeVideoViewSearchUrl" name="treeView" native="true"/>
-        </item>
-        <item>
-         <widget class="VideoInsPanel" name="widget_2" native="true"/>
-        </item>
-       </layout>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_5">
-     <item>
-      <widget class="QFrame" name="frame_play_form">
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout" stretch="3,1,1,1">
-        <item>
-         <widget class="QComboBox" name="comboBox_form">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Ignored">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_form_ok">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>应用</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_form_new">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>添加</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_form_del">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>删除</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QFrame" name="frame_play_alternate">
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,1,1,1">
-        <item>
-         <widget class="QComboBox" name="comboBox_alternate">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Ignored">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_alternate_ok">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>应用</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_alternate_new">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>添加</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_alternate_del">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>删除</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QStackedWidget" name="stackedWidget">
+     <widget class="MainVideoWidget" name="page"/>
+     <widget class="QWidget" name="page_2"/>
+     <widget class="MainSystemSetings" name="page_3"/>
+    </widget>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TreeVideoViewSearchUrl</class>
+   <class>MainVideoWidget</class>
    <extends>QWidget</extends>
-   <header>treevideoviewsearchurl.h</header>
+   <header>mainvideowidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>VideoWidget</class>
+   <class>MainSystemSetings</class>
    <extends>QWidget</extends>
-   <header>videowidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>VideoInsPanel</class>
-   <extends>QWidget</extends>
-   <header>videoinspanel.h</header>
+   <header>mainsystemsetings.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

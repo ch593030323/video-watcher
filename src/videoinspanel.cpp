@@ -3,27 +3,27 @@
 #include "propertycolor.h"
 
 VideoInsPanel::VideoInsPanel(QWidget *parent) :
-    QWidget(parent),
+    QFrame(parent),
     ui(new Ui::VideoInsPanel)
 {
     ui->setupUi(this);
+    ui->widget_2->setIconChar(0xf00e);
+    ui->widget_3->setIconChar(0xf010);
 
-    ui->pushButton_apert_add->setIcon(PropertyColor::getFontPixmap(0xf055));
-    ui->pushButton_focus_add->setIcon(PropertyColor::getFontPixmap(0xf055));
-    ui->pushButton_value_add->setIcon(PropertyColor::getFontPixmap(0xf055));
-    ui->pushButton_apert_add->setFlat(true);
-    ui->pushButton_focus_add->setFlat(true);
-    ui->pushButton_value_add->setFlat(true);
-
-    ui->pushButton_apert_sub->setIcon(PropertyColor::getFontPixmap(0xf056));
-    ui->pushButton_focus_sub->setIcon(PropertyColor::getFontPixmap(0xf056));
-    ui->pushButton_value_sub->setIcon(PropertyColor::getFontPixmap(0xf056));
-    ui->pushButton_apert_sub->setFlat(true);
-    ui->pushButton_focus_sub->setFlat(true);
-    ui->pushButton_value_sub->setFlat(true);
 }
 
 VideoInsPanel::~VideoInsPanel()
 {
     delete ui;
+}
+
+void VideoInsPanel::setStepValue(int value)
+{
+    ui->horizontalSlider->setValue(value);
+    ui->horizontalSlider->setTipValue(value);
+}
+
+void VideoInsPanel::resizeEvent(QResizeEvent *event)
+{
+    ui->horizontalSlider->updateTipPos();
 }

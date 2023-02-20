@@ -12,6 +12,7 @@ QColor PropertyColor::subToolColor;
 QColor PropertyColor::buttonColor;
 QColor PropertyColor::buttonTextColor;
 QColor PropertyColor::viewColor;
+QColor PropertyColor::buttonHoverColor;
 
 QString PropertyColor::iconFontFamily;
 
@@ -104,6 +105,16 @@ QColor PropertyColor::getviewColor() const
 {
     return viewColor;
 }
+void PropertyColor::setbuttonHoverColor(const QColor &color)
+{
+    buttonHoverColor = color;
+}
+
+QColor PropertyColor::getbuttonHoverColor() const
+{
+    return buttonHoverColor;
+}
+
 void PropertyColor::init(const QString &iconFontFamily, const QString &styleSheetString)
 {
     PropertyColor::iconFontFamily = iconFontFamily;

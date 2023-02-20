@@ -58,6 +58,7 @@ TreeVideoViewSearch::TreeVideoViewSearch(QWidget *parent)
     hlayout->addWidget(m_comboBox);
     hlayout->addWidget(m_lineEdit, 1);
     hlayout->setSpacing(0);
+    hlayout->setMargin(0);
 
     QVBoxLayout *vlayout = new QVBoxLayout;
     vlayout->addLayout(hlayout);

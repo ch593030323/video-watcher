@@ -6,6 +6,7 @@
     qproperty-subToolColor:#ac888a;
     /*按钮*/
     qproperty-buttonColor:#4e6ef2;
+    qproperty-buttonHoverColor:#859bff;
     qproperty-buttonTextColor:#fefefe;
 
     qproperty-viewColor:#ffffff;
@@ -49,6 +50,10 @@ QToolButton{
     background:#4e6ef2;
     color:#fefefe;
 }
+QPushButton:hover,
+QToolButton:hover{
+    background:#859bff;
+}
 QPushButton:pressed,
 QToolButton:pressed{
     background: #ff506b;
@@ -69,12 +74,14 @@ QPushButton::menu-indicator {
 }
 
 
-#buttonIcon{
+#buttonIcon,
+*[outer_stylesheet="buttonIcon"]{
     border-radius:0px;
     border-width:0px;
     background:transparent;
 }
-#buttonIcon:pressed{
+#buttonIcon:pressed,
+*[outer_stylesheet="buttonIcon"]:pressed{
     border-radius:0px;
     border-width:0px;
     background: #ff506b;
@@ -103,7 +110,7 @@ QTreeView::item:selected,
 QTreeView::branch:selected,
 QListView::item:selected{
     background: #ff506b;
-    color:#171718;
+    color:#ffffff;
 }
 
 QTreeView::item:!selected ,
@@ -147,7 +154,7 @@ color:#171718;
 
 QScrollBar:horizontal{background:#a2b1bc;padding:0px;border-radius:6px;max-height:12px;}
 QScrollBar::handle:horizontal{background:#4e6ff3;min-width:120px;border-radius:6px;}
-QScrollBar::handle:horizontal:hover{background:#ff506b;}
+QScrollBar::handle:horizontal:hover{background:#859bff;}
 QScrollBar::handle:horizontal:pressed{background:#ff506b;}
 QScrollBar::add-page:horizontal{background:none;}
 QScrollBar::sub-page:horizontal{background:none;}
@@ -155,7 +162,7 @@ QScrollBar::add-line:horizontal{background:none;}
 QScrollBar::sub-line:horizontal{background:none;}
 QScrollBar:vertical{background:#a2b1bc;padding:0px;border-radius:6px;max-width:12px;}
 QScrollBar::handle:vertical{background:#4e6ff3;min-height:120px;border-radius:6px;}
-QScrollBar::handle:vertical:hover{background:#ff506b;}
+QScrollBar::handle:vertical:hover{background:#859bff;}
 QScrollBar::handle:vertical:pressed{background:#ff506b;}
 QScrollBar::add-page:vertical{background:none;}
 QScrollBar::sub-page:vertical{background:none;}
@@ -175,6 +182,9 @@ QComboBox {
     border:1px solid #a1b0bb; /*边框风格*/
     background:#4e6ef2;
     color:#fefefe;
+}
+QComboBox:hover {
+    background:#859bff;
 }
 
 QComboBox QAbstractItemView {
@@ -201,7 +211,8 @@ QComboBox::down-arrow {
 }
 
 /*======================================搜索的三个控件begin====================================*/
-QFrame[outer_stylesheet="search"]{
+QFrame[outer_stylesheet="search"],
+QFrame[outer_stylesheet="view"]{
     border:1px solid #a1b0bb;
     background:#ffffff;
 }
@@ -213,11 +224,62 @@ QLineEdit[outer_stylesheet="search"]{
     border-width: 0px;
     background:transparent;
 }
+QComboBox[outer_stylesheet="search"]{
+    border-bottom:0px;
+    border-right:0px;
+}
+QFrame[outer_stylesheet="search"]{
+    border-bottom:0px;
+}
 /*======================================搜索的三个控件end====================================*/
 
-*[outer_stylesheet="line"] {
+*[outer_stylesheet="horizontal_line"] {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #a1b0bb, stop:1 #e0e0e0);
+}
+*[outer_stylesheet="vertical_line"] {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 #a1b0bb, stop:1 #e0e0e0);
 }
 *[outer_stylesheet="window_title"] {
     background:#e0e0e0;
 }
+
+/*======================================QSlider begin====================================*/
+*[outer_stylesheet="sliderTip"] {
+    color:#ffffff;
+}
+
+QSlider:horizontal {
+     min-height:32px;
+}
+QSlider::groove:horizontal {
+     border-width:0px;
+     height: 8px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+     background:#a2b1bc;
+     margin: 2px 0;
+}
+QSlider::add-page:horizontal{
+    height:8px;
+    border-radius:4px;
+    background:none;
+}
+QSlider::sub-page:horizontal{
+    height:8px;
+    border-radius:4px;
+    background:none;
+}
+
+QSlider::handle:horizontal {
+     background: #4e6ef2;
+     border-width:0px;
+     width: 32px;
+     margin: -12px 0;/* = (width - groove.height) / -2 */
+     border-radius: 16px;/* = width / 2 */
+}
+QSlider::handle:horizontal:hover{
+    background:#859bff;
+}
+QSlider::handle:horizontal:pressed{
+    background:#ff506b;
+}
+
+/*======================================QSlider end====================================*/
