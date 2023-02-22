@@ -16,8 +16,6 @@
 #include <QLineF>
 #include "mainvideowidget.h"
 
-VideoCell *VideoCell::lastFocusWidget = 0;
-
 VideoCell::VideoCell(LayoutPos pos, QWidget *parent)
     : QWidget(parent)
     , m_isPressed(false)
@@ -27,8 +25,6 @@ VideoCell::VideoCell(LayoutPos pos, QWidget *parent)
     , m_playListIndex(0)
 {
     m_info.pos = pos;
-    //每次new时，初始化lastFocusWidget
-    lastFocusWidget = NULL;
 
     this->setFocusPolicy(Qt::StrongFocus);
     this->setAcceptDrops(true);
@@ -45,13 +41,13 @@ VideoCell::VideoCell(LayoutPos pos, QWidget *parent)
     connect(m_controlPanel,  SIGNAL(signalButtonClose()), this, SLOT(toControlClose()));
     connect(m_controlPanel,  SIGNAL(signalButtonFullScreen()), this, SLOT(toControlFullScreen()));
     connect(m_controlPanel,  SIGNAL(signalButtonFullScreenExit()), this, SLOT(toControlFullScreenExit()));
+    connect(m_controlPanel,  SIGNAL(signalButtonSaveImage()), this, SLOT(toControlSaveImage()));
 
 }
 
 VideoCell::~VideoCell()
 {
-    //每次delete时，初始化lastFocusWidget
-    lastFocusWidget = NULL;
+    removeThread(m_info.url);
 }
 
 void VideoCell::parseVideoArea(const LayoutInfo &info, QWidget *parentWidget, QRect area, QMap<LayoutPos, VideoCell *> &cacheMap)
@@ -171,19 +167,21 @@ void VideoCell::toControlFullScreen()
 
 void VideoCell::toControlFullScreenExit()
 {
-    if(playformnewdialog *w = qobject_cast<playformnewdialog *>(this->parent())) {
-        m_controlPanel->setFullSreen(false);
-        w->updateLayout();
-    } else if(MainVideoWidget *w = this->parent()->findChild<MainVideoWidget *>()) {
-        QWidget *pw = w->findChild<QWidget *>("widget_video");
-        if(!pw)
-            Q_ASSERT(pw);
+    VideoWidget *pw = this->parent()->findChild<VideoWidget *>();
+    if(!pw)
+        return;
+    this->setParent(pw);
+    this->setFocus();
 
-        m_controlPanel->setFullSreen(false);
-        this->setParent(pw);
-        w->updateLayout();
-        this->setFocus();
-    }
+    m_controlPanel->setFullSreen(false);
+    pw->updateLayout();
+}
+
+void VideoCell::toControlSaveImage()
+{
+    QString path = "snap";
+    QDir().mkpath(path);
+    m_ffmpegData.image.save(path + "/" + lds::getUniqueFileNamehByDateTime(path) + ".png");
 }
 
 void VideoCell::updatePlayListDevice()
@@ -206,16 +204,24 @@ void VideoCell::paintEvent(QPaintEvent *)
     painter.fillRect(paint_rect, PropertyColor::viewColor);
     if(m_ffmpegData.isNoError) {
         //后台播放，直接removePlayer会有残留图片，故增加obidIsValid参数
-        QImage &image = m_ffmpegData.image;
+        const QImage &image = m_ffmpegData.image;
         bool obidIsValid = (m_info.url != "" || m_playListUrl != "");
         if(!image.isNull() && obidIsValid) {
-            image = image.scaled(paint_rect.size(), Qt::KeepAspectRatio);
-            painter.drawImage((this->rect().width() - image.width()) / 2, (this->rect().height() - image.height()) / 2, image);
+            int r1 = image.width() * 10 / image.height();
+            int r2 = paint_rect.width() * 10 / paint_rect.height();
+            QSize target_size;
+            if(r1 > r2) {
+                target_size = QSize(paint_rect.width(), paint_rect.width() / (r1 / 10.0));
+            } else {
+                target_size = QSize(paint_rect.height() * (r1 / 10.0), paint_rect.height());
+            }
+            QRect target_rect = QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, target_size, paint_rect);
+            painter.drawImage(target_rect, image, image.rect());
         }
     } else {
         //绘制异常报错
         painter.save();
-        painter.setPen(PropertyColor::buttonTextColor);
+        painter.setPen(PropertyColor::highlightColor);
         painter.drawText(this->rect(), Qt::AlignCenter | Qt::TextWordWrap, m_ffmpegData.errorString);
         painter.restore();
     }
@@ -310,6 +316,10 @@ void VideoCell::dropEvent(QDropEvent *event)
 
 void VideoCell::mousePressEvent(QMouseEvent *event)
 {
+    if(event->button() == Qt::RightButton) {
+        event->ignore();
+        return;
+    }
     m_pressPos = event->pos();
     m_isPressed = true;
 }
@@ -418,7 +428,7 @@ void VideoCell::removeThread(QString url)
     if(!thread)
         return;
     disconnect(thread, SIGNAL(receiveImage(FFmpegData)), this, SLOT(updateImage(FFmpegData)));
-    qDebug() << "ffmpeg thread connection count is " << thread->receiverImageConnectionCount();
+    qDebug() << __LINE__ << "ffmpeg thread connection count is " << thread->receiverImageConnectionCount();
     if(thread->receiverImageConnectionCount() == 0) {
         thread->close();
     }
@@ -431,7 +441,7 @@ void VideoCell::addThread(QString url)
         return;
     thread->open();
     connect(thread, SIGNAL(receiveImage(FFmpegData)), this, SLOT(updateImage(FFmpegData)), Qt::QueuedConnection);
-    qDebug() << "ffmpeg thread connection count is " << thread->receiverImageConnectionCount();
+    qDebug() << "ffmpeg thread connection count is " << thread->getUrl() << thread->receiverImageConnectionCount();
 
 }
 
@@ -442,7 +452,7 @@ void VideoCell::addPlayer(const QString &url)
 
     PlayThread *thread = PlayThread::PlayThreadMap.value(url, NULL);
     if(thread == NULL) {
-        thread = new PlayThread(url, this);
+        thread = PlayThread::createPlayThread(url);
         PlayThread::PlayThreadMap.insert(url, thread);
     }
 
@@ -477,7 +487,7 @@ void VideoCell::runPlayerList()
 
 void VideoCell::updateControlPanelGeometry()
 {    
-    m_controlPanel->setGeometry(lds::margin / 2, lds::margin / 2, this->width() - lds::margin, 50);
+    m_controlPanel->setGeometry(lds::margin / 2, lds::margin / 2, this->width() - lds::margin, 40);
 }
 
 void VideoCell::setCheckable(bool enabled)
@@ -534,7 +544,6 @@ const LayoutCell &VideoCell::getInfo()
 void VideoCell::focusInEvent(QFocusEvent *event)
 {
     QWidget::focusInEvent(event);
-    lastFocusWidget = this;
 }
 
 void VideoCell::focusOutEvent(QFocusEvent *event)
@@ -545,8 +554,6 @@ void VideoCell::focusOutEvent(QFocusEvent *event)
 void VideoCell::resizeEvent(QResizeEvent *event)
 {
     QWidget::resizeEvent(event);
-    //每次resize时，初始化lastFocusWidget
-    lastFocusWidget = NULL;
     updateControlPanelGeometry();
 }
 

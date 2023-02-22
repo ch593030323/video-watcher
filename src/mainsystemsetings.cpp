@@ -22,6 +22,7 @@ MainSystemSetings::MainSystemSetings(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    //buttongroup
     ui->pushButton_play_alternate->setCheckable(true);
     ui->pushButton_play_form->setCheckable(true);
     QButtonGroup *buttonGroup = new QButtonGroup(this);
@@ -100,10 +101,10 @@ MainSystemSetings::~MainSystemSetings()
 
 void MainSystemSetings::toPlayFormNew()
 {
-    playformnewdialog dialog(this);
+//    playformnewdialog dialog(this);
     //dialog.setDataSource(ui->treeView->dataSource());
-    dialog.resize(this->size());
-    dialog.exec();
+//    dialog.resize(this->size());
+//    dialog.exec();
 }
 
 void MainSystemSetings::toPlayFormOK()
@@ -121,21 +122,13 @@ void MainSystemSetings::toPlayFormOK()
 
 void MainSystemSetings::toPlayAlternateNew()
 {
-    PlayAlternateNewDialog dialog(this);
-    //dialog.setDataSource(ui->treeView->dataSource());
+    PlayAlternateNewDialog dialog(PlayAlternateNewDialog::TypeNew, this);
     dialog.resize(this->size());
     dialog.exec();
 }
 
 void MainSystemSetings::toPlayAlternateOK()
 {
-//    if(!VideoCell::lastFocusWidget)
-//        return;
-//    int row = ui->comboBox_alternate->currentIndex();
-//    if(row < 0)
-//        return;
-
-    //    VideoCell::lastFocusWidget->addPlayerList(AlterPlayFrame::readFrom(ui->comboBox_alternate->itemData(row).toString()));
 }
 
 void MainSystemSetings::toalter()

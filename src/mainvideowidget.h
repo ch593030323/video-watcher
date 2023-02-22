@@ -38,10 +38,12 @@ private slots:
     void toVideoShowMax();
     void toVideoShowNormal();
 
-    void toHoldVideoFocus();
-    void toReleaseVideoFocus();
+    void toUpdateMoreMenu();
+    void toApplyLayoutInfo();
+
 protected:
     void resizeEvent(QResizeEvent *event);
+
 private:
     Ui::MainVideoWidget *ui;
 };

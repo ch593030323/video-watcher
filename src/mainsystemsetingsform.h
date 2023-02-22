@@ -2,6 +2,7 @@
 #define MAINSYSTEMSETINGSFORM_H
 
 #include <QWidget>
+#include <QStandardItemModel>
 
 namespace Ui {
 class MainSystemSetingsForm;
@@ -15,10 +16,11 @@ public:
     explicit MainSystemSetingsForm(QWidget *parent = 0);
     ~MainSystemSetingsForm();
 
+    void refresh();
 public slots:
     void toadd();
     void todel();
-    void tomodfy();
+    void tomodify();
 private:
     Ui::MainSystemSetingsForm *ui;
 };

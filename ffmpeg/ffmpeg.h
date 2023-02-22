@@ -119,6 +119,7 @@ public:
     explicit FFmpegThread(const QString &url, QObject *parent = 0);
     virtual ~FFmpegThread();
 
+    inline QString getUrl() {return url;}
 signals:
     //收到图片信号
     void receiveImage(const FFmpegData &d);

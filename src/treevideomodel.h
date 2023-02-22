@@ -16,7 +16,7 @@
 
 //树状图的节点
 #define VideoNodeStation 1
-#define VideoNodeTrain   2
+#define VideoNodeDevice  2
 
 class TreeVideoModel : public QStandardItemModel
 {

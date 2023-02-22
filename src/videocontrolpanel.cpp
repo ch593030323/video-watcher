@@ -16,15 +16,19 @@ VideoControlPanel::VideoControlPanel(VideoCell *parent)
     m_controlPanelTimer->setSingleShot(true);
 
     m_labelText = new QLabel;
+    m_labelText->setProperty("outer_stylesheet", "sliderTip");
+
     m_buttonPlay            = createPanelButton("buttonIcon", QSize(15, 15), 0x25b6);
     m_buttonPause           = createPanelButton("buttonIcon", QSize(15, 15), 0x23f8);
     m_buttonClose           = createPanelButton("buttonIcon", QSize(15, 15), 0x23f9);
     m_buttonFullScreen      = createPanelButton("buttonIcon", QSize(15, 15), 0xf424);
     m_buttonFullScreenExit  = createPanelButton("buttonIcon", QSize(15, 15), 0xf422);
+    m_buttonSaveImage       = createPanelButton("buttonIcon", QSize(15, 15), 0xf03e);
     m_buttonFullScreenExit->hide();
 
     QHBoxLayout *hlayout = new QHBoxLayout;
     hlayout->addWidget(m_labelText, 1);
+    hlayout->addWidget(m_buttonSaveImage);
     hlayout->addWidget(m_buttonPlay);
     hlayout->addWidget(m_buttonPause);
     hlayout->addWidget(m_buttonClose);
@@ -41,6 +45,7 @@ VideoControlPanel::VideoControlPanel(VideoCell *parent)
     connect(m_buttonClose,          SIGNAL(clicked()), this, SIGNAL(signalButtonClose()));
     connect(m_buttonFullScreen,     SIGNAL(clicked()), this, SIGNAL(signalButtonFullScreen()));
     connect(m_buttonFullScreenExit, SIGNAL(clicked()), this, SIGNAL(signalButtonFullScreenExit()));
+    connect(m_buttonSaveImage,      SIGNAL(clicked()), this, SIGNAL(signalButtonSaveImage()));
 }
 
 

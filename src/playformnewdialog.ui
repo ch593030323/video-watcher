@@ -37,7 +37,7 @@
       <widget class="QPushButton" name="pushButton_1x1">
        <property name="minimumSize">
         <size>
-         <width>50</width>
+         <width>40</width>
          <height>40</height>
         </size>
        </property>
@@ -50,7 +50,7 @@
       <widget class="QPushButton" name="pushButton_2x2">
        <property name="minimumSize">
         <size>
-         <width>50</width>
+         <width>40</width>
          <height>40</height>
         </size>
        </property>
@@ -63,7 +63,7 @@
       <widget class="QPushButton" name="pushButton_3x3">
        <property name="minimumSize">
         <size>
-         <width>50</width>
+         <width>40</width>
          <height>40</height>
         </size>
        </property>
@@ -76,7 +76,7 @@
       <widget class="QPushButton" name="pushButton_4x4">
        <property name="minimumSize">
         <size>
-         <width>50</width>
+         <width>40</width>
          <height>40</height>
         </size>
        </property>
@@ -89,7 +89,7 @@
       <widget class="QPushButton" name="pushButton_5x5">
        <property name="minimumSize">
         <size>
-         <width>50</width>
+         <width>40</width>
          <height>40</height>
         </size>
        </property>
@@ -112,28 +112,19 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_merge">
-       <property name="minimumSize">
-        <size>
-         <width>60</width>
-         <height>40</height>
-        </size>
-       </property>
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string>合并</string>
+        <string>文件名</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_clear">
-       <property name="minimumSize">
-        <size>
-         <width>60</width>
-         <height>40</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>清除</string>
+      <widget class="QLineEdit" name="lineEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
       </widget>
      </item>
@@ -141,12 +132,12 @@
       <widget class="QPushButton" name="pushButton_ok">
        <property name="minimumSize">
         <size>
-         <width>60</width>
+         <width>80</width>
          <height>40</height>
         </size>
        </property>
        <property name="text">
-        <string>确定</string>
+        <string>保存</string>
        </property>
       </widget>
      </item>
@@ -154,7 +145,7 @@
       <widget class="QPushButton" name="pushButton_exit">
        <property name="minimumSize">
         <size>
-         <width>60</width>
+         <width>80</width>
          <height>40</height>
         </size>
        </property>

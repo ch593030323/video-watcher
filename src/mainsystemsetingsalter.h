@@ -14,6 +14,12 @@ class MainSystemSetingsAlter : public QWidget
 public:
     explicit MainSystemSetingsAlter(QWidget *parent = 0);
     ~MainSystemSetingsAlter();
+    void refresh();
+
+public slots:
+    void toadd();
+    void todel();
+    void tomodify();
 
 private:
     Ui::MainSystemSetingsAlter *ui;

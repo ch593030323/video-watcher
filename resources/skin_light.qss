@@ -3,7 +3,7 @@
     qproperty-textColor:#171718;
     qproperty-borderColor:#a1b0bb;
     /*视频播放顶部菜单栏*/
-    qproperty-subToolColor:#ac888a;
+    qproperty-subToolColor:#000000;
     /*按钮*/
     qproperty-buttonColor:#4e6ef2;
     qproperty-buttonHoverColor:#859bff;
@@ -174,12 +174,12 @@ QScrollBar::sub-line:vertical{background:none;}
 QLineEdit,
 QPlainTextEdit{
     border:1px solid #a1b0bb;
-    background:#e0e0e0;
+    background:#ffffff;
     color:#171718;
 }
 
 QComboBox {
-    border:1px solid #a1b0bb; /*边框风格*/
+    border:1px solid #a1b0bb;
     background:#4e6ef2;
     color:#fefefe;
 }
@@ -188,7 +188,7 @@ QComboBox:hover {
 }
 
 QComboBox QAbstractItemView {
-    border:1px solid #a1b0bb; /*边框风格*/
+    border:1px solid #a1b0bb;
     background: #e0e0e0;
     border-radius:0px;
     selection-background-color: #ff506b;/*hover color*/

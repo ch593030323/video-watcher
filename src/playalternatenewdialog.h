@@ -26,10 +26,21 @@ class PlayAlternateNewDialog : public QDialog
          QString value;
     };
 public:
-    explicit PlayAlternateNewDialog(QWidget *parent = 0);
+    enum Type{
+        TypeNew,
+        TypeModify
+    };
+public:
+    explicit PlayAlternateNewDialog(Type type, QWidget *parent = 0);
     ~PlayAlternateNewDialog();
 
     void setDataSource(DataSource *datasource);
+
+    void readFrom(const QString &filepath);
+
+private:
+    void insertAlterData(AlterType type, const QString &value);
+
 private slots:
     void toadd();
     void todel();
@@ -40,6 +51,7 @@ private slots:
     void toadjust();
 private:
     Ui::PlayAlternateNewDialog *ui;
+    Type m_type;
 };
 
 #endif // PLAYALTERNATENEWDIALOG_H

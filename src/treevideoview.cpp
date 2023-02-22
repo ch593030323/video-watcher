@@ -1,13 +1,17 @@
 #include "treevideoview.h"
+#include "treevideomodel.h"
 
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QStandardItem>
+#include <QScrollBar>
 
 TreeVideoView::TreeVideoView(QWidget *parent)
     : QTreeView(parent)
     , m_hideMenu(false)
 {
+    setFocusPolicy(Qt::NoFocus);
+    connect(this, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(slotEmitUrl(QModelIndex)));
 }
 
 void TreeVideoView::hideMenu()
@@ -30,6 +34,11 @@ void TreeVideoView::slotExpandAll()
             continue;
         this->expand(itemStation->index());
     }
+}
+
+void TreeVideoView::slotEmitUrl(const QModelIndex &index)
+{
+    emit signalPlayRequest(index.data(VideoUrlRole).toString());
 }
 
 void TreeVideoView::contextMenuEvent(QContextMenuEvent *event)

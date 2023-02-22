@@ -45,6 +45,8 @@ public:
 
     static QPixmap getLayoutPixmap(int count);
 
+    static QString getUniqueFileNamehByDateTime(const QString &dir);
+
     static QString styleSheetString;
 };
 

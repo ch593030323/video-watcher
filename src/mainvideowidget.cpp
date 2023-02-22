@@ -23,25 +23,34 @@ MainVideoWidget::MainVideoWidget(QWidget *parent) :
     setDataSource(new DataSource(this));
     ui->widget_ins_panel->setStepValue(30);
 
-    //buttongroup
     ui->pushButton_1x1->setIcon(lds::getLayoutPixmap(1));
     ui->pushButton_1x1->setText("");
-    ui->pushButton_1x1->setCheckable(true);
     ui->pushButton_2x2->setIcon(lds::getLayoutPixmap(2));
     ui->pushButton_2x2->setText("");
-    ui->pushButton_2x2->setCheckable(true);
     ui->pushButton_3x3->setIcon(lds::getLayoutPixmap(3));
     ui->pushButton_3x3->setText("");
+    ui->pushButton_4x4->setIcon(lds::getLayoutPixmap(4));
+    ui->pushButton_4x4->setText("");
+
+    ui->pushButton_more->setIcon(lds::getFontPixmap(0xf141));
+    ui->pushButton_more->setText("");
+    {
+        QMenu *menu = new QMenu(ui->pushButton_more);
+        ui->pushButton_more->setMenu(menu);
+        connect(menu, SIGNAL(aboutToShow()), this, SLOT(toUpdateMoreMenu()));
+    }
+
+    //buttongroup
+    ui->pushButton_1x1->setCheckable(true);
+    ui->pushButton_2x2->setCheckable(true);
     ui->pushButton_3x3->setCheckable(true);
-    ui->pushButton_test->setIcon(lds::getLayoutPixmap(4));
-    ui->pushButton_test->setText("");
-    ui->pushButton_test->setCheckable(true);
+    ui->pushButton_4x4->setCheckable(true);
 
     QButtonGroup *buttonGroup = new QButtonGroup(this);
     buttonGroup->addButton(ui->pushButton_1x1);
     buttonGroup->addButton(ui->pushButton_2x2);
     buttonGroup->addButton(ui->pushButton_3x3);
-    buttonGroup->addButton(ui->pushButton_test);
+    buttonGroup->addButton(ui->pushButton_4x4);
     buttonGroup->setExclusive(true);
 
     //checked
@@ -56,10 +65,12 @@ MainVideoWidget::MainVideoWidget(QWidget *parent) :
     connect(ui->pushButton_1x1, SIGNAL(clicked()), this, SLOT(toVideoLayout1x1()));
     connect(ui->pushButton_2x2, SIGNAL(clicked()), this, SLOT(toVideoLayout2x2()));
     connect(ui->pushButton_3x3, SIGNAL(clicked()), this, SLOT(toVideoLayout3x3()));
-    connect(ui->pushButton_test, SIGNAL(clicked()), this, SLOT(toVideoLayout4x4()));
+    connect(ui->pushButton_4x4, SIGNAL(clicked()), this, SLOT(toVideoLayout4x4()));
 
     connect(ui->pushButton_fullscreen, SIGNAL(clicked()), this, SLOT(toVideoShowMax()));
     connect(ui->pushButton_fullscreen_exit, SIGNAL(clicked()), this, SLOT(toVideoShowNormal()));
+
+    connect(ui->treeView->view(), SIGNAL(signalPlayRequest(QString)), ui->widget_video, SLOT(slotAddUrlToFocusedCell(QString)));
 }
 
 MainVideoWidget::~MainVideoWidget()
@@ -104,21 +115,29 @@ void MainVideoWidget::toVideoLayout4x4()
     ui->widget_video->updateLayout(LayoutInfo(4, 4));
 }
 
-void MainVideoWidget::toHoldVideoFocus()
+void MainVideoWidget::toUpdateMoreMenu()
 {
-    if(!VideoCell::lastFocusWidget)
-        return;
-    VideoCell::lastFocusWidget->setCheckable(true);
-    VideoCell::lastFocusWidget->setChecked(true);
+    QMenu *m = ui->pushButton_more->menu();
+    m->clear();
+    for(const QFileInfo &info : QDir("play_form").entryInfoList()) {
+        if(!info.isFile())
+            continue;
+        QAction *ac = m->addAction(info.baseName(), this, SLOT(toApplyLayoutInfo()));
+        ac->setData(info.filePath());
+    }
 }
 
-void MainVideoWidget::toReleaseVideoFocus()
+void MainVideoWidget::toApplyLayoutInfo()
 {
-    if(!VideoCell::lastFocusWidget)
+    QAction *ac = qobject_cast<QAction *>(sender());
+    if(!ac)
         return;
-    VideoCell::lastFocusWidget->setCheckable(false);
-    VideoCell::lastFocusWidget->setChecked(false);
-    VideoCell::lastFocusWidget = NULL;
+    QFile file(ac->data().toString());
+    if(!file.open(QFile::ReadOnly)) {
+        qDebug() << file.errorString();
+        return;
+    }
+    ui->widget_video->updateLayout(LayoutInfo::readFrom(file.readAll()));
 }
 
 void MainVideoWidget::toVideoShowMax()

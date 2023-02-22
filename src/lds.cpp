@@ -8,6 +8,9 @@
 #include <QFontDatabase>
 #include <QtDebug>
 #include <QFile>
+#include <QDateTime>
+#include <QFileInfo>
+#include <QDir>
 
 //QRect lds::AppBoundingRect;
 QString lds::iconFontFamily;
@@ -54,6 +57,24 @@ QPixmap lds::getLayoutPixmap(int count)
     paint.fillPath(path, PropertyColor::buttonTextColor);
 
     return pixmap;
+}
+
+QString lds::getUniqueFileNamehByDateTime(const QString &dir)
+{
+    //自动填充新增的文件名
+    int maxIndex = -1;
+    QString prefix = QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm");
+    for(const QFileInfo &info : QDir(dir).entryInfoList()) {
+        if(info.isFile() && info.baseName().startsWith(prefix)) {
+            int begin = info.baseName().lastIndexOf("(");
+            int end = info.baseName().lastIndexOf(")");
+            maxIndex = qMax(maxIndex, info.baseName().mid(begin + 1, end - begin - 1).toInt());
+        }
+    }
+    maxIndex++;
+
+    return (maxIndex == 0 ? prefix : (prefix + "(" + QString::number(maxIndex) + ")"));
+
 }
 
 void lds::init()

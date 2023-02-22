@@ -6,29 +6,55 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>626</width>
+    <width>943</width>
     <height>510</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_4">
+  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,0">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0,1">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,1">
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1">
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>摄像头列表</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="TreeVideoViewSearchUrl" name="treeView" native="true"/>
-       </item>
-      </layout>
+      <widget class="QFrame" name="frame_camera">
+       <property name="minimumSize">
+        <size>
+         <width>300</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>摄像头列表</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="TreeVideoViewSearchUrl" name="treeView" native="true"/>
+        </item>
+       </layout>
+      </widget>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,1">
@@ -43,7 +69,7 @@
         <widget class="QPushButton" name="pushButton_add">
          <property name="minimumSize">
           <size>
-           <width>80</width>
+           <width>100</width>
            <height>40</height>
           </size>
          </property>
@@ -56,7 +82,7 @@
         <widget class="QPushButton" name="pushButton_del">
          <property name="minimumSize">
           <size>
-           <width>80</width>
+           <width>100</width>
            <height>40</height>
           </size>
          </property>
@@ -82,7 +108,7 @@
         <widget class="QPushButton" name="pushButton_add_gap">
          <property name="minimumSize">
           <size>
-           <width>80</width>
+           <width>100</width>
            <height>40</height>
           </size>
          </property>
@@ -143,6 +169,23 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>文件名</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lineEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_adjust">

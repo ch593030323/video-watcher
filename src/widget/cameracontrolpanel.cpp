@@ -60,7 +60,9 @@ void CameraControlPanel::mouseReleaseEvent(QMouseEvent *event)
     update();
     for(int k = TopRight; k <= Center; k ++) {
         if(m_paintInfo.pathMap[k].contains(event->pos())) {
-            emit clicked((Direction)k);        }
+            emit clicked((Direction)k);
+            break;
+        }
     }
 }
 

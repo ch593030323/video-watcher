@@ -69,6 +69,10 @@ struct LayoutInfo{
     QList<LayoutCell> cells;
 
     LayoutInfo(){}
+    LayoutInfo(int c) {
+         column_count = c;
+         row_count = c;
+    }
     LayoutInfo(int c, int r) {
          column_count = c;
          row_count = r;

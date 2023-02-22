@@ -74,7 +74,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_test">
+         <widget class="QPushButton" name="pushButton_4x4">
           <property name="minimumSize">
            <size>
             <width>50</width>
@@ -82,7 +82,20 @@
            </size>
           </property>
           <property name="text">
-           <string>test</string>
+           <string>4x4</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_more">
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>more</string>
           </property>
          </widget>
         </item>

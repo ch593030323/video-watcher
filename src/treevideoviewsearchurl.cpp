@@ -12,7 +12,7 @@ TreeVideoViewSearchUrl::TreeVideoViewSearchUrl(QWidget *parent)
 void TreeVideoViewSearchUrl::addToPlayThread(const QString &url)
 {
     if(!url.isEmpty() && !PlayThread::PlayThreadMap.contains(url)) {
-        PlayThread *thread = new PlayThread(url, this);
+        PlayThread *thread = PlayThread::createPlayThread(url);
         PlayThread::PlayThreadMap.insert(url, thread);
     }
 }

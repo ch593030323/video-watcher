@@ -12,9 +12,14 @@ class PlayThread : public FFmpegThread{
 public:
     //url and play thread
     static QMap<QString, PlayThread *> PlayThreadMap;
-public:
+    //统一父类，便于统一释放资源
+    static QObject *threadParent;
+    static PlayThread *createPlayThread(const QString &url);
+
+private:
     explicit PlayThread(const QString &url, QObject *parent = 0);
     virtual ~PlayThread();
+public:
     int receiverImageConnectionCount() const;
     void open();
     void close();

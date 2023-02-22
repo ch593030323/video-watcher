@@ -135,6 +135,7 @@ void TreeVideoViewSearch::slotInitTree()
         itemISCS->appendRow(item_location);
 
         //占位用
+        //TODO location.count 等于零时
         item_location->setChild(0, 0, new QStandardItem);
     }
     //
@@ -346,6 +347,7 @@ void TreeVideoViewSearch::updateCameraItemList(QStandardItem *item_location)
         QString name = d.name;
         int state = d.state;
         int type = d.type;
+        //TODO 可删
         QString url = d.url;
 
         QString stateName = m_datasource->getCameraStateName(state);
@@ -355,7 +357,7 @@ void TreeVideoViewSearch::updateCameraItemList(QStandardItem *item_location)
         QStandardItem *item_device = new QStandardItem;
         item_device->setText(name);
         item_device->setToolTip("[" + stateName+ "]" + "[" + typeName + "]" + name);
-        item_device->setData(VideoNodeTrain,    VideoNodeType);
+        item_device->setData(VideoNodeDevice,    VideoNodeType);
         item_device->setData(name,              VideoNameRole);
         item_device->setData(type,              VideoTypeRole);
         item_device->setData(obid,              VideoObidRole);

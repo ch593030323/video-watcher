@@ -33,7 +33,7 @@ void TreeVideoViewSearchSettings::appendDeviceHorizontalItem(QStandardItem *item
 
 void TreeVideoViewSearchSettings::slotEditUrl(const QModelIndex &index)
 {
-    if(VideoNodeTrain == index.data(VideoNodeType).toInt()) {
+    if(VideoNodeDevice == index.data(VideoNodeType).toInt()) {
         //默认，第0列显示设备名，第1列是显示url
         m_treeView->edit(index.sibling(index.row(), 1));
     }

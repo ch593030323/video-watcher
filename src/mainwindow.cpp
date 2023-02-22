@@ -24,11 +24,12 @@ MainFrame::MainFrame(QWidget *parent)
     , ui(new Ui::MainWidget)
 {
     lds::init();
+    PlayThread::threadParent = this;
     ui->setupUi(this);
 
     this->setStyleSheet(lds::styleSheetString);
     setObjectName("Window");
-    setFocusPolicy(Qt::StrongFocus);
+    setFocusPolicy(Qt::NoFocus);
 
     ui->pushButton_video_widget->setCheckable(true);
     ui->pushButton_video_playback->setCheckable(true);

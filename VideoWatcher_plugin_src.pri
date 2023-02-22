@@ -32,7 +32,8 @@ HEADERS += \
     $$PWD/src/mainplayback.h \
     $$PWD/src/mainsystemsetingsalter.h \
     $$PWD/src/mainsystemsetingsform.h \
-    $$PWD/src/mainsystemsetings.h
+    $$PWD/src/mainsystemsetings.h \
+    $$PWD/src/widget/lds_tableview.h
 
 SOURCES += \
     $$PWD/src/mainwindow.cpp \
@@ -61,7 +62,8 @@ SOURCES += \
     $$PWD/src/mainplayback.cpp \
     $$PWD/src/mainsystemsetingsalter.cpp \
     $$PWD/src/mainsystemsetingsform.cpp \
-    $$PWD/src/mainsystemsetings.cpp
+    $$PWD/src/mainsystemsetings.cpp \
+    $$PWD/src/widget/lds_tableview.cpp
 
 FORMS += \
     $$PWD/src/mainwindow.ui \

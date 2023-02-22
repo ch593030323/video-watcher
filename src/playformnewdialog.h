@@ -17,22 +17,26 @@ class playformnewdialog;
 class playformnewdialog : public QDialog
 {
     Q_OBJECT
+public:
+    enum Type{
+        TypeNew,
+        TypeModify
+    };
 
 public:
-    explicit playformnewdialog(QWidget *parent = 0);
+    explicit playformnewdialog(Type type, QWidget *parent = 0);
     ~playformnewdialog();
 
     void setDataSource(DataSource *datasource);
 
-    void updateLayout(bool isRemovePlayer = false);
+    void updateLayout();
+
+    void readFrom(const QString &filepath);
 
 protected:
     void contextMenuEvent(QContextMenuEvent * event);
 
     void resizeEvent(QResizeEvent *event);
-
-private:
-    QList<VideoCell *> selectedWidgetList();
 
 private slots:
     void toVideoLayout1x1();
@@ -43,16 +47,10 @@ private slots:
 
     void toaccept();
     void toexit();
-    void tomerge();
-    void toclear();
-    void torestore();
 
-    void toselected();
-    void tounselectedall();
 private:
-    Ui::playformnewdialog               *ui;
-    QMap<LayoutPos, VideoCell *>      m_videoMap;
-    LayoutInfo                          m_layoutInfo;
+    Ui::playformnewdialog *ui;
+    Type m_type;
 };
 
 #endif // PLAYFORMNEWDIALOG_H

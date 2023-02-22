@@ -1,6 +1,15 @@
 #include "playthread.h"
 
 QMap<QString, PlayThread *> PlayThread::PlayThreadMap;
+QObject *PlayThread::threadParent = 0;
+
+PlayThread *PlayThread::createPlayThread(const QString &url)
+{
+    //确保父类唯一
+    Q_ASSERT(threadParent);
+
+    return new PlayThread(url, threadParent);
+}
 
 PlayThread::PlayThread(const QString &url, QObject *parent)
     : FFmpegThread(url, parent)

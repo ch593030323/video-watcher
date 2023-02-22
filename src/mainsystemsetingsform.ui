@@ -30,7 +30,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_modfy">
+      <widget class="QPushButton" name="pushButton_modify">
        <property name="minimumSize">
         <size>
          <width>80</width>
@@ -71,10 +71,17 @@
     </layout>
    </item>
    <item>
-    <widget class="QTableView" name="tableView"/>
+    <widget class="lds_tableview" name="tableView"/>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>lds_tableview</class>
+   <extends>QTableView</extends>
+   <header>lds_tableview.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

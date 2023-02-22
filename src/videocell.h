@@ -78,6 +78,7 @@ private slots:
     void toControlClose();
     void toControlFullScreen();
     void toControlFullScreenExit();
+    void toControlSaveImage();
 
 signals:
     void signalRelease();
@@ -120,9 +121,6 @@ private:
 
     LayoutCell                  m_info;//记录layoutcell的数据
     QList<ContextMenuData>      m_contextMenuDataList;//右键菜单的action信息
-
-public:
-    static VideoCell           *lastFocusWidget; //记录最后一次的焦点控件指针
 };
 
 

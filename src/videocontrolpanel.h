@@ -50,6 +50,7 @@ signals:
     void signalButtonClose();
     void signalButtonFullScreen();
     void signalButtonFullScreenExit();
+    void signalButtonSaveImage();
 private:
     QTimer              *m_controlPanelTimer;//定时自动隐藏
     QPushButton         *m_buttonPlay;
@@ -57,6 +58,7 @@ private:
     QPushButton         *m_buttonClose;
     QPushButton         *m_buttonFullScreen;
     QPushButton         *m_buttonFullScreenExit;
+    QPushButton         *m_buttonSaveImage;
     QLabel              *m_labelText;
     bool                m_isFullScreen;
     int                 m_processCur;
