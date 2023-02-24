@@ -36,13 +36,13 @@ VideoCell::VideoCell(LayoutPos pos, QWidget *parent)
     //
     m_playListTimer = new QTimer(this);
     connect(m_playListTimer, SIGNAL(timeout()), this, SLOT(updatePlayListDevice()));
+
     connect(m_controlPanel,  SIGNAL(signalButtonPlay()), this, SLOT(toControlPlay()));
     connect(m_controlPanel,  SIGNAL(signalButtonPause()), this, SLOT(toControlPause()));
     connect(m_controlPanel,  SIGNAL(signalButtonClose()), this, SLOT(toControlClose()));
     connect(m_controlPanel,  SIGNAL(signalButtonFullScreen()), this, SLOT(toControlFullScreen()));
     connect(m_controlPanel,  SIGNAL(signalButtonFullScreenExit()), this, SLOT(toControlFullScreenExit()));
     connect(m_controlPanel,  SIGNAL(signalButtonSaveImage()), this, SLOT(toControlSaveImage()));
-
 }
 
 VideoCell::~VideoCell()
@@ -116,6 +116,19 @@ void VideoCell::parseVideoArea(const LayoutInfo &info, QWidget *parentWidget, QR
 
 void VideoCell::updateImage(const FFmpegData &d)
 {
+    //播放、暂停的控制命令
+    if(d.type == FFmpegData::Control) {
+        if(FFmpegData::Playing == d.playState) {
+            m_controlPanel->setPause(false);
+        }
+        if(FFmpegData::Paused == d.playState) {
+            m_controlPanel->setPause(true);
+        }
+        if(FFmpegData::Stopped == d.playState) {
+            //m_controlPanel->setPause(true);
+        }
+        return;
+    }
     //轮播控制
     if(m_playListTimer->isActive()) {
         FFmpegThread *thread = qobject_cast<FFmpegThread *>(sender());
@@ -136,7 +149,7 @@ void VideoCell::toControlPlay()
         return;
     thread->play();
 
-    m_controlPanel->setPause(false);
+//    m_controlPanel->setPause(false);
 }
 
 void VideoCell::toControlPause()
@@ -146,7 +159,7 @@ void VideoCell::toControlPause()
         return;
     thread->pause();
     //
-    m_controlPanel->setPause(true);
+//    m_controlPanel->setPause(true);
 }
 
 void VideoCell::toControlClose()
@@ -202,7 +215,7 @@ void VideoCell::paintEvent(QPaintEvent *)
     QPainter painter(this);
     QRect paint_rect = this->rect().adjusted(lds::margin / 2, lds::margin / 2, -lds::margin / 2, -lds::margin / 2);
     painter.fillRect(paint_rect, PropertyColor::viewColor);
-    if(m_ffmpegData.isNoError) {
+    if(FFmpegData::NoError == m_ffmpegData.errorCode) {
         //后台播放，直接removePlayer会有残留图片，故增加obidIsValid参数
         const QImage &image = m_ffmpegData.image;
         bool obidIsValid = (m_info.url != "" || m_playListUrl != "");
@@ -441,7 +454,7 @@ void VideoCell::addThread(QString url)
         return;
     thread->open();
     connect(thread, SIGNAL(receiveImage(FFmpegData)), this, SLOT(updateImage(FFmpegData)), Qt::QueuedConnection);
-    qDebug() << "ffmpeg thread connection count is " << thread->getUrl() << thread->receiverImageConnectionCount();
+    //qDebug() << "ffmpeg thread connection count is " << thread->getUrl() << thread->receiverImageConnectionCount();
 
 }
 
@@ -458,10 +471,27 @@ void VideoCell::addPlayer(const QString &url)
 
     removePlayer();
 
+    addThread(url);
+
+    //播放器的定义为：一个播放线程一个播放器，VideoCell是一个播放窗口
+    //无状态 正在播放
+    if(thread->lastPlayState() == FFmpegData::NoState
+            || thread->lastPlayState() == FFmpegData::Playing) {
+        m_controlPanel->setPause(false);
+    }
+    //播放暂停
+    if(thread->lastPlayState() == FFmpegData::Paused) {
+        m_controlPanel->setPause(true);
+        updateImage(thread->lastPlayData());
+    }
+    //播放结束
+    if(thread->lastPlayState() == FFmpegData::Stopped) {
+        m_controlPanel->setPause(false);
+        thread->play();
+    }
+    qDebug() << __LINE__ << thread->lastPlayState();
+
     m_info.url = url;
-    addThread(m_info.url);
-    //
-    toControlPlay();
 }
 
 void VideoCell::addPlayerList(const QList<AlterPlayFrame> &playList)

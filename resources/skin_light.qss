@@ -72,21 +72,6 @@ QPushButton::menu-indicator {
     image: none;
     width:0px;
 }
-
-
-#buttonIcon,
-*[outer_stylesheet="buttonIcon"]{
-    border-radius:0px;
-    border-width:0px;
-    background:transparent;
-}
-#buttonIcon:pressed,
-*[outer_stylesheet="buttonIcon"]:pressed{
-    border-radius:0px;
-    border-width:0px;
-    background: #ff506b;
-}
-
 /*======================================树状图 样式begin====================================*/
 
 QTableView,

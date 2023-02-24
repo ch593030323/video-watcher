@@ -12,7 +12,7 @@ class PlayThread : public FFmpegThread{
 public:
     //url and play thread
     static QMap<QString, PlayThread *> PlayThreadMap;
-    //统一父类，便于统一释放资源
+    //统一父类，便于统一释放资源，只赋值一次
     static QObject *threadParent;
     static PlayThread *createPlayThread(const QString &url);
 

@@ -1,6 +1,8 @@
 #ifndef VIDEOCONTROLPANEL_H
 #define VIDEOCONTROLPANEL_H
 
+#include "iconbutton.h"
+
 #include <QWidget>
 #include <QPushButton>
 #include <QLabel>
@@ -41,7 +43,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
 
 private:
-    QPushButton *createPanelButton(const QString &objectName, const QSize &size, QChar icon);
+    IconButton *createPanelButton(QChar icon, const QString &tipText);
     void updateControlPanelState(ControlState state);
 
 signals:
@@ -53,12 +55,12 @@ signals:
     void signalButtonSaveImage();
 private:
     QTimer              *m_controlPanelTimer;//定时自动隐藏
-    QPushButton         *m_buttonPlay;
-    QPushButton         *m_buttonPause;
-    QPushButton         *m_buttonClose;
-    QPushButton         *m_buttonFullScreen;
-    QPushButton         *m_buttonFullScreenExit;
-    QPushButton         *m_buttonSaveImage;
+    IconButton          *m_buttonPlay;
+    IconButton          *m_buttonPause;
+    IconButton          *m_buttonClose;
+    IconButton          *m_buttonFullScreen;
+    IconButton          *m_buttonFullScreenExit;
+    IconButton          *m_buttonSaveImage;
     QLabel              *m_labelText;
     bool                m_isFullScreen;
     int                 m_processCur;

@@ -1,26 +1,26 @@
 ﻿#include "ffmpeg.h"
 
 static QByteArray errorToByteArray(int errnum) {
-
-    QByteArray b(100, '0');
-    av_strerror(errnum, b.data(),b.size());
+    QByteArray b(AV_ERROR_MAX_STRING_SIZE, '0');
+    av_strerror(errnum, b.data(), b.size());
     return b;
 }
 FFmpegThread::FFmpegThread(const QString &url, QObject *parent)
     : QThread(parent)
-    , url(url)
+    , m_url(url)
+    , m_lastPlayState(FFmpegData::NoState)
 {
 }
 
 FFmpegThread::~FFmpegThread()
 {
-    qDebug() << __FUNCTION__ << this->url;
+    qDebug() << __FUNCTION__ << this->m_url;
 }
 
 void FFmpegThread::run()
 {
-    FFmpegObject obj(url, &mutex);
-    connect(&obj, SIGNAL(receiveImage(FFmpegData)), this, SIGNAL(receiveImage(FFmpegData)), Qt::QueuedConnection);
+    FFmpegObject obj(m_url, &m_mutex);
+    connect(&obj, SIGNAL(receiveImage(FFmpegData)), this, SLOT(slotReceiveImage(FFmpegData)), Qt::QueuedConnection);
     connect(this, SIGNAL(signalPlay()),             &obj, SLOT(play()),                     Qt::QueuedConnection);
 
     obj.play();
@@ -34,12 +34,22 @@ void FFmpegThread::play()
 
 void FFmpegThread::pause()
 {
-    mutex.setPaused(true);
+    m_mutex.setPaused(true);
 }
 
 void FFmpegThread::stop()
 {
-    mutex.setStopped(true);
+    m_mutex.setStopped(true);
+}
+
+void FFmpegThread::slotReceiveImage(const FFmpegData &d)
+{
+    if(d.type == FFmpegData::Control) {
+        m_lastPlayState = d.playState;
+    } else {
+        m_lastPlayData = d;
+    }
+    emit receiveImage(d);
 }
 
 //一个软件中只需要初始化一次就行
@@ -74,6 +84,10 @@ FFmpegObject::FFmpegObject(const QString &url, FFmpegControl *mutex, QObject *pa
     videoDecoder = NULL;
     audioDecoder = NULL;
 
+    process_cur = 0;
+    process_cur_org = 0;
+    process_total = 0;
+
     //初始化注册,一个软件中只注册一次即可
     FFmpegObject::initlib();
 }
@@ -85,12 +99,13 @@ void FFmpegObject::play()
 
 void FFmpegObject::playNext(bool begin)
 {
+    emit receiveImage(FFmpegData(FFmpegData::Playing));
+    process_cur = 0;
     forever
     {
         QImage image;
-        static int process_cur = 0;//当前进度，单位秒
-        int process_cur_org = 0;//当前进度,单位秒，可能小于process_cur
-        int process_total = 0;//视频总时长，单位秒
+        process_cur_org = 0;
+        process_total = 0;
         //开始播放
         if(begin) {
             begin = false;
@@ -102,10 +117,14 @@ void FFmpegObject::playNext(bool begin)
         }
         if(mutex->isPaused()) {
             //已经暂停，则本次播放无效
+            qDebug() << __FILE__ << __LINE__ << "手动暂停";
+            emit receiveImage(FFmpegData(FFmpegData::Paused));
             goto pause;
         }
         if(mutex->isStopped()) {
             //已经停止，则本次播放结束
+            qDebug() << __FILE__ << __LINE__ << "手动结束";
+            emit receiveImage(FFmpegData(FFmpegData::Stopped));
             goto end;
         }
 
@@ -114,9 +133,11 @@ void FFmpegObject::playNext(bool begin)
             av_packet_unref(avPacket);
             av_freep(avPacket);
         }
+        //设置阻塞超时的开始时间
+        block_interrupt_data.last_time = time(NULL);
         //读取下一帧
         frameFinish = av_read_frame(avFormatContext, avPacket);
-        ///播放结束
+        //播放结束
         if(mutex->isStopped() || frameFinish < 0) {
             goto end;
         }
@@ -171,20 +192,26 @@ end:
     //释放资源
     free();
 pause:
-    if(mutex->isStopped()) {
-        qDebug() << __FILE__ << __LINE__ << "手动结束";
-    }
-    if(frameFinish < 0) {
-        //emit receiveImage(FFmpegData(errorToByteArray(frameFinish)));
-        qDebug() << AVERROR_EOF << errorToByteArray(frameFinish);
-    }
-    if(frameFinish == AVERROR_EOF) {
-        playNext(true);
-    }
-
     //重置标志位
     mutex->setPaused(false);
     mutex->setStopped(false);
+
+    if(frameFinish < 0) {
+        qDebug() << __FILE__ << __LINE__
+                 << "block_duration:" << block_interrupt_data.block_duration
+                    ;
+    }
+
+    //播放超时
+    if(block_interrupt_data.isTimeOut()) {
+        emit receiveImage(FFmpegData(QString::fromUtf8("播放已经断开，请检查网络<read"), FFmpegData::ErrorNetwork));
+        return;
+    }
+    //到文件尾
+    if(frameFinish == AVERROR_EOF) {
+        playNext(true);
+        return;
+    }
 }
 
 void FFmpegObject::free()
@@ -231,6 +258,19 @@ void FFmpegObject::free()
 
     av_dict_free(&options);
     //qDebug() << TIMEMS << "close ffmpeg ok";
+}
+
+int FFmpegObject::block_interrupt_callback(void *p)
+{
+    BlockInterruptData *r = (BlockInterruptData *)p;
+    if (r->last_time > 0) {
+        r->block_duration = time(NULL) - r->last_time;
+        if (r->isTimeOut()) {
+            //中断
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void FFmpegObject::initlib()
@@ -284,11 +324,19 @@ bool FFmpegObject::init()
 
     //打开视频流
     avFormatContext = avformat_alloc_context();
+    //阻塞中断控制
+    avFormatContext->interrupt_callback.callback = block_interrupt_callback;
+    avFormatContext->interrupt_callback.opaque = &block_interrupt_data;
+    block_interrupt_data.last_time = time(NULL);
 
     int result = avformat_open_input(&avFormatContext, url.toStdString().data(), NULL, &options);//&options
     if (result < 0) {
-        emit receiveImage(FFmpegData(errorToByteArray(videoStreamIndex)));
-        qDebug() << TIMEMS << "open input error" << url << errorToByteArray(videoStreamIndex);
+        //网络超时
+        if(AVUNERROR(result) == ETIMEDOUT) {
+            emit receiveImage(FFmpegData(QString::fromUtf8("播放已经断开，请检查网络<open"), FFmpegData::ErrorNetwork));
+            return false;
+        }
+        emit receiveImage(FFmpegData(errorToByteArray(result)));
         return false;
     }
 
@@ -461,4 +509,17 @@ bool FFmpegControl::isPaused()
 {
     QMutexLocker locker(&mutex);
     return paused;
+}
+
+FFmpegObject::BlockInterruptData::BlockInterruptData()
+    : last_time(0)
+    , block_duration(0)
+    , max_block_duration(8)
+{
+
+}
+
+bool FFmpegObject::BlockInterruptData::isTimeOut()
+{
+    return block_duration > max_block_duration;
 }

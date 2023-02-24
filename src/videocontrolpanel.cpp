@@ -2,6 +2,7 @@
 #include "lds.h"
 #include "videocell.h"
 #include "propertycolor.h"
+#include "iconbutton.h"
 
 VideoControlPanel::VideoControlPanel(VideoCell *parent)
     : QWidget(parent)
@@ -18,12 +19,12 @@ VideoControlPanel::VideoControlPanel(VideoCell *parent)
     m_labelText = new QLabel;
     m_labelText->setProperty("outer_stylesheet", "sliderTip");
 
-    m_buttonPlay            = createPanelButton("buttonIcon", QSize(15, 15), 0x25b6);
-    m_buttonPause           = createPanelButton("buttonIcon", QSize(15, 15), 0x23f8);
-    m_buttonClose           = createPanelButton("buttonIcon", QSize(15, 15), 0x23f9);
-    m_buttonFullScreen      = createPanelButton("buttonIcon", QSize(15, 15), 0xf424);
-    m_buttonFullScreenExit  = createPanelButton("buttonIcon", QSize(15, 15), 0xf422);
-    m_buttonSaveImage       = createPanelButton("buttonIcon", QSize(15, 15), 0xf03e);
+    m_buttonPlay            = createPanelButton(0x25b6, QString::fromUtf8("播放"));
+    m_buttonPause           = createPanelButton(0x23f8, QString::fromUtf8("暂停"));
+    m_buttonClose           = createPanelButton(0x23f9, QString::fromUtf8("关闭"));
+    m_buttonFullScreen      = createPanelButton(0xf424, QString::fromUtf8("全屏"));
+    m_buttonFullScreenExit  = createPanelButton(0xf422, QString::fromUtf8("退出全屏"));
+    m_buttonSaveImage       = createPanelButton(0xf03e, QString::fromUtf8("截图"));
     m_buttonFullScreenExit->hide();
 
     QHBoxLayout *hlayout = new QHBoxLayout;
@@ -49,13 +50,14 @@ VideoControlPanel::VideoControlPanel(VideoCell *parent)
 }
 
 
-QPushButton * VideoControlPanel::createPanelButton(const QString &objectName, const QSize &size, QChar icon) {
-
-    QPushButton *b = new QPushButton;
+IconButton *VideoControlPanel::createPanelButton(QChar icon, const QString &tipText)
+{
+    IconButton *b = new IconButton;
+    b->setIconChar(icon);
     b->setFocusPolicy(Qt::NoFocus);
-    b->setFlat(true);
-    b->setIcon(lds::getFontPixmap(icon, PropertyColor::buttonTextColor, size));
-    b->setObjectName(objectName);
+    b->setToolTip(tipText);
+    b->setFixedSize(QSize(15, 15));
+    b->setType(IconButton::ToolButton);
     return b;
 }
 

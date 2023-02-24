@@ -5,6 +5,7 @@
 #include "lds.h"
 #include "videolayout.h"
 #include "playthread.h"
+#include "videocontrolpanel.h"
 
 #include <QWidget>
 #include <QFrame>

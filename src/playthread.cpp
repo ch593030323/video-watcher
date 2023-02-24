@@ -35,7 +35,7 @@ int PlayThread::receiverImageConnectionCount() const
 void PlayThread::open()
 {
     if(isRunning()) {
-        FFmpegThread::play();
+//        FFmpegThread::play();
     } else {
         FFmpegThread::start();
     }

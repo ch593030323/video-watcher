@@ -9,40 +9,74 @@
 #include "ffmpeghead.h"
 
 
-struct FFmpegData{
+class FFmpegData{
+public:
+    enum ErrorCode{
+        NoError,
+        ErrorNetwork,
+        ErrorOther
+    };
+    enum Type{
+        Image,
+        Control
+    };
+    enum PlayState{
+        NoState,
+        Playing,
+        Paused,
+        Stopped
+    };
+
+    //0
     FFmpegData(){
         init();
     }
+    //3、4、5
     FFmpegData(const QImage &image,
                int cur,
                int total,
-               bool isNoError = true,
-               const QString &errorString = ""){
+               ErrorCode errorCode = NoError,
+               const QString &errorString = "") {
         init();
         this->image = image;
         this->cur = cur;
         this->total = total;
-        this->isNoError = isNoError;
+        this->errorCode = errorCode;
         this->errorString = errorString;
     }
-    FFmpegData(const QString &errorString) {
+
+    //1、2
+    FFmpegData(const QString &errorString,
+               ErrorCode errorCode = ErrorOther) {
         init();
-        this->isNoError = false;
+        this->errorCode = errorCode;
         this->errorString = errorString;
     }
+
+    //1 控制命令
+    FFmpegData(PlayState state) {
+        init();
+        this->type = Control;
+        this->playState = state;
+    }
+
     inline void init(){
         this->image = QImage();
         this->cur = 0;
         this->total = 0;
-        this->isNoError = true;
+        this->errorCode = NoError;
         this->errorString = "";
+        this->type = Image;
+        this->playState = NoState;
     }
     //
     QImage image;
     int cur;    //当前进度
     int total;  //总进度
-    bool isNoError;
+    ErrorCode errorCode;
     QString errorString;
+    Type type;
+    PlayState playState;
 };
 
 struct FFmpegControl{
@@ -110,6 +144,29 @@ private:
     AVDictionary *options;          //参数对象
     AVCodec *videoDecoder;          //视频解码
     AVCodec *audioDecoder;          //音频解码
+
+    //播放进度
+    int process_cur;        //当前进度，单位秒
+    int process_cur_org;    //当前进度,单位秒，可能小于process_cur
+    int process_total;      //视频总时长，单位秒
+
+    /**
+     * @brief The BlockInterruptData struct
+     * 中断阻塞的回调结构体
+     */
+    struct BlockInterruptData {
+        BlockInterruptData();
+
+        time_t last_time;//阻塞前的时间，单位s
+        int block_duration;//阻塞的时长，单位s
+        const int max_block_duration;//最长阻塞时间，单位s
+
+        bool isTimeOut();
+    };
+
+    // 回调函数
+    static int block_interrupt_callback(void *p);
+    BlockInterruptData block_interrupt_data;
 };
 
 class FFmpegThread : public QThread
@@ -119,7 +176,9 @@ public:
     explicit FFmpegThread(const QString &url, QObject *parent = 0);
     virtual ~FFmpegThread();
 
-    inline QString getUrl() {return url;}
+    inline QString getUrl() {return m_url;}
+    inline FFmpegData::PlayState lastPlayState() {return m_lastPlayState;}
+    inline FFmpegData lastPlayData() {return m_lastPlayData;}
 signals:
     //收到图片信号
     void receiveImage(const FFmpegData &d);
@@ -134,9 +193,15 @@ public slots:
     void pause();
     void stop();
 
+private slots:
+    void slotReceiveImage(const FFmpegData &d);
+
 private:
-    QString url;           //视频流地址 set only if thread start
-    FFmpegControl mutex;
+    QString m_url;           //视频流地址 set only if thread start
+    FFmpegControl m_mutex;
+
+    FFmpegData::PlayState m_lastPlayState;
+    FFmpegData m_lastPlayData;
 };
 
 #endif // FFMPEG_H
