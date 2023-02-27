@@ -70,7 +70,7 @@ MainVideoWidget::MainVideoWidget(QWidget *parent) :
     connect(ui->pushButton_fullscreen, SIGNAL(clicked()), this, SLOT(toVideoShowMax()));
     connect(ui->pushButton_fullscreen_exit, SIGNAL(clicked()), this, SLOT(toVideoShowNormal()));
 
-    connect(ui->treeView->view(), SIGNAL(signalPlayRequest(QString)), ui->widget_video, SLOT(slotAddUrlToFocusedCell(QString)));
+    connect(ui->treeView->view(), SIGNAL(signalPlayRequest(QString)), ui->widget_video, SLOT(slotAutoAddUrl(QString)));
 }
 
 MainVideoWidget::~MainVideoWidget()

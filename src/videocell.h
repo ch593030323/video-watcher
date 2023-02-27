@@ -21,16 +21,20 @@ class VideoCell : public QWidget
     Q_OBJECT
 public:
 
-    struct ContextMenuData{
+    struct ContextMenuData {
         ContextMenuData(){}
-        ContextMenuData(QString text, QObject *target, const char *slot){
+        ContextMenuData(QString text, QObject *target, const char *slot, const QVariant &var = QVariant()){
             this->text = text;
             this->target = target;
             this->slot = slot;
+            this->var = var;
         }
         QString text;
         QObject *target;
         const char *slot;
+        QVariant var;
+
+        QList<ContextMenuData> children;
     };
 
 public:
@@ -43,7 +47,7 @@ public:
     void addPlayer(const QString &url);
 
     void removeThread(QString url);
-    void addThread(QString url);
+    PlayThread *addThread(QString url);
 
     void updateControlPanelGeometry();
 
@@ -70,6 +74,10 @@ public:
     int                     m_playListIndex;//播放列表的序号
 private slots:
     void updatePlayListDevice();
+public slots:
+    void toAlterStart();
+    void toAlterStop();
+
     //=====================PlayList end=====================
 private slots:
     void updateImage(const FFmpegData &d);
@@ -99,6 +107,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event);
 
     void contextMenuEvent(QContextMenuEvent * event);
+    void addActionsToMenu(const QList<ContextMenuData> &list, QMenu *sub_menu, QMenu *parent_menu);
 
     //focus
     void focusInEvent(QFocusEvent *event);

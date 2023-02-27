@@ -14,7 +14,7 @@
  */
 struct AlterPlayFrame {
     QString url;
-    int timeout;
+    int length;
 
     static QList<AlterPlayFrame> readFrom(const QString &filepath);
 };

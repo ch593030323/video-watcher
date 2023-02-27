@@ -16,7 +16,17 @@ public:
     QVariant data(int row, const QString &key);
 
     bool removeRows(int begin, int count);
+    bool removeRow(int begin);
+
     void appendRow(const QStringList &texts);
+
+    void insertRow(int row, const QStringList &texts);
+    void insertRow(int row, const QString &text);
+    void insertRow(int row, QStandardItem *item);
+
+    QStandardItem *takeItem(int row, int column = 0);
+
+    QStandardItem *item(int row, int column = 0);
 
     int rowCount();
 private:

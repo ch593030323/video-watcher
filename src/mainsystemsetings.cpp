@@ -36,62 +36,6 @@ MainSystemSetings::MainSystemSetings(QWidget *parent) :
 
     connect(ui->pushButton_play_alternate, SIGNAL(clicked()),this,SLOT(toalter()));
     connect(ui->pushButton_play_form, SIGNAL(clicked()),this,SLOT(toform()));
-
-
-
-//    ui->frame_play_alternate->setObjectName("Window");
-//    ui->frame_play_form->setObjectName("Window");
-
-//    //
-//    {
-//        ui->frame_play_form->setFixedSize(500, 60);
-//        ui->frame_play_form->layout()->setMargin(10);
-//        QWidgetAction *wac = new QWidgetAction( ui->pushButton_play_form);
-//        wac->setDefaultWidget(ui->frame_play_form);
-//        QMenu *menu_form = new QMenu(ui->pushButton_play_form);
-//        menu_form->addAction(wac);
-//        ui->pushButton_play_form->setMenu(menu_form);
-//    }
-//    {
-//        ui->frame_play_alternate->setFixedSize(500, 60);
-//        ui->frame_play_alternate->layout()->setMargin(10);
-//        QWidgetAction *wac = new QWidgetAction( ui->pushButton_play_alternate);
-//        wac->setDefaultWidget(ui->frame_play_alternate);
-//        QMenu *menu_alternate = new QMenu(ui->pushButton_play_alternate);
-//        menu_alternate->addAction(wac);
-//        ui->pushButton_play_alternate->setMenu(menu_alternate);
-//    }
-
-//    //play_form
-//    {
-//        QDirIterator dir("play_form");
-//        while(dir.hasNext()) {
-//            dir.next();
-//            if(dir.fileInfo().isFile()) {
-//                ui->comboBox_form->addItem(dir.fileName(), dir.filePath());
-//            }
-//        }
-//    }
-
-//    //play_alter
-//    {
-//        QDirIterator dir("play_alter");
-//        while(dir.hasNext()) {
-//            dir.next();
-//            if(dir.fileInfo().isFile()) {
-//                ui->comboBox_alternate->addItem(dir.fileName(), dir.filePath());
-//            }
-//        }
-//    }
-
-
-//    connect(ui->pushButton_form_new, SIGNAL(clicked()), this, SLOT(toPlayFormNew()));
-//    connect(ui->pushButton_form_ok, SIGNAL(clicked()), this, SLOT(toPlayFormOK()));
-//    connect(ui->pushButton_alternate_new, SIGNAL(clicked()), this, SLOT(toPlayAlternateNew()));
-//    connect(ui->pushButton_alternate_ok, SIGNAL(clicked()), this, SLOT(toPlayAlternateOK()));
-//    connect(ui->pushButton_play_alternate->menu(), SIGNAL(aboutToShow()), this, SLOT(toHoldVideoFocus()));
-//    connect(ui->pushButton_play_alternate->menu(), SIGNAL(aboutToHide()), this, SLOT(toReleaseVideoFocus()));
-
 }
 
 MainSystemSetings::~MainSystemSetings()

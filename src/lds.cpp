@@ -126,13 +126,18 @@ QList<AlterPlayFrame> AlterPlayFrame::readFrom(const QString &filepath)
     if(!file.open(QFile::ReadOnly)) {
         qDebug() << file.errorString();
     }
+    //更新listwidget的内容
     while(!file.atEnd()) {
-        QString line = file.readLine();
-        QString line2 = file.readLine();
+        QString line = file.readLine().trimmed();
+        int index = line.indexOf(":");
+        QString length = line.mid(0, index);
+        QString url = line.mid(index + 1);
+        if(length.isEmpty() || url.isEmpty())
+            continue;
 
         AlterPlayFrame frame;
-        frame.url = line.mid(2).trimmed();
-        frame.timeout = line2.mid(2).trimmed().toInt();
+        frame.url = url.trimmed();
+        frame.length = length.trimmed().toInt();
 
         playlist << frame;
     }

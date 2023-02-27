@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,0">
+  <layout class="QVBoxLayout" name="verticalLayout_4">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,1">
      <item>
@@ -57,7 +57,7 @@
       </widget>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,1">
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,1">
        <item>
         <widget class="QLabel" name="label_3">
          <property name="text">
@@ -79,17 +79,28 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_del">
-         <property name="minimumSize">
-          <size>
-           <width>100</width>
-           <height>40</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>删除</string>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1">
+         <item>
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>间隔</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="spinBox">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="suffix">
+            <string>s</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <spacer name="verticalSpacer">
@@ -105,7 +116,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_add_gap">
+        <widget class="QPushButton" name="pushButton_del">
          <property name="minimumSize">
           <size>
            <width>100</width>
@@ -113,14 +124,7 @@
           </size>
          </property>
          <property name="text">
-          <string>间隔</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QSpinBox" name="spinBox">
-         <property name="suffix">
-          <string>s</string>
+          <string>删除</string>
          </property>
         </widget>
        </item>
@@ -149,7 +153,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QListWidget" name="listWidget"/>
+        <widget class="lds_tableview" name="tableView"/>
        </item>
       </layout>
      </item>
@@ -178,12 +182,12 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="LineEditX" name="lineEdit" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>60</width>
+         <height>0</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -236,6 +240,17 @@
    <extends>QWidget</extends>
    <header>treevideoviewsearchurl.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LineEditX</class>
+   <extends>QWidget</extends>
+   <header>lineeditx.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>lds_tableview</class>
+   <extends>QTableView</extends>
+   <header>lds_tableview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

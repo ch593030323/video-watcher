@@ -17,26 +17,29 @@ PlayAlternateNewDialog::PlayAlternateNewDialog(PlayAlternateNewDialog::Type type
     ui->setupUi(this);
     setObjectName("Window");
     ui->spinBox->setMinimum(1);
+
+    ui->tableView->appHorizontalHeader("url", QString::fromUtf8("流地址(url)"), 250);
+    ui->tableView->appHorizontalHeader("length", QString::fromUtf8("播放时间(s)"), 50);
+    ui->tableView->horizontalHeader()->setStretchLastSection(true);
+
     resize(832, 557);
     //
     ui->pushButton_ok->setIcon(lds::getFontPixmap(0x2713));
     ui->pushButton_exit->setIcon(lds::getFontPixmap(0xd7));
 
     ui->pushButton_ok->setText(type == TypeNew ? QString::fromUtf8("新增") : QString::fromUtf8("修改"));
+    if(type == TypeModify) {
+        ui->lineEdit->setEnabled(false);
+    }
     ui->lineEdit->setText(lds::getUniqueFileNamehByDateTime("play_alter"));
 
     ui->pushButton_add->setIcon(lds::getFontPixmap(0x203a, PropertyColor::buttonTextColor));
     ui->pushButton_del->setIcon(lds::getFontPixmap(0x203a, PropertyColor::buttonTextColor));
-    ui->pushButton_add_gap->setIcon(lds::getFontPixmap(0x203a, PropertyColor::buttonTextColor));
 
     connect(ui->pushButton_ok, SIGNAL(clicked()), this, SLOT(took()));
     connect(ui->pushButton_exit, SIGNAL(clicked()), this, SLOT(toexit()));
     connect(ui->pushButton_add, SIGNAL(clicked()), this, SLOT(toadd()));
-    connect(ui->pushButton_add_gap, SIGNAL(clicked()), this, SLOT(toaddgap()));
     connect(ui->pushButton_del, SIGNAL(clicked()), this, SLOT(todel()));
-    connect(ui->pushButton_adjust, SIGNAL(clicked()), this, SLOT(toadjust()));
-
-    ui->pushButton_adjust->hide();
 }
 
 PlayAlternateNewDialog::~PlayAlternateNewDialog()
@@ -52,20 +55,11 @@ void PlayAlternateNewDialog::setDataSource(DataSource *datasource)
 
 void PlayAlternateNewDialog::readFrom(const QString &filepath)
 {
-    QFile file(filepath);
-    if(!file.open(QFile::ReadOnly)) {
-        qDebug() << file.errorString();
-    }
-    ui->listWidget->clear();
-    //更新listwidget的内容
-    while(!file.atEnd()) {
-        QString line = file.readLine().trimmed();
-        int index = line.indexOf(":");
-        QString key = line.mid(0, index);
-        QString value = line.mid(index + 1);
-        if(key.isEmpty() || value.isEmpty())
-            continue;
-        insertAlterData((AlterType)key.toInt(), value);
+    ui->tableView->removeRows(0, ui->tableView->rowCount());
+
+    QList<AlterPlayFrame> list = AlterPlayFrame::readFrom(filepath);
+    for(int k = 0; k < list.count(); k ++) {
+        ui->tableView->appendRow({list[k].url, QString::number(list[k].length)});
     }
 
     ui->lineEdit->setText(QFileInfo(filepath).baseName());
@@ -73,14 +67,16 @@ void PlayAlternateNewDialog::readFrom(const QString &filepath)
 
 void PlayAlternateNewDialog::insertAlterData(AlterType type, const QString &value)
 {
-    int row_next = ui->listWidget->currentRow() < 0 ? ui->listWidget->count() : (ui->listWidget->currentRow() + 1);
+    int row_cur = ui->tableView->currentIndex().row();
+    int row_count = ui->tableView->rowCount();
+    int row_next = row_cur < 0 ? row_count : (row_cur + 1);
 
-    QListWidgetItem *item = new QListWidgetItem;
+    QStandardItem *item = new QStandardItem;
     item->setText((type == CameraUrlType ? "url:" : "timeout:") + value);
-    item->setData(AlterTypeRole, type);
-    item->setData(AlterValueRole, value);
+    item->setData(type, AlterTypeRole);
+    item->setData(value, AlterValueRole);
 
-    ui->listWidget->insertItem(row_next, item);
+    ui->tableView->insertRow(row_next, item);
 }
 
 void PlayAlternateNewDialog::toadd()
@@ -90,33 +86,25 @@ void PlayAlternateNewDialog::toadd()
         return;
     if(index.data(VideoNodeType).toInt() != VideoNodeDevice)
         return;
-
-    insertAlterData(CameraUrlType,index.data(VideoUrlRole).toString());
+    ui->tableView->appendRow({index.data(VideoUrlRole).toString(),
+                             QString::number(ui->spinBox->value())});
 }
 
 void PlayAlternateNewDialog::todel()
 {
-    int row = ui->listWidget->currentRow();
+    int row = ui->tableView->currentIndex().row();
     if(row < 0)
         return;
-    delete ui->listWidget->takeItem(row);
-}
-
-void PlayAlternateNewDialog::toaddgap()
-{
-    insertAlterData(TimeGapType, QString::number(ui->spinBox->value()));
+    ui->tableView->removeRow(row);
 }
 
 void PlayAlternateNewDialog::took()
 {
-//    toadjust();
-
     QString content;
-    for(int row = 0; row < ui->listWidget->count(); row ++) {
-        QListWidgetItem *item = ui->listWidget->item(row);
+    for(int row = 0; row < ui->tableView->rowCount(); row ++) {
         content += QString("%1:%2\n")
-                .arg(item->data(AlterTypeRole).toInt())
-                .arg(item->data(AlterValueRole).toString());
+                .arg(ui->tableView->data(row, "length").toString())
+                .arg(ui->tableView->data(row, "url").toString());
     }
 
     QDir().mkpath("play_alter");
@@ -133,59 +121,4 @@ void PlayAlternateNewDialog::took()
 void PlayAlternateNewDialog::toexit()
 {
     this->reject();
-}
-
-void PlayAlternateNewDialog::toadjust()
-{
-    //合并
-    QList<AlterData> lineList;
-    for(int row = 0; row < ui->listWidget->count(); row ++) {
-        QListWidgetItem *item = ui->listWidget->item(row);
-        AlterData line2;
-        line2.type = (AlterType)item->data(AlterTypeRole).toInt();
-        line2.value = item->data(AlterValueRole).toString();
-
-        if(row == 0) {
-            lineList << line2;
-            continue;
-        }
-        AlterData &line = lineList.last();
-        if(line2.type == TimeGapType && line.type == TimeGapType) {
-            line.value = QString::number(line.value.toInt() + line2.value.toInt());
-            continue;
-        }
-        if(line2.type == CameraUrlType && line.type == CameraUrlType) {
-            line.value = line2.value;
-            continue;
-        }
-        lineList << line2;
-    }
-    //移除
-    if(lineList.count() >= 2) {
-        if(lineList[0].type == TimeGapType) {
-            lineList.append(lineList.takeFirst());
-        }
-        if(lineList[0].type == CameraUrlType && lineList.last().type == CameraUrlType) {
-            lineList.removeLast();
-        }
-    }
-    //更新
-    ui->listWidget->clear();
-    for(int k = 0; k < lineList.count(); k ++) {
-        const AlterData &line = lineList[k];
-        QListWidgetItem *item = new QListWidgetItem;
-
-        if(line.type == TimeGapType) {
-            item->setText(QString::fromUtf8("间隔:") + line.value + "s");
-            item->setData(AlterTypeRole, line.type);
-            item->setData(AlterValueRole, line.value);
-        }
-        if(line.type == CameraUrlType) {
-            item->setText("url:" + line.value);
-            item->setData(AlterTypeRole, line.type);
-            item->setData(AlterValueRole, line.value);
-        }
-
-        ui->listWidget->addItem(item);
-    }
 }

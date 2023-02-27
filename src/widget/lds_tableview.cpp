@@ -35,13 +35,43 @@ bool lds_tableview::removeRows(int begin, int count)
     return model->removeRows(begin, count);
 }
 
+bool lds_tableview::removeRow(int begin)
+{
+    return model->removeRows(begin, 1);
+}
+
 void lds_tableview::appendRow(const QStringList &texts)
+{
+    insertRow(model->rowCount(), texts);
+}
+
+void lds_tableview::insertRow(int row, const QStringList &texts)
 {
     QList<QStandardItem *> items;
     for(const QString &text : texts) {
         items << new QStandardItem(text);
     }
-    model->appendRow(items);
+    model->insertRow(row, items);
+}
+
+void lds_tableview::insertRow(int row, const QString &text)
+{
+    insertRow(row, QStringList() << text);
+}
+
+void lds_tableview::insertRow(int row, QStandardItem *item)
+{
+    model->insertRow(row, item);
+}
+
+QStandardItem *lds_tableview::takeItem(int row, int column)
+{
+    return model->takeItem(row, column);
+}
+
+QStandardItem *lds_tableview::item(int row, int column)
+{
+    return model->item(row, column);
 }
 
 int lds_tableview::rowCount()

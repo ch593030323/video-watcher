@@ -59,5 +59,5 @@ QString LineEditFind::text()
 
 void LineEditFind::slotShowCloseButton(const QString &text)
 {
-     buttonClose->setVisible(text.count() > 0);
+    buttonClose->setVisible(this->isEnabled() && text.count() > 0);
 }

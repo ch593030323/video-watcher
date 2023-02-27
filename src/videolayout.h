@@ -22,8 +22,12 @@ struct LayoutPos{
     int x;
     int y;
 
+    /**
+     * @brief value
+     * 获取pos的值，用于map的内部排序
+     */
     int value() const {
-        return x * 100 + y;
+        return y * 100 + x;
     }
     /**
      * @brief operator <

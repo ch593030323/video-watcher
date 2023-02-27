@@ -5,6 +5,7 @@
 #include "datasource.h"
 
 #include <QDialog>
+#include <QStandardItemModel>
 
 
 namespace Ui {
@@ -44,11 +45,10 @@ private:
 private slots:
     void toadd();
     void todel();
-    void toaddgap();
 
     void took();
     void toexit();
-    void toadjust();
+
 private:
     Ui::PlayAlternateNewDialog *ui;
     Type m_type;

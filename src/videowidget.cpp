@@ -36,10 +36,35 @@ void VideoWidget::updateLayout()
         //添加右键菜单栏
         for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
             QList<VideoCell::ContextMenuData> pairList;
-            pairList << VideoCell::ContextMenuData(QString::fromUtf8("合并"), this, SLOT(tomerge()));
-            pairList << VideoCell::ContextMenuData(QString::fromUtf8("清除"), this, SLOT(toclear()));
-            pairList << VideoCell::ContextMenuData(QString::fromUtf8("还原"), this, SLOT(torestore()));
+            pairList << VideoCell::ContextMenuData(QString::fromUtf8("合并所选"), this, SLOT(tomerge()));
+            pairList << VideoCell::ContextMenuData(QString::fromUtf8("清除所有"), this, SLOT(toclear()));
+            pairList << VideoCell::ContextMenuData(QString::fromUtf8("还原初始"), this, SLOT(torestore()));
             k.value()->setContextMenuDataList(pairList);
+        }
+    } else {
+        //添加右键菜单栏
+        for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
+            VideoCell *cell = k.value();
+            VideoCell::ContextMenuData ac_alter_start = VideoCell::ContextMenuData(QString::fromUtf8("开始轮播"),
+                                                   this,
+                                                   "",
+                                                   "alter_start");
+            VideoCell::ContextMenuData ac_alter_stop = VideoCell::ContextMenuData(QString::fromUtf8("停止轮播"),
+                                                   cell,
+                                                   SLOT(toAlterStop()),
+                                                   "alter_stop");
+
+            for(const QFileInfo &info : QDir("play_alter").entryInfoList()) {
+                if(info.isFile())
+                    ac_alter_start.children << VideoCell::ContextMenuData(
+                                                    info.baseName(),
+                                                    cell,
+                                                    SLOT(toAlterStart()),
+                                                    info.filePath());
+            }
+            cell->setContextMenuDataList(QList<VideoCell::ContextMenuData>()
+                                         << ac_alter_start
+                                         << ac_alter_stop);
         }
     }
 }
@@ -56,10 +81,27 @@ QByteArray VideoWidget::layoutInfo2Json()
 
 void VideoWidget::slotAddUrlToFocusedCell(const QString &url)
 {
-    VideoCell *cell = qobject_cast<VideoCell *>(this->focusWidget());
+    VideoCell *cell = qobject_cast<VideoCell *>(qApp->focusWidget());
     if(!cell)
         return;
 
+    cell->addPlayer(url);
+}
+
+void VideoWidget::slotAutoAddUrl(const QString &url)
+{
+    VideoCell *cell = qobject_cast<VideoCell *>(qApp->focusWidget());
+    if(!cell) {
+        for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
+            qDebug() << __LINE__ << k.key().value() << k.value()->getInfo().url;
+            if(k.value()->getInfo().url.isEmpty()) {
+                cell = k.value();
+                break;
+            }
+        }
+    }
+    if(!cell)
+        return;
     cell->addPlayer(url);
 }
 

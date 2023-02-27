@@ -39,6 +39,9 @@ QMenu::item:selected {
     background: #ff506b;
     color:#171718;
 }
+QMenu::item:disabled {
+    color:#a1b0bb;
+}
 
 QLabel{
     color:#171718;
@@ -268,3 +271,57 @@ QSlider::handle:horizontal:pressed{
 }
 
 /*======================================QSlider end====================================*/
+
+/*======================================QSpinBox begin====================================*/
+QSpinBox {
+    border:1px solid #a1b0bb;
+    background:#ffffff;
+    color:#171718;
+}
+
+ QSpinBox::up-button {
+     subcontrol-position: right; /* position at the top right corner */
+     width: 18px;
+     height: 18px;
+     margin-right:2px;
+     image:url(:/skin_image/light/plus_normal_40x40.png);
+     border:1px outset #a1b0bb;
+     border-radius:4px;
+ }
+ QSpinBox::down-button {
+    subcontrol-position: right;
+    margin-right:24px;
+    width: 18px;
+    height: 18px;
+    image:url(:/skin_image/light/minus_normal_40x40.png);
+    border:1px outset #a1b0bb;
+    border-radius:4px;
+ }
+
+QSpinBox::up-button:hover {
+    image:url(:/skin_image/light/plus_hover_40x40.png);
+}
+
+QSpinBox::down-button:hover {
+    image:url(:/skin_image/light/minus_hover_40x40.png);
+}
+
+QSpinBox::up-button:pressed {
+    image:url(:/skin_image/light/plus_pressed_40x40.png);
+}
+
+QSpinBox::down-button:pressed {
+    image:url(:/skin_image/light/minus_pressed_40x40.png);
+}
+
+/*off 和 disable暂时不起作用，还不清楚原因*/
+QSpinBox::down-button:off{
+    image:url(:/skin_image/light/plus_disable_40x40.png);
+}
+
+/*off 和 disable暂时不起作用，还不清楚原因*/
+QSpinBox::down-button:off{
+    image:url(:/skin_image/light/minus_disable_40x40.png);
+}
+
+ /*======================================QSpinBox end====================================*/

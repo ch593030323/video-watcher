@@ -22,6 +22,7 @@ public:
 
 public slots:
     void slotAddUrlToFocusedCell(const QString &url);
+    void slotAutoAddUrl(const QString &url);
 
 protected:
     virtual void resizeEvent(QResizeEvent *event);
@@ -30,8 +31,8 @@ private:
     QMap<LayoutPos, VideoCell *> m_videoMap;
     LayoutInfo m_layoutInfo;
 
-public:
     /*----------------------------多选begin----------------------------*/
+public:
     QList<VideoCell *> selectedWidgetList();
     void setMultilselected(bool isMultilselected);
 public slots:
@@ -44,6 +45,7 @@ public slots:
 private:
     bool m_isMultilselected;
     /*----------------------------多选end----------------------------*/
+
 };
 
 #endif // VIDEOWIDGET_H

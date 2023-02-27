@@ -119,12 +119,12 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="LineEditX" name="lineEdit" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>60</width>
+         <height>0</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -163,6 +163,12 @@
    <class>TreeVideoViewSearchUrl</class>
    <extends>QWidget</extends>
    <header>treevideoviewsearchurl.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LineEditX</class>
+   <extends>QWidget</extends>
+   <header>lineeditx.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
