@@ -45,6 +45,11 @@ MainFrame::MainFrame(QWidget *parent)
     connect(ui->pushButton_video_widget, SIGNAL(clicked()), this, SLOT(tovideo_widget()));
     connect(ui->pushButton_video_playback, SIGNAL(clicked()), this, SLOT(tovideo_playback()));
     connect(ui->pushButton_system_setting, SIGNAL(clicked()), this, SLOT(tovideo_system_setting()));
+
+    MainVideoWidget *w = qobject_cast<MainVideoWidget *>(ui->stackedWidget->widget(0));
+    if(w) {
+        QTimer::singleShot(0, w, SLOT(loadLayout()));
+    }
 }
 
 MainFrame::~MainFrame()
@@ -55,6 +60,10 @@ MainFrame::~MainFrame()
 
 void MainFrame::toexit()
 {
+    MainVideoWidget *w = qobject_cast<MainVideoWidget *>(ui->stackedWidget->widget(0));
+    if(w) {
+        w->saveLayout();
+    }
     this->close();
     qApp->quit();
 }

@@ -13,9 +13,27 @@ int LayoutCell::indexOf(QRect rect, const QList<LayoutCell> &list)
     return -1;
 }
 
+int LayoutCell::indexOf(LayoutPos pos, const QList<LayoutCell> &list)
+{
+    for(int k = 0; k < list.count(); k ++) {
+        if(list[k].pos.value() == pos.value())
+            return k;
+    }
+    return -1;
+}
+
 QRect LayoutCell::rect() const
 {
     return QRect(pos.x, pos.y, column_spans, row_spans);
+}
+
+QString LayoutCell::toString() const
+{
+    return QString("pos:%1, row_spans: %2, column_spans:%3, url:%4")
+            .arg(pos.value())
+            .arg(row_spans)
+            .arg(column_spans)
+            .arg(url);
 }
 
 QByteArray LayoutInfo::toJson()
@@ -75,9 +93,9 @@ void LayoutInfo::update(const QMap<LayoutPos, VideoCell *> &map)
     for(QMap<LayoutPos, VideoCell *>::const_iterator k = map.begin(); k != map.end(); k ++) {
         VideoCell *w = k.value();
         QString url = w->getInfo().url;
-        if(w->isVisible() && url != "") {
+        if(w->isVisible()) {
             QList<LayoutCell> &cells = this->cells;
-            int index = LayoutCell::indexOf(w->rectX(), cells);
+            int index = LayoutCell::indexOf(w->getInfo().pos, cells);
             if(index >= 0) {
                 cells[index].url = url;
             } else {

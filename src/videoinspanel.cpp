@@ -7,8 +7,9 @@ VideoInsPanel::VideoInsPanel(QWidget *parent) :
     ui(new Ui::VideoInsPanel)
 {
     ui->setupUi(this);
-    ui->widget_2->setIconChar(0xf00e);
-    ui->widget_3->setIconChar(0xf010);
+    ui->widget_plus->setIconChar(0xf00e);
+    ui->widget_minus->setIconChar(0xf010);
+    ui->horizontalSlider->setFocusPolicy(Qt::NoFocus);
 
 }
 

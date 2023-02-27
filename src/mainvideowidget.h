@@ -24,6 +24,9 @@ public:
     void updateLayout();
     void setDataSource(DataSource *datasource);
 
+    void saveLayout();
+public slots:
+    void loadLayout();
 private slots:
 
     /**

@@ -45,6 +45,7 @@ public:
 
     void removePlayer();
     void addPlayer(const QString &url);
+    void preparePlayer(const QString &url);
 
     void removeThread(QString url);
     PlayThread *addThread(QString url);

@@ -5,6 +5,7 @@
 #include "playformnewdialog.h"
 #include "videocontrolpanel.h"
 #include "propertycolor.h"
+#include "mainvideowidget.h"
 
 #include <QPainter>
 #include <QtDebug>
@@ -14,7 +15,6 @@
 #include <QMimeData>
 #include <QMenu>
 #include <QLineF>
-#include "mainvideowidget.h"
 
 VideoCell::VideoCell(LayoutPos pos, QWidget *parent)
     : QWidget(parent)
@@ -362,7 +362,7 @@ void VideoCell::mouseMoveEvent(QMouseEvent *event)
      * 但是VideoControlPanel上move时，会先触发自己的moveEvent然后再触发VideoWidget的moveEvent，导致自动隐藏功一直生效
      * 这里加个geometry().contains的判断来规避上述情况
     */
-    if(m_info.url.isEmpty()) {
+    if(m_info.url.isEmpty() && m_playList.isEmpty()) {
         //obid无效
     } else if(m_controlPanel->isVisible() && !m_controlPanel->geometry().contains(event->pos())) {
         //面板显示且光标不在面板上
@@ -372,6 +372,9 @@ void VideoCell::mouseMoveEvent(QMouseEvent *event)
         m_controlPanel->showAutoHide(1000);
     }
 
+    if(!m_playList.isEmpty()) {
+        m_controlPanel->hideButtons(m_controlPanel->buttonFlags() | VideoControlPanel::VideoAlter);
+    }
     //当移动的偏移量 大于 startDragDistance时才会触发拖拽
     if((event->pos() - m_pressPos).manhattanLength() < qApp->startDragDistance()
             || m_pressMoving
@@ -509,9 +512,7 @@ PlayThread *VideoCell::addThread(QString url)
         thread = PlayThread::createPlayThread(url);
         PlayThread::PlayThreadMap.insert(url, thread);
     }
-    thread->open();
     connect(thread, SIGNAL(receiveImage(FFmpegData)), this, SLOT(updateImage(FFmpegData)), Qt::QueuedConnection);
-    //qDebug() << "ffmpeg thread connection count is " << thread->getUrl() << thread->receiverImageConnectionCount();
 
     return thread;
 }
@@ -522,7 +523,14 @@ void VideoCell::addPlayer(const QString &url)
         return;
 
     removePlayer();
+    m_info.url = url;
 
+    preparePlayer(url);
+
+}
+
+void VideoCell::preparePlayer(const QString &url)
+{
     PlayThread *thread = addThread(url);
 
     //播放器的定义为：一个播放线程一个播放器，VideoCell是一个播放窗口
@@ -541,8 +549,6 @@ void VideoCell::addPlayer(const QString &url)
         m_controlPanel->setPause(false);
         thread->play();
     }
-
-    m_info.url = url;
 }
 
 void VideoCell::addPlayerList(const QList<AlterPlayFrame> &playList)
@@ -551,15 +557,10 @@ void VideoCell::addPlayerList(const QList<AlterPlayFrame> &playList)
 
     m_playList = playList;
     for(int k = 0; k < playList.count(); k ++) {
-        PlayThread *thread = addThread(playList[k].url);
-        //播放结束
-        if(thread->lastPlayState() == FFmpegData::Stopped) {
-            m_controlPanel->setPause(false);
-            thread->play();
-        }
+        preparePlayer(playList[k].url);
     }
     //
-    toControlPlay();
+//    toControlPlay();
 
     runPlayerList();
 }

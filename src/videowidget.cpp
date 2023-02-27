@@ -13,11 +13,7 @@ VideoWidget::VideoWidget(QWidget *parent)
 void VideoWidget::updateLayout(const LayoutInfo &info)
 {
     m_layoutInfo = info;
-    updateLayout();
-}
 
-void VideoWidget::updateLayout()
-{
     VideoCell::parseVideoArea(m_layoutInfo,
                               this,
                               this->rect().adjusted(-lds::margin/2, -lds::margin/2, lds::margin/2, lds::margin/2),
@@ -67,6 +63,12 @@ void VideoWidget::updateLayout()
                                          << ac_alter_stop);
         }
     }
+}
+
+void VideoWidget::updateLayout()
+{
+    updateLayoutInfo();
+    updateLayout(m_layoutInfo);
 }
 
 void VideoWidget::updateLayoutInfo()

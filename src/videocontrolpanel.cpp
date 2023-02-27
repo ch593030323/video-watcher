@@ -67,6 +67,17 @@ void VideoControlPanel::showAutoHide(int timeout)
     m_controlPanelTimer->start(timeout);
 }
 
+void VideoControlPanel::setFullSreen(bool e)
+{
+    m_isFullScreen = e;
+    updateControlPanelState(e ? VideoFullScreen : VideoNormalScreen);
+}
+
+void VideoControlPanel::setPause(bool e)
+{
+    updateControlPanelState(e ? VideoPause : VideoPlay);
+}
+
 void VideoControlPanel::updateProgress(int cur, int total)
 {
     //当直播时，total小于零，即无播放时长
@@ -86,6 +97,27 @@ void VideoControlPanel::updateProgress(int cur, int total)
                                      m_processTotal   % (60));
     text = QFontMetrics(m_labelText->font()).elidedText(text, Qt::ElideRight, m_labelText->width());
     m_labelText->setText(text);
+}
+
+void VideoControlPanel::hideButtons(int flags)
+{
+    m_buttonPlay->setHidden(flags & VideoPlay);
+    m_buttonPause->setHidden(flags & VideoPause);
+    m_buttonClose->setHidden(flags & VideoClose);
+    m_buttonFullScreen->setHidden(flags & VideoFullScreen);
+    m_buttonFullScreenExit->setHidden(flags & VideoNormalScreen);
+    m_buttonSaveImage->setHidden(flags & VideoSaveImage);
+}
+
+int VideoControlPanel::buttonFlags()
+{
+    return  (m_buttonPlay->isVisible() ? 0 : VideoPlay) |
+            (m_buttonPause->isVisible() ? 0 : VideoPause) |
+            (m_buttonClose->isVisible() ? 0 : VideoClose) |
+            (m_buttonFullScreen->isVisible() ? 0 : VideoFullScreen) |
+            (m_buttonFullScreenExit->isVisible() ? 0 : VideoNormalScreen) |
+            (m_buttonSaveImage->isVisible() ? 0 : VideoSaveImage)
+            ;
 }
 
 void VideoControlPanel::paintEvent(QPaintEvent *event)

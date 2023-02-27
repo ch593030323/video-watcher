@@ -35,7 +35,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="IconButton" name="widget_2" native="true">
+        <widget class="IconButton" name="widget_plus" native="true">
          <property name="minimumSize">
           <size>
            <width>40</width>
@@ -58,7 +58,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="IconButton" name="widget_3" native="true">
+        <widget class="IconButton" name="widget_minus" native="true">
          <property name="minimumSize">
           <size>
            <width>40</width>

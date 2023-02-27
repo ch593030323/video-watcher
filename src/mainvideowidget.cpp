@@ -95,6 +95,24 @@ void MainVideoWidget::setDataSource(DataSource *datasource)
     ui->treeView->slotInitAll();
 }
 
+void MainVideoWidget::saveLayout()
+{
+    QFile file("layout_cur.json");
+    if(!file.open(QFile::WriteOnly)) {
+        qDebug() << file.errorString();
+    }
+    file.write(ui->widget_video->getLayoutInfo().toJson());
+}
+
+void MainVideoWidget::loadLayout()
+{
+    QFile file("layout_cur.json");
+    if(!file.open(QFile::ReadOnly)) {
+        qDebug() << file.errorString();
+    }
+    ui->widget_video->updateLayout(LayoutInfo::readFrom(file.readAll()));
+}
+
 void MainVideoWidget::toVideoLayout1x1()
 {
     ui->widget_video->updateLayout(LayoutInfo(1, 1));

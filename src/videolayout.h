@@ -56,8 +56,10 @@ struct LayoutCell{
     QString url;
 
     static int indexOf(QRect rect, const QList<LayoutCell> &list);
+    static int indexOf(LayoutPos pos, const QList<LayoutCell> &list);
 
     QRect rect() const;
+    QString toString() const;
 
     inline int x() const {return pos.x;}
     inline int y() const {return pos.y;}

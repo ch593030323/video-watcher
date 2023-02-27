@@ -15,6 +15,7 @@
 #include <QMenu>
 #include <QDir>
 #include <QDirIterator>
+#include <QButtonGroup>
 
 MainSystemSetings::MainSystemSetings(QWidget *parent) :
     QWidget(parent),

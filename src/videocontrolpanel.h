@@ -13,30 +13,33 @@ class VideoControlPanel : public QWidget
     Q_OBJECT
 public:
     enum ControlState{
-        VideoPlay,
-        VideoPause,
-        VideoFullScreen,
-        VideoNormalScreen
+        VideoPlay = 1,
+        VideoPause = 2,
+        VideoFullScreen = 4,
+        VideoNormalScreen = 8,
+        VideoClose = 16,
+        VideoSaveImage = 32,
+
+        VideoAlter = VideoPlay | VideoPause,
     };
+    Q_DECLARE_FLAGS(ControlStates, ControlState)
 public:
     explicit VideoControlPanel(VideoCell *parent);
-
 
     void showAutoHide(int timeout);
 
     inline bool isFullScreen() {
         return m_isFullScreen;
     }
-    inline void setFullSreen(bool e) {
-        m_isFullScreen = e;
-        updateControlPanelState(e ? VideoFullScreen : VideoNormalScreen);
-    }
+    void setFullSreen(bool e);
 
-    inline void setPause(bool e) {
-        updateControlPanelState(e ? VideoPause : VideoPlay);
-    }
+    void setPause(bool e);
 
     void updateProgress(int cur, int total);
+
+    void hideButtons(int flags);
+
+    int buttonFlags();
 
 protected:
     void paintEvent(QPaintEvent *event);
