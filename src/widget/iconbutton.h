@@ -12,7 +12,7 @@ public:
         ToolButton
     };
 public:
-    explicit IconButton(QWidget *parent = nullptr);
+    explicit IconButton(QWidget *parent = 0);
 
     void setIconChar(QChar ch);
     void setType(Type type);

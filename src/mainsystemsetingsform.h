@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QStandardItemModel>
 
+class DataSource;
 namespace Ui {
 class MainSystemSetingsForm;
 }
@@ -17,12 +18,14 @@ public:
     ~MainSystemSetingsForm();
 
     void refresh();
+    void setDataSource(DataSource *datasource);
 public slots:
     void toadd();
     void todel();
     void tomodify();
 private:
     Ui::MainSystemSetingsForm *ui;
+    DataSource *m_datasource;
 };
 
 #endif // MAINSYSTEMSETINGSFORM_H

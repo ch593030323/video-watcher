@@ -20,7 +20,6 @@ MainVideoWidget::MainVideoWidget(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    setDataSource(new DataSource(this));
     ui->widget_ins_panel->setStepValue(30);
 
     ui->pushButton_1x1->setIcon(lds::getLayoutPixmap(1));
@@ -101,7 +100,7 @@ void MainVideoWidget::saveLayout()
     if(!file.open(QFile::WriteOnly)) {
         qDebug() << file.errorString();
     }
-    file.write(ui->widget_video->getLayoutInfo().toJson());
+    file.write(ui->widget_video->toJson());
 }
 
 void MainVideoWidget::loadLayout()

@@ -70,12 +70,12 @@ void VideoControlPanel::showAutoHide(int timeout)
 void VideoControlPanel::setFullSreen(bool e)
 {
     m_isFullScreen = e;
-    updateControlPanelState(e ? VideoFullScreen : VideoNormalScreen);
+    updateControlPanelState(e ? FullScreen : NormalScreen);
 }
 
 void VideoControlPanel::setPause(bool e)
 {
-    updateControlPanelState(e ? VideoPause : VideoPlay);
+    updateControlPanelState(e ? Paused : Playing);
 }
 
 void VideoControlPanel::updateProgress(int cur, int total)
@@ -101,22 +101,22 @@ void VideoControlPanel::updateProgress(int cur, int total)
 
 void VideoControlPanel::hideButtons(int flags)
 {
-    m_buttonPlay->setHidden(flags & VideoPlay);
-    m_buttonPause->setHidden(flags & VideoPause);
-    m_buttonClose->setHidden(flags & VideoClose);
-    m_buttonFullScreen->setHidden(flags & VideoFullScreen);
-    m_buttonFullScreenExit->setHidden(flags & VideoNormalScreen);
-    m_buttonSaveImage->setHidden(flags & VideoSaveImage);
+    m_buttonPlay->setHidden(flags & Playing);
+    m_buttonPause->setHidden(flags & Paused);
+    m_buttonClose->setHidden(flags & Close);
+    m_buttonFullScreen->setHidden(flags & FullScreen);
+    m_buttonFullScreenExit->setHidden(flags & NormalScreen);
+    m_buttonSaveImage->setHidden(flags & SaveImage);
 }
 
 int VideoControlPanel::buttonFlags()
 {
-    return  (m_buttonPlay->isVisible() ? 0 : VideoPlay) |
-            (m_buttonPause->isVisible() ? 0 : VideoPause) |
-            (m_buttonClose->isVisible() ? 0 : VideoClose) |
-            (m_buttonFullScreen->isVisible() ? 0 : VideoFullScreen) |
-            (m_buttonFullScreenExit->isVisible() ? 0 : VideoNormalScreen) |
-            (m_buttonSaveImage->isVisible() ? 0 : VideoSaveImage)
+    return  (m_buttonPlay->isVisible() ? 0 : Playing) |
+            (m_buttonPause->isVisible() ? 0 : Paused) |
+            (m_buttonClose->isVisible() ? 0 : Close) |
+            (m_buttonFullScreen->isVisible() ? 0 : FullScreen) |
+            (m_buttonFullScreenExit->isVisible() ? 0 : NormalScreen) |
+            (m_buttonSaveImage->isVisible() ? 0 : SaveImage)
             ;
 }
 
@@ -140,19 +140,19 @@ void VideoControlPanel::mouseMoveEvent(QMouseEvent *event)
 void VideoControlPanel::updateControlPanelState(ControlState state)
 {
     switch(state) {
-    case VideoPlay:
+    case Playing:
         m_buttonPlay->hide();
         m_buttonPause->show();
         break;
-    case VideoPause:
+    case Paused:
         m_buttonPlay->show();
         m_buttonPause->hide();
         break;
-    case VideoFullScreen:
+    case FullScreen:
         m_buttonFullScreen->hide();
         m_buttonFullScreenExit->show();
         break;
-    case VideoNormalScreen:
+    case NormalScreen:
         m_buttonFullScreen->show();
         m_buttonFullScreenExit->hide();
         break;

@@ -3,6 +3,10 @@
 
 #include <QWidget>
 
+
+class MainSystemSetingsAlter;
+class MainSystemSetingsForm;
+class DataSource;
 namespace Ui {
 class MainSystemSetings;
 }
@@ -15,18 +19,16 @@ public:
     explicit MainSystemSetings(QWidget *parent = 0);
     ~MainSystemSetings();
 
+    void setDataSource(DataSource *datasource);
 private slots:
-    //新增组播表单
-    void toPlayFormNew();
-    void toPlayFormOK();
-    //新增轮播表单
-    void toPlayAlternateNew();
-    void toPlayAlternateOK();
-
     void toalter();
     void toform();
 private:
     Ui::MainSystemSetings *ui;
+    DataSource *m_datasource;
+
+    MainSystemSetingsAlter *m_settingsAlter;
+    MainSystemSetingsForm *m_settingsForm;
 };
 
 #endif // MAINSYSTEMSETINGS_H

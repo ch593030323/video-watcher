@@ -13,14 +13,14 @@ class VideoControlPanel : public QWidget
     Q_OBJECT
 public:
     enum ControlState{
-        VideoPlay = 1,
-        VideoPause = 2,
-        VideoFullScreen = 4,
-        VideoNormalScreen = 8,
-        VideoClose = 16,
-        VideoSaveImage = 32,
+        Playing = 1,
+        Paused = 2,
+        FullScreen = 4,
+        NormalScreen = 8,
+        Close = 16,
+        SaveImage = 32,
 
-        VideoAlter = VideoPlay | VideoPause,
+        Alter = Playing | Paused,
     };
     Q_DECLARE_FLAGS(ControlStates, ControlState)
 public:
@@ -34,6 +34,7 @@ public:
     void setFullSreen(bool e);
 
     void setPause(bool e);
+    void updateControlPanelState(ControlState state);
 
     void updateProgress(int cur, int total);
 
@@ -47,7 +48,6 @@ protected:
 
 private:
     IconButton *createPanelButton(QChar icon, const QString &tipText);
-    void updateControlPanelState(ControlState state);
 
 signals:
     void signalButtonPlay();

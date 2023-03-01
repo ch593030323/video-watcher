@@ -63,6 +63,8 @@ struct LayoutCell{
 
     inline int x() const {return pos.x;}
     inline int y() const {return pos.y;}
+
+    bool isNull() const;
 };
 
 /**

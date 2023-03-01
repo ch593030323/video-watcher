@@ -194,7 +194,7 @@ public slots:
     void stop();
 
 private slots:
-    void slotReceiveImage(const FFmpegData &d);
+    void slotReceiveImage(FFmpegData d);
 
 private:
     QString m_url;           //视频流地址 set only if thread start
@@ -202,6 +202,9 @@ private:
 
     FFmpegData::PlayState m_lastPlayState;
     FFmpegData m_lastPlayData;
+
+    int m_tryReconnectIndex;
+    const int m_tryReconnectMax;
 };
 
 #endif // FFMPEG_H

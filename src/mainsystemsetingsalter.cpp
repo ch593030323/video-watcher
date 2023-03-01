@@ -51,10 +51,15 @@ void MainSystemSetingsAlter::refresh()
     ui->tableView->selectRow(0);
 }
 
+void MainSystemSetingsAlter::setDataSource(DataSource *datasource)
+{
+    m_datasource = datasource;
+}
+
 void MainSystemSetingsAlter::toadd()
 {
     PlayAlternateNewDialog d(PlayAlternateNewDialog::TypeNew, this);
-    d.setDataSource(new DataSource(this));
+    d.setDataSource(m_datasource);
     if(QDialog::Accepted == d.exec()) {
         refresh();
     }
@@ -77,7 +82,7 @@ void MainSystemSetingsAlter::tomodify()
         return;
 
     PlayAlternateNewDialog d(PlayAlternateNewDialog::TypeModify, this);
-    d.setDataSource(new DataSource(this));
+    d.setDataSource(m_datasource);
     d.readFrom("play_alter"  "/" + ui->tableView->data(row, "name").toString());
     if(QDialog::Accepted == d.exec()) {
         refresh();

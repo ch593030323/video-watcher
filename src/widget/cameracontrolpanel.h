@@ -2,7 +2,10 @@
 #define CAMERACONTROLPANEL_H
 
 #include <QWidget>
-#include <QtWidgets>
+#include <QMap>
+#include <QPainter>
+#include <QMouseEvent>
+#include <QStyle>
 
 class CameraControlPanel : public QWidget
 {
@@ -50,7 +53,7 @@ public:
     };
 
 public:
-    explicit CameraControlPanel(QWidget *parent = nullptr);
+    explicit CameraControlPanel(QWidget *parent = 0);
 
 signals:
     void clicked(Direction direct);

@@ -15,7 +15,6 @@ playformnewdialog::playformnewdialog(Type type, QWidget *parent)
 {
     ui->setupUi(this);
     setObjectName("Window");
-    setDataSource(new DataSource(this));
     resize(832, 557);
 
     ui->widget_video->setMultilselected(true);
@@ -66,7 +65,7 @@ playformnewdialog::playformnewdialog(Type type, QWidget *parent)
 
     connect(ui->pushButton_ok, SIGNAL(clicked()), this, SLOT(toaccept()));
     connect(ui->pushButton_exit, SIGNAL(clicked()), this, SLOT(toexit()));
-    connect(ui->treeView->view(), SIGNAL(signalPlayRequest(QString)), ui->widget_video, SLOT(slotAddUrlToFocusedCell(QString)));
+    connect(ui->treeView->view(), SIGNAL(signalPlayRequest(QString)), ui->widget_video, SLOT(slotAutoAddUrl(QString)));
 
     toVideoLayout3x3();
     ui->pushButton_3x3->setChecked(true);
@@ -100,15 +99,15 @@ void playformnewdialog::readFrom(const QString &filepath)
     ui->lineEdit->setText(QFileInfo(filepath).baseName());
 
     //checked
-    if(1 == ui->widget_video->getLayoutInfo().column_count) {
+    if(1 == ui->widget_video->columnCount()) {
         ui->pushButton_1x1->setChecked(true);
-    } else if(2 == ui->widget_video->getLayoutInfo().column_count) {
+    } else if(2 == ui->widget_video->columnCount()) {
         ui->pushButton_2x2->setChecked(true);
-    } else if(3 == ui->widget_video->getLayoutInfo().column_count) {
+    } else if(3 == ui->widget_video->columnCount()) {
         ui->pushButton_3x3->setChecked(true);
-    } else if(4 == ui->widget_video->getLayoutInfo().column_count) {
+    } else if(4 == ui->widget_video->columnCount()) {
         ui->pushButton_4x4->setChecked(true);
-    } else if(5 == ui->widget_video->getLayoutInfo().column_count) {
+    } else if(5 == ui->widget_video->columnCount()) {
         ui->pushButton_5x5->setChecked(true);
     }
 }
@@ -157,7 +156,7 @@ void playformnewdialog::toaccept()
     if(!file.open(QFile::WriteOnly)) {
         qDebug() << file.errorString();
     }
-    file.write(ui->widget_video->layoutInfo2Json());
+    file.write(ui->widget_video->toJson());
 
     this->accept();
 }

@@ -9,6 +9,8 @@ FFmpegThread::FFmpegThread(const QString &url, QObject *parent)
     : QThread(parent)
     , m_url(url)
     , m_lastPlayState(FFmpegData::NoState)
+    , m_tryReconnectIndex(-1)
+    , m_tryReconnectMax(3)
 {
 }
 
@@ -42,13 +44,29 @@ void FFmpegThread::stop()
     m_mutex.setStopped(true);
 }
 
-void FFmpegThread::slotReceiveImage(const FFmpegData &d)
+void FFmpegThread::slotReceiveImage(FFmpegData d)
 {
+    //save state
     if(d.type == FFmpegData::Control) {
         m_lastPlayState = d.playState;
     } else {
         m_lastPlayData = d;
     }
+    //reconnect
+    if(d.errorCode == FFmpegData::ErrorNetwork) {
+        m_tryReconnectIndex ++;
+        if(m_tryReconnectIndex < m_tryReconnectMax) {
+            d.errorString += QString("\n正在重新连接：%1/%2").arg(m_tryReconnectIndex).arg(m_tryReconnectMax);
+            qDebug() << __LINE__ << d.errorString;
+            QTimer::singleShot(10, this, SIGNAL(signalPlay()));
+        } else {
+            m_tryReconnectIndex = -1;
+            d.errorString += QString::fromUtf8("\n重新连接失败");
+            qDebug() << __LINE__ << d.errorString;
+
+        }
+    }
+    //send
     emit receiveImage(d);
 }
 
@@ -123,7 +141,7 @@ void FFmpegObject::playNext(bool begin)
         }
         if(mutex->isStopped()) {
             //已经停止，则本次播放结束
-            qDebug() << __FILE__ << __LINE__ << "手动结束";
+            qDebug() << __FILE__ << __LINE__ << url.section('/', -1) << "手动结束";
             emit receiveImage(FFmpegData(FFmpegData::Stopped));
             goto end;
         }
@@ -138,7 +156,7 @@ void FFmpegObject::playNext(bool begin)
         //读取下一帧
         frameFinish = av_read_frame(avFormatContext, avPacket);
         //播放结束
-        if(mutex->isStopped() || frameFinish < 0) {
+        if(frameFinish < 0) {
             goto end;
         }
         //获取播放进度
@@ -264,6 +282,7 @@ int FFmpegObject::block_interrupt_callback(void *p)
 {
     BlockInterruptData *r = (BlockInterruptData *)p;
     if (r->last_time > 0) {
+        qDebug() << "block_interrupt_callback:"<<r->last_time << time(NULL);
         r->block_duration = time(NULL) - r->last_time;
         if (r->isTimeOut()) {
             //中断

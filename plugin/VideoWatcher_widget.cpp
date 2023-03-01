@@ -496,16 +496,16 @@ QList<DataSource::Location> DataSourceOMS::getLocationList()
 QList<DataSource::Camera> DataSourceOMS::getCameraList(const QString &location_obid)
 {
     QList<DataSource::Camera> r;
-    OMSQuery query_camera(m_database);
-    query_camera.exec(QString("select obid, Name, FaultState from Camera where ParentLink = %1")
+    OMSQuery query(m_database);
+    query.exec(QString("select obid, Name, FaultState from Camera where ParentLink = %1")
                       .arg(location_obid));
-    while(query_camera.next()) {
+    while(query.next()) {
         DataSource::Camera d;
-        d.obid = query_camera.value("obid").toString();
-        d.name = query_camera.value("Name").toString();
+        d.obid = query.value("obid").toString();
+        d.name = query.value("Name").toString();
         d.location_obid = location_obid;
         d.type = 1;
-        d.state = query_camera.value("FaultState").toInt();
+        d.state = query.value("FaultState").toInt();
         d.url = "rtsp://10.137.32.250:554/rtp/34020000001320000067_34020000001310000001";
 
         r << d;

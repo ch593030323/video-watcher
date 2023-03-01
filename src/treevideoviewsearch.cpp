@@ -17,6 +17,8 @@
 #include <QApplication>
 #include <QtDebug>
 #include <QFile>
+#include <QListView>
+#include <QTableView>
 
 QPixmap getCameraStatePixmap(int state) {
     if(0 == state) {
@@ -37,8 +39,18 @@ QPixmap getCameraStatePixmap(int state) {
 TreeVideoViewSearch::TreeVideoViewSearch(QWidget *parent)
     : QWidget(parent)
 {
+    QTableView *comView = new QTableView;
+    comView->horizontalHeader()->hide();
+    comView->verticalHeader()->hide();
+    comView->setEditTriggers(QTableView::NoEditTriggers);
+    comView->verticalHeader()->setDefaultSectionSize(22);
+    comView->horizontalHeader()->setStretchLastSection(true);
+    comView->setShowGrid(false);
+    m_comboBox->setView(comView);
+
     m_lineEdit = new LineEditFind;
     m_comboBox = new QComboBox;
+    m_comboBox->setView(comView);
 
     m_treeModel = new TreeVideoModel(this);
     m_treeView = new TreeVideoView;
@@ -135,8 +147,8 @@ void TreeVideoViewSearch::slotInitTree()
         itemISCS->appendRow(item_location);
 
         //占位用
-        //TODO location.count 等于零时
-        item_location->setChild(0, 0, new QStandardItem);
+        if(d.camera_count > 0)
+            item_location->setChild(0, 0, new QStandardItem);
     }
     //
     m_treeView->expand(m_treeModel->index(0, 0));

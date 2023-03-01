@@ -50,7 +50,7 @@ VideoCell::~VideoCell()
     removeThread(m_info.url);
 }
 
-void VideoCell::parseVideoArea(const LayoutInfo &info, QWidget *parentWidget, QRect area, QMap<LayoutPos, VideoCell *> &cacheMap)
+void VideoCell::updateVideoScene(const LayoutInfo &info, QWidget *parentWidget, QRect area, QMap<LayoutPos, VideoCell *> &cacheMap)
 {
     const int column_count =  info.column_count;
     const int row_count = info.row_count;
@@ -65,9 +65,8 @@ void VideoCell::parseVideoArea(const LayoutInfo &info, QWidget *parentWidget, QR
             if(!cacheMap.contains(pos)) {
                 cacheMap.insert(pos, new VideoCell(pos, parentWidget));
             }
-            VideoCell *w = cacheMap.value(pos);
-            w->setGeometryX(1, 1, area, column_count, row_count);
 
+            VideoCell *w = cacheMap.value(pos);
             unused_video_widget_list.removeOne(w);
         }
     }
@@ -85,7 +84,6 @@ void VideoCell::parseVideoArea(const LayoutInfo &info, QWidget *parentWidget, QR
 
         unused_video_widget_list.removeOne(w);
 
-        w->setGeometryX(cell.column_spans, cell.row_spans, area, column_count, row_count);
         //将不需要显示的cell保存在unused_video
         for(int p1 = 0; p1 < cell.column_spans; p1 ++) {
             for(int p2 = 0; p2 < cell.row_spans; p2 ++) {
@@ -112,21 +110,55 @@ void VideoCell::parseVideoArea(const LayoutInfo &info, QWidget *parentWidget, QR
             w->show();
         }
     }
+
+    updateVideoGeometry(info, area, cacheMap);
+}
+
+void VideoCell::updateVideoGeometry(const LayoutInfo &info, QRect area, QMap<LayoutPos, VideoCell *> &cacheMap)
+{
+    const int column_count =  info.column_count;
+    const int row_count = info.row_count;
+    //更新所有的cell的geometry
+    for(int row = 0; row < row_count; row ++) {
+        for(int column = 0; column < column_count; column ++) {
+            LayoutPos pos = LayoutPos(column, row);
+            VideoCell *w = cacheMap.value(pos, 0);
+            if(w)
+                w->setGeometryX(1, 1, area, column_count, row_count);
+        }
+    }
+
+
+    //只更新info里cell的geometry
+    for(int k = 0; k < info.cells.count(); k ++) {
+        const LayoutCell &cell = info.cells[k];
+        //
+        LayoutPos pos = cell.pos;
+        VideoCell *w = cacheMap.value(pos, 0);
+        if(w)
+            w->setGeometryX(cell.column_spans, cell.row_spans, area, column_count, row_count);
+    }
 }
 
 void VideoCell::updateImage(const FFmpegData &d)
 {
     //播放、暂停的控制命令
     if(d.type == FFmpegData::Control) {
+        qDebug() << __LINE__;
         if(FFmpegData::Playing == d.playState) {
-            m_controlPanel->setPause(false);
+            m_controlPanel->updateControlPanelState(VideoControlPanel::Playing);
         }
         if(FFmpegData::Paused == d.playState) {
-            m_controlPanel->setPause(true);
+            m_controlPanel->updateControlPanelState(VideoControlPanel::Paused);
         }
         if(FFmpegData::Stopped == d.playState) {
-            //m_controlPanel->setPause(true);
+            //m_controlPanel->updateControlPanelState(VideoControlPanel::Paused);
         }
+    }
+    if(d.errorCode != FFmpegData::NoError) {
+        m_controlPanel->updateControlPanelState(VideoControlPanel::Paused);
+    }
+    if(d.type == FFmpegData::Control) {
         return;
     }
     //轮播控制
@@ -144,22 +176,24 @@ void VideoCell::updateImage(const FFmpegData &d)
 
 void VideoCell::toControlPlay()
 {
+    qDebug() << __FUNCTION__;
     PlayThread *thread = PlayThread::PlayThreadMap.value(m_info.url, NULL);
     if(!thread)
         return;
     thread->play();
 
-    //    m_controlPanel->setPause(false);
+    //    m_controlPanel->updateControlPanelState(VideoControlPanel::Playing);
 }
 
 void VideoCell::toControlPause()
 {
+    qDebug() << __FUNCTION__;
     PlayThread *thread = PlayThread::PlayThreadMap.value(m_info.url, NULL);
     if(!thread)
         return;
     thread->pause();
     //
-    //    m_controlPanel->setPause(true);
+    //    m_controlPanel->updateControlPanelState(VideoControlPanel::Paused);
 }
 
 void VideoCell::toControlClose()
@@ -213,6 +247,13 @@ void VideoCell::updatePlayListDevice()
 void VideoCell::toAlterStop()
 {
     removePlayer();
+}
+
+void VideoCell::toShowDetail()
+{
+    qDebug() << "url:" << m_info.url
+             << "state:" << PlayThread::PlayThreadMap.value(m_info.url)->lastPlayState()
+             << "data:" << PlayThread::PlayThreadMap.value(m_info.url)->lastPlayData().errorString;
 }
 
 void VideoCell::toAlterStart()
@@ -373,7 +414,7 @@ void VideoCell::mouseMoveEvent(QMouseEvent *event)
     }
 
     if(!m_playList.isEmpty()) {
-        m_controlPanel->hideButtons(m_controlPanel->buttonFlags() | VideoControlPanel::VideoAlter);
+        m_controlPanel->hideButtons(m_controlPanel->buttonFlags() | VideoControlPanel::Alter);
     }
     //当移动的偏移量 大于 startDragDistance时才会触发拖拽
     if((event->pos() - m_pressPos).manhattanLength() < qApp->startDragDistance()
@@ -439,7 +480,7 @@ void VideoCell::addActionsToMenu(const QList<VideoCell::ContextMenuData> &list, 
             menu = new QMenu;
             ac = menu->menuAction();
         } else {
-            ac = new QAction;
+            ac = new QAction(0);
         }
 
 
@@ -512,6 +553,9 @@ PlayThread *VideoCell::addThread(QString url)
         thread = PlayThread::createPlayThread(url);
         PlayThread::PlayThreadMap.insert(url, thread);
     }
+
+    thread->open();
+
     connect(thread, SIGNAL(receiveImage(FFmpegData)), this, SLOT(updateImage(FFmpegData)), Qt::QueuedConnection);
 
     return thread;
@@ -526,27 +570,27 @@ void VideoCell::addPlayer(const QString &url)
     m_info.url = url;
 
     preparePlayer(url);
-
 }
 
 void VideoCell::preparePlayer(const QString &url)
 {
     PlayThread *thread = addThread(url);
+    qDebug() << __FILE__ << __LINE__ << "state:" << thread->lastPlayState();
 
     //播放器的定义为：一个播放线程一个播放器，VideoCell是一个播放窗口
     //无状态 正在播放
     if(thread->lastPlayState() == FFmpegData::NoState
             || thread->lastPlayState() == FFmpegData::Playing) {
-        m_controlPanel->setPause(false);
+//        m_controlPanel->updateControlPanelState(VideoControlPanel::Playing);
     }
     //播放暂停
     if(thread->lastPlayState() == FFmpegData::Paused) {
-        m_controlPanel->setPause(true);
+//        m_controlPanel->updateControlPanelState(VideoControlPanel::Paused);
         updateImage(thread->lastPlayData());
     }
     //播放结束
     if(thread->lastPlayState() == FFmpegData::Stopped) {
-        m_controlPanel->setPause(false);
+//        m_controlPanel->updateControlPanelState(VideoControlPanel::Playing);
         thread->play();
     }
 }

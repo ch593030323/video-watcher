@@ -6,6 +6,7 @@ QT += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 DEFINES += OUTPUT_APP
+DEFINES += OMS_DATASOURCE
 
 contains(DEFINES, OUTPUT_APP) {
     TEMPLATE = app

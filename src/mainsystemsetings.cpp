@@ -35,6 +35,10 @@ MainSystemSetings::MainSystemSetings(QWidget *parent) :
     toform();
 
 
+    m_settingsAlter = qobject_cast<MainSystemSetingsAlter *>(ui->stackedWidget->widget(0));
+    m_settingsForm = qobject_cast<MainSystemSetingsForm *>(ui->stackedWidget->widget(1));
+
+
     connect(ui->pushButton_play_alternate, SIGNAL(clicked()),this,SLOT(toalter()));
     connect(ui->pushButton_play_form, SIGNAL(clicked()),this,SLOT(toform()));
 }
@@ -44,36 +48,11 @@ MainSystemSetings::~MainSystemSetings()
     delete ui;
 }
 
-void MainSystemSetings::toPlayFormNew()
+void MainSystemSetings::setDataSource(DataSource *datasource)
 {
-//    playformnewdialog dialog(this);
-    //dialog.setDataSource(ui->treeView->dataSource());
-//    dialog.resize(this->size());
-//    dialog.exec();
-}
-
-void MainSystemSetings::toPlayFormOK()
-{
-//    int row = ui->comboBox_form->currentIndex();
-//    if(row < 0)
-//        return;
-//    QFile file(ui->comboBox_form->itemData(row).toString());
-//    if(!file.open(QFile::ReadOnly)) {
-//        qDebug() << file.errorString();
-//    }
-//    LayoutInfo info =  LayoutInfo::readFrom(file.readAll());
-    //ui->widget_video->updateLayout(info);
-}
-
-void MainSystemSetings::toPlayAlternateNew()
-{
-    PlayAlternateNewDialog dialog(PlayAlternateNewDialog::TypeNew, this);
-    dialog.resize(this->size());
-    dialog.exec();
-}
-
-void MainSystemSetings::toPlayAlternateOK()
-{
+    m_datasource = datasource;
+    m_settingsForm->setDataSource(m_datasource);
+    m_settingsAlter->setDataSource(m_datasource);
 }
 
 void MainSystemSetings::toalter()

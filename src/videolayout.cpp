@@ -36,6 +36,13 @@ QString LayoutCell::toString() const
             .arg(url);
 }
 
+bool LayoutCell::isNull() const
+{
+    return column_spans == 1
+            && row_spans == 1
+            && url.trimmed().isEmpty();
+}
+
 QByteArray LayoutInfo::toJson()
 {
     Json::Value root;
@@ -46,12 +53,17 @@ QByteArray LayoutInfo::toJson()
 
     Json::Value json_cells;
     for(int k = 0; k < cells.count(); k ++) {
+        const LayoutCell &cell = cells[k];
+
+        if(cell.isNull())
+            continue;
+
         Json::Value json_cell;
-        json_cell["x"] = cells[k].x();
-        json_cell["y"] = cells[k].y();
-        json_cell["column_spans"] = cells[k].column_spans;
-        json_cell["row_spans"] = cells[k].row_spans;
-        json_cell["url"] = cells[k].url.toStdString();
+        json_cell["x"] = cell.x();
+        json_cell["y"] = cell.y();
+        json_cell["column_spans"] = cell.column_spans;
+        json_cell["row_spans"] = cell.row_spans;
+        json_cell["url"] = cell.url.toStdString();
 
         json_cells.append(json_cell);
     }
@@ -98,7 +110,7 @@ void LayoutInfo::update(const QMap<LayoutPos, VideoCell *> &map)
             int index = LayoutCell::indexOf(w->getInfo().pos, cells);
             if(index >= 0) {
                 cells[index].url = url;
-            } else {
+            } else if(!w->getInfo().isNull()){
                 cells << w->getInfo();
             }
         }

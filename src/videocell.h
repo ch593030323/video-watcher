@@ -41,7 +41,8 @@ public:
     VideoCell(LayoutPos pos, QWidget *parent = 0);
     ~VideoCell();
 
-    static void parseVideoArea(const LayoutInfo &info, QWidget *parentWidget, QRect area, QMap<LayoutPos, VideoCell *> &cacheMap);
+    static void updateVideoScene(const LayoutInfo &info, QWidget *parentWidget, QRect area, QMap<LayoutPos, VideoCell *> &cacheMap);
+    static void updateVideoGeometry(const LayoutInfo &info, QRect area, QMap<LayoutPos, VideoCell *> &cacheMap);
 
     void removePlayer();
     void addPlayer(const QString &url);
@@ -78,6 +79,7 @@ private slots:
 public slots:
     void toAlterStart();
     void toAlterStop();
+    void toShowDetail();
 
     //=====================PlayList end=====================
 private slots:

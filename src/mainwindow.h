@@ -10,6 +10,9 @@
 
 
 class TreeVideoModel;
+class MainVideoWidget;
+class MainSystemSetings;
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWidget; }
 QT_END_NAMESPACE
@@ -22,6 +25,8 @@ public:
     MainFrame(QWidget *parent = 0);
     ~MainFrame();
 
+    void setDataSource(DataSource *datasource);
+
 protected slots:
     void toexit();
     void tovideo_widget();
@@ -29,5 +34,9 @@ protected slots:
     void tovideo_system_setting();
 protected:
     Ui::MainWidget *ui;
+
+    DataSource *m_datasource;
+    MainVideoWidget *m_videoWidget;
+    MainSystemSetings *m_systemSettings;
 };
 #endif // MAINWINDOW_H

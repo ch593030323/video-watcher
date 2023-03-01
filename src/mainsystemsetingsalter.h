@@ -3,6 +3,7 @@
 
 #include <QWidget>
 
+class DataSource;
 namespace Ui {
 class MainSystemSetingsAlter;
 }
@@ -16,6 +17,8 @@ public:
     ~MainSystemSetingsAlter();
     void refresh();
 
+    void setDataSource(DataSource *datasource);
+
 public slots:
     void toadd();
     void todel();
@@ -23,6 +26,7 @@ public slots:
 
 private:
     Ui::MainSystemSetingsAlter *ui;
+    DataSource *m_datasource;
 };
 
 #endif // MAINSYSTEMSETINGSALTER_H

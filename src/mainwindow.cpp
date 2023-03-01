@@ -46,10 +46,15 @@ MainFrame::MainFrame(QWidget *parent)
     connect(ui->pushButton_video_playback, SIGNAL(clicked()), this, SLOT(tovideo_playback()));
     connect(ui->pushButton_system_setting, SIGNAL(clicked()), this, SLOT(tovideo_system_setting()));
 
-    MainVideoWidget *w = qobject_cast<MainVideoWidget *>(ui->stackedWidget->widget(0));
-    if(w) {
-        QTimer::singleShot(0, w, SLOT(loadLayout()));
-    }
+    m_videoWidget = qobject_cast<MainVideoWidget *>(ui->stackedWidget->widget(0));
+    m_systemSettings = qobject_cast<MainSystemSetings *>(ui->stackedWidget->widget(2));
+
+#ifdef OMS_DATASOURCE
+#else
+    setDataSource(new DataSource(this));
+#endif
+
+    QTimer::singleShot(0, m_videoWidget, SLOT(loadLayout()));
 }
 
 MainFrame::~MainFrame()
@@ -57,13 +62,17 @@ MainFrame::~MainFrame()
     delete ui;
 }
 
+void MainFrame::setDataSource(DataSource *datasource)
+{
+    m_datasource = datasource;
+    m_videoWidget->setDataSource(m_datasource);
+    m_systemSettings->setDataSource(m_datasource);
+}
+
 
 void MainFrame::toexit()
 {
-    MainVideoWidget *w = qobject_cast<MainVideoWidget *>(ui->stackedWidget->widget(0));
-    if(w) {
-        w->saveLayout();
-    }
+    m_videoWidget->saveLayout();
     this->close();
     qApp->quit();
 }

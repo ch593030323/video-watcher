@@ -2,7 +2,7 @@
 #define VIDEOWIDGET_H
 
 #include <QWidget>
-#include "videoCell.h"
+#include "videocell.h"
 #include "videowidget.h"
 #include "videolayout.h"
 
@@ -10,18 +10,17 @@ class VideoWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit VideoWidget(QWidget *parent = nullptr);
+    explicit VideoWidget(QWidget *parent = 0);
 
     void updateLayout(const LayoutInfo &info);
     void updateLayout();
 
     void updateLayoutInfo();
-    QByteArray layoutInfo2Json();
+    QByteArray toJson();
 
-    inline LayoutInfo getLayoutInfo() {return m_layoutInfo;}
+    inline int columnCount() {return m_layoutInfo.column_count;}
 
 public slots:
-    void slotAddUrlToFocusedCell(const QString &url);
     void slotAutoAddUrl(const QString &url);
 
 protected:

@@ -14,10 +14,12 @@ void VideoWidget::updateLayout(const LayoutInfo &info)
 {
     m_layoutInfo = info;
 
-    VideoCell::parseVideoArea(m_layoutInfo,
-                              this,
-                              this->rect().adjusted(-lds::margin/2, -lds::margin/2, lds::margin/2, lds::margin/2),
-                              m_videoMap);
+    VideoCell::updateVideoScene(m_layoutInfo,
+                                this,
+                                this->rect().adjusted(-lds::margin/2, -lds::margin/2, lds::margin/2, lds::margin/2),
+                                m_videoMap);
+
+    //信号和右键菜单
     if(m_isMultilselected) {
         //多选
         for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
@@ -42,25 +44,28 @@ void VideoWidget::updateLayout(const LayoutInfo &info)
         for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
             VideoCell *cell = k.value();
             VideoCell::ContextMenuData ac_alter_start = VideoCell::ContextMenuData(QString::fromUtf8("开始轮播"),
-                                                   this,
-                                                   "",
-                                                   "alter_start");
+                                                                                   this,
+                                                                                   "",
+                                                                                   "alter_start");
             VideoCell::ContextMenuData ac_alter_stop = VideoCell::ContextMenuData(QString::fromUtf8("停止轮播"),
-                                                   cell,
-                                                   SLOT(toAlterStop()),
-                                                   "alter_stop");
+                                                                                  cell,
+                                                                                  SLOT(toAlterStop()),
+                                                                                  "alter_stop");
 
             for(const QFileInfo &info : QDir("play_alter").entryInfoList()) {
                 if(info.isFile())
                     ac_alter_start.children << VideoCell::ContextMenuData(
-                                                    info.baseName(),
-                                                    cell,
-                                                    SLOT(toAlterStart()),
-                                                    info.filePath());
+                                                   info.baseName(),
+                                                   cell,
+                                                   SLOT(toAlterStart()),
+                                                   info.filePath());
             }
             cell->setContextMenuDataList(QList<VideoCell::ContextMenuData>()
                                          << ac_alter_start
-                                         << ac_alter_stop);
+                                         << ac_alter_stop
+                                         << VideoCell::ContextMenuData(QString::fromUtf8("详细"),
+                                                                       cell,
+                                                                       SLOT(toShowDetail())));
         }
     }
 }
@@ -76,26 +81,18 @@ void VideoWidget::updateLayoutInfo()
     m_layoutInfo.update(m_videoMap);
 }
 
-QByteArray VideoWidget::layoutInfo2Json()
+QByteArray VideoWidget::toJson()
 {
+    updateLayoutInfo();
     return m_layoutInfo.toJson();
-}
-
-void VideoWidget::slotAddUrlToFocusedCell(const QString &url)
-{
-    VideoCell *cell = qobject_cast<VideoCell *>(qApp->focusWidget());
-    if(!cell)
-        return;
-
-    cell->addPlayer(url);
 }
 
 void VideoWidget::slotAutoAddUrl(const QString &url)
 {
+    //search
     VideoCell *cell = qobject_cast<VideoCell *>(qApp->focusWidget());
     if(!cell) {
         for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
-            qDebug() << __LINE__ << k.key().value() << k.value()->getInfo().url;
             if(k.value()->getInfo().url.isEmpty()) {
                 cell = k.value();
                 break;
@@ -104,12 +101,16 @@ void VideoWidget::slotAutoAddUrl(const QString &url)
     }
     if(!cell)
         return;
+    //add
     cell->addPlayer(url);
 }
 
 void VideoWidget::resizeEvent(QResizeEvent *event)
 {
-    updateLayout();
+    VideoCell::updateVideoGeometry(m_layoutInfo,
+                                   this->rect().adjusted(-lds::margin/2, -lds::margin/2, lds::margin/2, lds::margin/2),
+                                   m_videoMap);
+
 }
 
 
@@ -144,27 +145,24 @@ void VideoWidget::tomerge()
     cell.pos.y = rect.y();
     cell.column_spans = rect.width();
     cell.row_spans = rect.height();
-    m_layoutInfo.cells << cell;
 
-    //layoutinfo移除无用的cell
-    QList<int> willRemoveList;
-    const QList<LayoutCell> &cells = m_layoutInfo.cells;
-    for(int k1 = 0; k1 < cells.count(); k1 ++) {
-        for(int k2 = k1 + 1; k2 < cells.count(); k2 ++) {
-            if(willRemoveList.contains(k1) || willRemoveList.contains(k2))
-                continue;
+    //clear cells in rect
+    for(int x = 0; x < rect.width(); x ++) {
+        for(int y = 0; y < rect.height(); y ++) {
+            LayoutPos pos(x + rect.x(), y + rect.y());
+            if(m_videoMap.contains(pos)) {
+                m_videoMap[pos]->hide();
+            }
 
-            if(cells[k1].rect().contains(cells[k2].rect())) {
-                willRemoveList << k2;
-            } else if(cells[k2].rect().contains(cells[k1].rect())) {
-                willRemoveList << k1;
+            int index = LayoutCell::indexOf(pos, m_layoutInfo.cells);
+            if(index >= 0) {
+                m_layoutInfo.cells.removeAt(index);
             }
         }
     }
-    qSort(willRemoveList.begin(), willRemoveList.end(), qGreater<int>());
-    for(int k = 0; k < willRemoveList.count(); k ++) {
-        m_layoutInfo.cells.removeAt(willRemoveList[k]);
-    }
+    //append rect
+    m_layoutInfo.cells << cell;
+    m_videoMap[cell.pos]->show();
 
     //清除选区
     tounselectedall();

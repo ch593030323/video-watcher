@@ -13,6 +13,7 @@ MainSystemSetingsForm::MainSystemSetingsForm(QWidget *parent) :
     ui(new Ui::MainSystemSetingsForm)
 {
     ui->setupUi(this);
+
     ui->pushButton_add->setIcon(PropertyColor::getFontPixmap(0x2b));
     ui->pushButton_del->setIcon(PropertyColor::getFontPixmap(0x2d));
     ui->pushButton_modify->setIcon(PropertyColor::getFontPixmap(0x2700));
@@ -50,9 +51,15 @@ void MainSystemSetingsForm::refresh()
     ui->tableView->selectRow(0);
 }
 
+void MainSystemSetingsForm::setDataSource(DataSource *datasource)
+{
+    m_datasource = datasource;
+}
+
 void MainSystemSetingsForm::toadd()
 {
     playformnewdialog d(playformnewdialog::TypeNew, this);
+    d.setDataSource(m_datasource);
     //TODO: exec作为插件有问题
     if(QDialog::Accepted == d.exec()) {
         refresh();
@@ -76,6 +83,7 @@ void MainSystemSetingsForm::tomodify()
         return;
 
     playformnewdialog d(playformnewdialog::TypeModify, this);
+    d.setDataSource(m_datasource);
     d.readFrom("play_form"  "/" + ui->tableView->data(row, "name").toString());
     //TODO: exec作为插件有问题
     d.exec();

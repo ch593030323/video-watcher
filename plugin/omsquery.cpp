@@ -337,6 +337,7 @@ bool OMSQuery::selectCount(const SqlContent &content)
         QStandardItem *item = new QStandardItem;
         item->setData(count, Qt::DisplayRole);
         item->setData(INTEGER_DATA, RoleDataType);
+        m_model->setHorizontalHeaderLabels({"count"});
         m_model->appendRow({item});
 
     } catch(Exception &e) {

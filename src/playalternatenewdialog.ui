@@ -188,19 +188,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_adjust">
-       <property name="minimumSize">
-        <size>
-         <width>80</width>
-         <height>40</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>整理</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="pushButton_ok">
        <property name="minimumSize">
         <size>
