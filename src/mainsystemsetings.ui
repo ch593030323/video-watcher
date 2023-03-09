@@ -81,6 +81,44 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="pushButton_snap">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>90</width>
+           <height>60</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>截图</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_url">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>90</width>
+           <height>60</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>地址</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -125,6 +163,8 @@
       <widget class="QStackedWidget" name="stackedWidget">
        <widget class="MainSystemSetingsAlter" name="page"/>
        <widget class="MainSystemSetingsForm" name="page_2"/>
+       <widget class="MainSystemSetingsSnap" name="page_3"/>
+       <widget class="MainSystemSetingsUrl" name="page_4"/>
       </widget>
      </item>
     </layout>
@@ -142,6 +182,18 @@
    <class>MainSystemSetingsForm</class>
    <extends>QWidget</extends>
    <header>mainsystemsetingsform.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MainSystemSetingsSnap</class>
+   <extends>QWidget</extends>
+   <header>mainsystemsetingssnap.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MainSystemSetingsUrl</class>
+   <extends>QWidget</extends>
+   <header>mainsystemsetingsurl.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

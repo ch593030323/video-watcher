@@ -18,73 +18,29 @@ void VideoWidget::updateLayout(const LayoutInfo &info)
                                 this,
                                 this->rect().adjusted(-lds::margin/2, -lds::margin/2, lds::margin/2, lds::margin/2),
                                 m_videoMap);
-
-    //信号和右键菜单
     if(m_isMultilselected) {
-        //多选
         for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
             k.value()->setCheckable(true);
-            disconnect(k.value(), SIGNAL(signalRelease()), this, SLOT(toselected()));
-            connect(k.value(), SIGNAL(signalRelease()), this, SLOT(toselected()));
-        }
-
-        //清理选区
-        tounselectedall();
-
-        //添加右键菜单栏
-        for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
-            QList<VideoCell::ContextMenuData> pairList;
-            pairList << VideoCell::ContextMenuData(QString::fromUtf8("合并所选"), this, SLOT(tomerge()));
-            pairList << VideoCell::ContextMenuData(QString::fromUtf8("清除所有"), this, SLOT(toclear()));
-            pairList << VideoCell::ContextMenuData(QString::fromUtf8("还原初始"), this, SLOT(torestore()));
-            k.value()->setContextMenuDataList(pairList);
-        }
-    } else {
-        //添加右键菜单栏
-        for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
-            VideoCell *cell = k.value();
-            VideoCell::ContextMenuData ac_alter_start = VideoCell::ContextMenuData(QString::fromUtf8("开始轮播"),
-                                                                                   this,
-                                                                                   "",
-                                                                                   "alter_start");
-            VideoCell::ContextMenuData ac_alter_stop = VideoCell::ContextMenuData(QString::fromUtf8("停止轮播"),
-                                                                                  cell,
-                                                                                  SLOT(toAlterStop()),
-                                                                                  "alter_stop");
-
-            for(const QFileInfo &info : QDir("play_alter").entryInfoList()) {
-                if(info.isFile())
-                    ac_alter_start.children << VideoCell::ContextMenuData(
-                                                   info.baseName(),
-                                                   cell,
-                                                   SLOT(toAlterStart()),
-                                                   info.filePath());
-            }
-            cell->setContextMenuDataList(QList<VideoCell::ContextMenuData>()
-                                         << ac_alter_start
-                                         << ac_alter_stop
-                                         << VideoCell::ContextMenuData(QString::fromUtf8("详细"),
-                                                                       cell,
-                                                                       SLOT(toShowDetail())));
         }
     }
 }
 
 void VideoWidget::updateLayout()
 {
-    updateLayoutInfo();
-    updateLayout(m_layoutInfo);
-}
-
-void VideoWidget::updateLayoutInfo()
-{
     m_layoutInfo.update(m_videoMap);
+    updateLayout(m_layoutInfo);
 }
 
 QByteArray VideoWidget::toJson()
 {
-    updateLayoutInfo();
+    m_layoutInfo.update(m_videoMap);
     return m_layoutInfo.toJson();
+}
+
+Json::Value VideoWidget::toJsonValue()
+{
+    m_layoutInfo.update(m_videoMap);
+    return m_layoutInfo.toJsonValue();
 }
 
 void VideoWidget::slotAutoAddUrl(const QString &url)
@@ -176,8 +132,7 @@ void VideoWidget::toclear()
 
 void VideoWidget::torestore()
 {
-    m_layoutInfo = LayoutInfo(m_layoutInfo.column_count, m_layoutInfo.row_count);
-    updateLayout();
+    updateLayout(LayoutInfo(m_layoutInfo.column_count, m_layoutInfo.row_count));
 }
 
 void VideoWidget::toselected()

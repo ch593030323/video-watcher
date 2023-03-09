@@ -33,7 +33,9 @@ HEADERS += \
     src/treevideomodel.h \
     src/treevideoview.h \
     src/treevideoviewsearch.h \
-    src/lds.h
+    src/lds.h\
+    src/widget/editedwidgetmapper.h \
+    src/widget/lds_checkbox_phonestyle.h
 
 SOURCES += \
     src/widget/lineeditfind.cpp \
@@ -44,7 +46,9 @@ SOURCES += \
     src/treevideomodel.cpp \
     src/treevideoview.cpp \
     src/treevideoviewsearch.cpp \
-    src/lds.cpp
+    src/lds.cpp\
+    src/widget/editedwidgetmapper.cpp \
+    src/widget/lds_checkbox_phonestyle.cpp
 
 include(jsoncpp/jsoncpp.pri)
 

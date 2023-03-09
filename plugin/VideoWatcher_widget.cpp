@@ -502,7 +502,7 @@ QList<DataSource::Camera> DataSourceOMS::getCameraList(const QString &location_o
     while(query.next()) {
         DataSource::Camera d;
         d.obid = query.value("obid").toString();
-        d.name = query.value("Name").toString();
+        d.name = QString::fromUtf8(query.value("Name").toByteArray());
         d.location_obid = location_obid;
         d.type = 1;
         d.state = query.value("FaultState").toInt();

@@ -33,7 +33,14 @@ HEADERS += \
     $$PWD/src/mainsystemsetingsalter.h \
     $$PWD/src/mainsystemsetingsform.h \
     $$PWD/src/mainsystemsetings.h \
-    $$PWD/src/widget/lds_tableview.h
+    $$PWD/src/widget/lds_tableview.h \
+    $$PWD/src/widget/editedwidgetmapper.h \
+    $$PWD/src/widget/lds_checkbox_phonestyle.h \
+    $$PWD/src/mainsystemsetingssnap.h \
+    $$PWD/src/global.h \
+    $$PWD/src/widget/autocloselabel.h \
+    $$PWD/src/mainsystemsetingssnaplistview.h\
+    $$PWD/src/mainsystemsetingsurl.h
 
 SOURCES += \
     $$PWD/src/mainwindow.cpp \
@@ -63,7 +70,14 @@ SOURCES += \
     $$PWD/src/mainsystemsetingsalter.cpp \
     $$PWD/src/mainsystemsetingsform.cpp \
     $$PWD/src/mainsystemsetings.cpp \
-    $$PWD/src/widget/lds_tableview.cpp
+    $$PWD/src/widget/lds_tableview.cpp \
+    $$PWD/src/widget/editedwidgetmapper.cpp \
+    $$PWD/src/widget/lds_checkbox_phonestyle.cpp \
+    $$PWD/src/mainsystemsetingssnap.cpp \
+    $$PWD/src/global.cpp \
+    $$PWD/src/widget/autocloselabel.cpp \
+    $$PWD/src/mainsystemsetingssnaplistview.cpp \
+    $$PWD/src/mainsystemsetingsurl.cpp
 
 FORMS += \
     $$PWD/src/mainwindow.ui \
@@ -74,7 +88,9 @@ FORMS += \
     $$PWD/src/mainplayback.ui \
     $$PWD/src/mainsystemsetingsalter.ui \
     $$PWD/src/mainsystemsetingsform.ui \
-    $$PWD/src/mainsystemsetings.ui
+    $$PWD/src/mainsystemsetings.ui\
+    $$PWD/src/mainsystemsetingssnap.ui \
+    $$PWD/src/mainsystemsetingsurl.ui
 
 RESOURCES += \
     resources/res.qrc

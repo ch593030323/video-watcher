@@ -1,6 +1,8 @@
 #ifndef VIDEOLAYOUT_H
 #define VIDEOLAYOUT_H
 
+#include "json/json.h"
+
 #include <QString>
 #include <QRect>
 #include <QList>
@@ -86,7 +88,10 @@ struct LayoutInfo{
          row_count = r;
     }
     QByteArray toJson();
+    Json::Value toJsonValue();
+
     static LayoutInfo readFrom(const QByteArray &json);
+    static LayoutInfo readFrom(const Json::Value &value);
 
     void update(const QMap<LayoutPos, VideoCell *> &map);
 };

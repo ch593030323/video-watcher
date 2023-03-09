@@ -25,9 +25,17 @@ int lds_tableview::fieldIndex(const QString &key)
     return horizontalHeaderMap.value(key, -1);
 }
 
-QVariant lds_tableview::data(int row, const QString &key)
+QVariant lds_tableview::data(int row, const QString &key, int role)
 {
-    return model->data(model->index(row, fieldIndex(key)));
+    return model->data(model->index(row, fieldIndex(key)), role);
+}
+
+bool lds_tableview::setData(int row, const QString &key, const QVariant &var, int role)
+{
+    QModelIndex index = model->index(row, fieldIndex(key));
+    if(!index.isValid())
+        return false;
+    model->setData(index, var, role);
 }
 
 bool lds_tableview::removeRows(int begin, int count)

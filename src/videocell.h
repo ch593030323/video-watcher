@@ -15,6 +15,7 @@
 
 class VideoControlPanel;
 class QMimeData;
+class VideoWidget;
 
 class VideoCell : public QWidget
 {
@@ -41,23 +42,22 @@ public:
     VideoCell(LayoutPos pos, QWidget *parent = 0);
     ~VideoCell();
 
-    static void updateVideoScene(const LayoutInfo &info, QWidget *parentWidget, QRect area, QMap<LayoutPos, VideoCell *> &cacheMap);
+    static VideoCell *createCell(LayoutPos pos, VideoWidget *parentWidget);
+    static void updateVideoScene(const LayoutInfo &info, VideoWidget *parentWidget, QRect area, QMap<LayoutPos, VideoCell *> &cacheMap);
     static void updateVideoGeometry(const LayoutInfo &info, QRect area, QMap<LayoutPos, VideoCell *> &cacheMap);
 
     void removePlayer();
     void addPlayer(const QString &url);
     void preparePlayer(const QString &url);
 
-    void removeThread(QString url);
-    PlayThread *addThread(QString url);
+    void removeThread(const QString &url);
+    PlayThread *addThread(const QString &url);
 
     void updateControlPanelGeometry();
 
-    void setCheckable(bool enabled);
     void setChecked(bool checked);
     bool isChecked();
-
-    void setContextMenuDataList(QList<ContextMenuData> contextMenuDataList);
+    void setCheckable(bool isCheckable);
 
     /**
      * @brief setGeometryX 更新videowidget的geometry
@@ -80,6 +80,7 @@ public slots:
     void toAlterStart();
     void toAlterStop();
     void toShowDetail();
+    void toAlterNew();
 
     //=====================PlayList end=====================
 private slots:
@@ -94,6 +95,9 @@ private slots:
 
 signals:
     void signalRelease();
+    void signalAlterMerge();
+    void signalAlterClear();
+    void signalAlterRestore();
 
 protected:
     void paintEvent(QPaintEvent *);
@@ -133,7 +137,6 @@ private:
     bool                        m_isCheckable;//是否可以被选中
 
     LayoutCell                  m_info;//记录layoutcell的数据
-    QList<ContextMenuData>      m_contextMenuDataList;//右键菜单的action信息
 };
 
 

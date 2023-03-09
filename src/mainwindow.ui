@@ -190,6 +190,9 @@
      <widget class="MainSystemSetings" name="page_3"/>
     </widget>
    </item>
+   <item>
+    <widget class="QStatusBar" name="statusBar"/>
+   </item>
   </layout>
  </widget>
  <customwidgets>

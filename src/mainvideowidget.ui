@@ -34,16 +34,22 @@
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <property name="spacing">
+         <number>2</number>
+        </property>
         <item>
          <widget class="QPushButton" name="pushButton_1x1">
           <property name="minimumSize">
            <size>
-            <width>50</width>
+            <width>40</width>
             <height>40</height>
            </size>
           </property>
-          <property name="text">
-           <string>1x1</string>
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
           </property>
          </widget>
         </item>
@@ -51,12 +57,15 @@
          <widget class="QPushButton" name="pushButton_2x2">
           <property name="minimumSize">
            <size>
-            <width>50</width>
+            <width>40</width>
             <height>40</height>
            </size>
           </property>
-          <property name="text">
-           <string>2x2</string>
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
           </property>
          </widget>
         </item>
@@ -64,12 +73,15 @@
          <widget class="QPushButton" name="pushButton_3x3">
           <property name="minimumSize">
            <size>
-            <width>50</width>
+            <width>40</width>
             <height>40</height>
            </size>
           </property>
-          <property name="text">
-           <string>3x3</string>
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
           </property>
          </widget>
         </item>
@@ -77,12 +89,15 @@
          <widget class="QPushButton" name="pushButton_4x4">
           <property name="minimumSize">
            <size>
-            <width>50</width>
+            <width>40</width>
             <height>40</height>
            </size>
           </property>
-          <property name="text">
-           <string>4x4</string>
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
           </property>
          </widget>
         </item>
@@ -90,12 +105,15 @@
          <widget class="QPushButton" name="pushButton_more">
           <property name="minimumSize">
            <size>
-            <width>50</width>
+            <width>40</width>
             <height>40</height>
            </size>
           </property>
-          <property name="text">
-           <string>more</string>
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
           </property>
          </widget>
         </item>
@@ -113,10 +131,54 @@
          </spacer>
         </item>
         <item>
+         <widget class="QPushButton" name="pushButton_statusbar">
+          <property name="minimumSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_control">
+          <property name="minimumSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="pushButton_fullscreen_exit">
           <property name="minimumSize">
            <size>
-            <width>50</width>
+            <width>40</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
             <height>40</height>
            </size>
           </property>
@@ -129,7 +191,13 @@
          <widget class="QPushButton" name="pushButton_fullscreen">
           <property name="minimumSize">
            <size>
-            <width>50</width>
+            <width>40</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
             <height>40</height>
            </size>
           </property>
@@ -151,7 +219,7 @@
        <height>16777215</height>
       </size>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,0">
+     <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,1">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -165,14 +233,21 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="TreeVideoViewSearchUrl" name="treeView" native="true"/>
+       <widget class="TreeVideoViewSearchUrl" name="treeView" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>10</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="VideoInsPanel" name="widget_ins_panel" native="true">
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>200</height>
+          <height>150</height>
          </size>
         </property>
         <property name="maximumSize">

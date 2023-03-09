@@ -31,5 +31,7 @@
         <file>skin_image/light/plus_pressed_40x40.png</file>
         <file>skin_image/light/minus_disable_40x40.png</file>
         <file>skin_image/light/plus_disable_40x40.png</file>
+        <file>skin_image/light/check_off_60x40.png</file>
+        <file>skin_image/light/check_on_60x40.png</file>
     </qresource>
 </RCC>

@@ -12,6 +12,9 @@ public:
 
     QStringList result();
     void setStringList(const QStringList &list);
+signals:
+    void editingFinished();
+
 public slots:
     void toCheckTable(QWidget *editor, QAbstractItemDelegate::EndEditHint hint);
 

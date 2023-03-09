@@ -8,10 +8,7 @@
 #include <QWidget>
 #include <QStandardItemModel>
 
-namespace Ui {
-class MainVideoWidget;
-}
-
+class Ui_MainVideoWidget;
 class MainVideoWidget : public QWidget
 {
     Q_OBJECT
@@ -24,9 +21,9 @@ public:
     void updateLayout();
     void setDataSource(DataSource *datasource);
 
-    void saveLayout();
-public slots:
-    void loadLayout();
+signals:
+    void signalStatusbarSetVisiable(bool showed);
+
 private slots:
 
     /**
@@ -43,12 +40,14 @@ private slots:
 
     void toUpdateMoreMenu();
     void toApplyLayoutInfo();
+    void toNewFormPlay();
 
 protected:
     void resizeEvent(QResizeEvent *event);
 
 private:
-    Ui::MainVideoWidget *ui;
+    Ui_MainVideoWidget *ui;
+    friend class MainFrame;
 };
 
 #endif // MAINVIDEOWIDGET_H

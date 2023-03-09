@@ -20,13 +20,14 @@
 #include <QListView>
 #include <QTableView>
 
+//1：在线、2：离线、3：故障
 QPixmap getCameraStatePixmap(int state) {
     if(0 == state) {
         return lds::getFontPixmap(0x25cf, QColor("green"), QSize(12, 12));
     }
 
     if(1 == state) {
-        return lds::getFontPixmap(0xf05e, QColor("red"), QSize(12, 12));
+        return lds::getFontPixmap(0xd7, QColor("red"), QSize(12, 12));
 
     }
     if(2 == state) {
@@ -46,7 +47,6 @@ TreeVideoViewSearch::TreeVideoViewSearch(QWidget *parent)
     comView->verticalHeader()->setDefaultSectionSize(22);
     comView->horizontalHeader()->setStretchLastSection(true);
     comView->setShowGrid(false);
-    m_comboBox->setView(comView);
 
     m_lineEdit = new LineEditFind;
     m_comboBox = new QComboBox;
@@ -59,7 +59,6 @@ TreeVideoViewSearch::TreeVideoViewSearch(QWidget *parent)
     m_treeView->setDragEnabled(true);
     m_treeView->setEditTriggers(QTreeView::AllEditTriggers);
     m_treeView->setModel(m_treeModel);
-    m_treeView->setDragEnabled(true);
 
     m_comboBox->setFixedSize(108, 30);
     m_comboBox->setProperty("outer_stylesheet", "search");
@@ -126,6 +125,7 @@ void TreeVideoViewSearch::slotInitAll()
 
 void TreeVideoViewSearch::slotInitTree()
 {
+    m_datasource->clearCache();
     m_comboBox->clear();
     m_comboBox->addItem(QString::fromUtf8("所有"), "%");
 
@@ -159,7 +159,7 @@ void TreeVideoViewSearch::slotSettings()
     QDialog d(this);
     d.setObjectName("Window");
     QGridLayout *vlayout = new QGridLayout;
-    QFile file("skin.qss");
+    QFile file(lds::configDirectory + "/skin.qss");
     file.open(QFile::ReadOnly);
     int row = 0;
     while(!file.atEnd()) {
@@ -203,7 +203,7 @@ void TreeVideoViewSearch::slotAppSettings()
 {
     QPushButton *button = qobject_cast<QPushButton *>(sender());
     QObject *w = button->parent();
-    QFile file("skin.qss");
+    QFile file(lds::configDirectory + "/skin.qss");
     file.open(QFile::ReadOnly);
     QByteArray all = file.readAll();
 
@@ -355,27 +355,29 @@ void TreeVideoViewSearch::updateCameraItemList(QStandardItem *item_location)
     item_location->removeRows(0, item_location->rowCount());
     QString location_obid = item_location->data(VideoObidRole).toString();
     for(const DataSource::Camera &d : m_datasource->getCameraList(location_obid)) {
-        QString obid = d.obid;
-        QString name = d.name;
-        int state = d.state;
-        int type = d.type;
-        //TODO 可删
-        QString url = d.url;
 
-        QString stateName = m_datasource->getCameraStateName(state);
-        QString typeName = m_datasource->getCameraTypeName(type);
+        QString url = m_datasource->getCameraUrl(d.obid);//d.url;
+
+        QString stateName = m_datasource->getCameraStateName(d.state);
+        QString typeName = m_datasource->getCameraTypeName(d.type);
 
         int row = item_location->rowCount();
         QStandardItem *item_device = new QStandardItem;
-        item_device->setText(name);
-        item_device->setToolTip("[" + stateName+ "]" + "[" + typeName + "]" + name);
+        item_device->setText(d.name);
+        item_device->setToolTip(QString() +
+                                "state:\t\t" + stateName + "\n" +
+                                "type:\t\t" + typeName + "\n" +
+                                "url:\t\t" + url + "\n" +
+                                "obid:\t\t" + d.obid + "\n" +
+                                "name:\t" + d.name + "\n"
+                                );
         item_device->setData(VideoNodeDevice,    VideoNodeType);
-        item_device->setData(name,              VideoNameRole);
-        item_device->setData(type,              VideoTypeRole);
-        item_device->setData(obid,              VideoObidRole);
-        item_device->setData(state,             VideoStateRole);
+        item_device->setData(d.name,              VideoNameRole);
+        item_device->setData(d.type,              VideoTypeRole);
+        item_device->setData(d.obid,              VideoObidRole);
+        item_device->setData(d.state,             VideoStateRole);
         item_device->setData(url,               VideoUrlRole);
-        item_device->setData(getCameraStatePixmap(state),   Qt::DecorationRole);
+        item_device->setData(getCameraStatePixmap(d.state),   Qt::DecorationRole);
         item_device->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
 
         item_location->setChild(row, 0, item_device);

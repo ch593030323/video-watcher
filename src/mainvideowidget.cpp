@@ -7,6 +7,7 @@
 #include "lds.h"
 #include "treevideoview.h"
 #include "propertycolor.h"
+#include "mainwindow.h"
 
 #include <QTreeView>
 #include <QStandardItemModel>
@@ -16,23 +17,18 @@
 
 MainVideoWidget::MainVideoWidget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::MainVideoWidget)
+    ui(new Ui_MainVideoWidget)
 {
     ui->setupUi(this);
 
     ui->widget_ins_panel->setStepValue(30);
 
     ui->pushButton_1x1->setIcon(lds::getLayoutPixmap(1));
-    ui->pushButton_1x1->setText("");
     ui->pushButton_2x2->setIcon(lds::getLayoutPixmap(2));
-    ui->pushButton_2x2->setText("");
     ui->pushButton_3x3->setIcon(lds::getLayoutPixmap(3));
-    ui->pushButton_3x3->setText("");
     ui->pushButton_4x4->setIcon(lds::getLayoutPixmap(4));
-    ui->pushButton_4x4->setText("");
 
     ui->pushButton_more->setIcon(lds::getFontPixmap(0xf141));
-    ui->pushButton_more->setText("");
     {
         QMenu *menu = new QMenu(ui->pushButton_more);
         ui->pushButton_more->setMenu(menu);
@@ -55,7 +51,11 @@ MainVideoWidget::MainVideoWidget(QWidget *parent) :
     //checked
     ui->widget_video->updateLayout(LayoutInfo(3, 3));
     ui->pushButton_3x3->setChecked(true);
+    ui->pushButton_control->setCheckable(true);
+    ui->pushButton_statusbar->setCheckable(true);
 
+    ui->pushButton_control->setIcon(lds::getFontPixmap(0x2721, PropertyColor::buttonTextColor, QSize(15, 15)));
+    ui->pushButton_statusbar->setIcon(lds::getFontPixmap(0xf0c6, PropertyColor::buttonTextColor, QSize(15, 15)));
     ui->pushButton_fullscreen->setIcon(lds::getFontPixmap(0xf424, PropertyColor::buttonTextColor, QSize(15, 15)));
     ui->pushButton_fullscreen_exit->setIcon(lds::getFontPixmap(0xf422, PropertyColor::buttonTextColor, QSize(15, 15)));
     ui->pushButton_fullscreen_exit->hide();
@@ -70,6 +70,10 @@ MainVideoWidget::MainVideoWidget(QWidget *parent) :
     connect(ui->pushButton_fullscreen_exit, SIGNAL(clicked()), this, SLOT(toVideoShowNormal()));
 
     connect(ui->treeView->view(), SIGNAL(signalPlayRequest(QString)), ui->widget_video, SLOT(slotAutoAddUrl(QString)));
+    connect(ui->pushButton_control, SIGNAL(clicked(bool)), ui->widget_ins_panel, SLOT(setVisible(bool)));
+    connect(ui->pushButton_statusbar, SIGNAL(clicked(bool)), this, SIGNAL(signalStatusbarSetVisiable(bool)));
+
+    ui->widget_ins_panel->hide();
 }
 
 MainVideoWidget::~MainVideoWidget()
@@ -94,53 +98,39 @@ void MainVideoWidget::setDataSource(DataSource *datasource)
     ui->treeView->slotInitAll();
 }
 
-void MainVideoWidget::saveLayout()
-{
-    QFile file("layout_cur.json");
-    if(!file.open(QFile::WriteOnly)) {
-        qDebug() << file.errorString();
-    }
-    file.write(ui->widget_video->toJson());
-}
-
-void MainVideoWidget::loadLayout()
-{
-    QFile file("layout_cur.json");
-    if(!file.open(QFile::ReadOnly)) {
-        qDebug() << file.errorString();
-    }
-    ui->widget_video->updateLayout(LayoutInfo::readFrom(file.readAll()));
-}
-
 void MainVideoWidget::toVideoLayout1x1()
 {
-    ui->widget_video->updateLayout(LayoutInfo(1, 1));
+    ui->widget_video->updateLayout(LayoutInfo(1));
 }
 
 void MainVideoWidget::toVideoLayout2x2()
 {
-    ui->widget_video->updateLayout(LayoutInfo(2, 2));
+    ui->widget_video->updateLayout(LayoutInfo(2));
 }
 
 void MainVideoWidget::toVideoLayout3x3()
 {
-    ui->widget_video->updateLayout(LayoutInfo(3, 3));
+    ui->widget_video->updateLayout(LayoutInfo(3));
 }
 
 void MainVideoWidget::toVideoLayout4x4()
 {
-    ui->widget_video->updateLayout(LayoutInfo(4, 4));
+    ui->widget_video->updateLayout(LayoutInfo(4));
 }
 
 void MainVideoWidget::toUpdateMoreMenu()
 {
     QMenu *m = ui->pushButton_more->menu();
     m->clear();
-    for(const QFileInfo &info : QDir("play_form").entryInfoList()) {
+    for(const QFileInfo &info : QDir(lds::configDirectory + "/play_form").entryInfoList()) {
         if(!info.isFile())
             continue;
         QAction *ac = m->addAction(info.baseName(), this, SLOT(toApplyLayoutInfo()));
         ac->setData(info.filePath());
+    }
+
+    if(m->actions().isEmpty()) {
+        m->addAction(QString::fromUtf8("新建组播"), this, SLOT(toNewFormPlay()));
     }
 }
 
@@ -151,15 +141,24 @@ void MainVideoWidget::toApplyLayoutInfo()
         return;
     QFile file(ac->data().toString());
     if(!file.open(QFile::ReadOnly)) {
-        qDebug() << file.errorString();
+        lds::showMessage((file.errorString() + " " + file.fileName()));
         return;
     }
     ui->widget_video->updateLayout(LayoutInfo::readFrom(file.readAll()));
 }
 
+void MainVideoWidget::toNewFormPlay()
+{
+    playformnewdialog d(playformnewdialog::TypeNew, this);
+    d.setDataSource(lds::dataSource);
+    if(QDialog::Accepted == d.exec()) {
+
+    }
+}
+
 void MainVideoWidget::toVideoShowMax()
 {
-//    ui->frame_title->hide();
+    //    ui->frame_title->hide();
     ui->frame_view->hide();
     this->layout()->update();
 
@@ -169,7 +168,7 @@ void MainVideoWidget::toVideoShowMax()
 
 void MainVideoWidget::toVideoShowNormal()
 {
-//    ui->frame_title->show();
+    //    ui->frame_title->show();
     ui->frame_view->show();
     this->layout()->update();
 

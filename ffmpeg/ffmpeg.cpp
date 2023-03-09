@@ -57,13 +57,10 @@ void FFmpegThread::slotReceiveImage(FFmpegData d)
         m_tryReconnectIndex ++;
         if(m_tryReconnectIndex < m_tryReconnectMax) {
             d.errorString += QString("\n正在重新连接：%1/%2").arg(m_tryReconnectIndex).arg(m_tryReconnectMax);
-            qDebug() << __LINE__ << d.errorString;
             QTimer::singleShot(10, this, SIGNAL(signalPlay()));
         } else {
             m_tryReconnectIndex = -1;
             d.errorString += QString::fromUtf8("\n重新连接失败");
-            qDebug() << __LINE__ << d.errorString;
-
         }
     }
     //send
@@ -135,7 +132,7 @@ void FFmpegObject::playNext(bool begin)
         }
         if(mutex->isPaused()) {
             //已经暂停，则本次播放无效
-            qDebug() << __FILE__ << __LINE__ << "手动暂停";
+            qDebug() << __FILE__ << __LINE__ << url.section('/', -1) << "手动暂停";
             emit receiveImage(FFmpegData(FFmpegData::Paused));
             goto pause;
         }
@@ -215,9 +212,7 @@ pause:
     mutex->setStopped(false);
 
     if(frameFinish < 0) {
-        qDebug() << __FILE__ << __LINE__
-                 << "block_duration:" << block_interrupt_data.block_duration
-                    ;
+        qDebug() << __FILE__ << __LINE__<< "block_duration:" << block_interrupt_data.block_duration;
     }
 
     //播放超时
@@ -275,14 +270,12 @@ void FFmpegObject::free()
     }
 
     av_dict_free(&options);
-    //qDebug() << TIMEMS << "close ffmpeg ok";
 }
 
 int FFmpegObject::block_interrupt_callback(void *p)
 {
     BlockInterruptData *r = (BlockInterruptData *)p;
     if (r->last_time > 0) {
-        qDebug() << "block_interrupt_callback:"<<r->last_time << time(NULL);
         r->block_duration = time(NULL) - r->last_time;
         if (r->isTimeOut()) {
             //中断

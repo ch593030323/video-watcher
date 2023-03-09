@@ -26,21 +26,26 @@ MainSystemSetings::MainSystemSetings(QWidget *parent) :
     //buttongroup
     ui->pushButton_play_alternate->setCheckable(true);
     ui->pushButton_play_form->setCheckable(true);
+    ui->pushButton_snap->setCheckable(true);
+    ui->pushButton_url->setCheckable(true);
     QButtonGroup *buttonGroup = new QButtonGroup(this);
     buttonGroup->addButton(ui->pushButton_play_alternate);
     buttonGroup->addButton(ui->pushButton_play_form);
+    buttonGroup->addButton(ui->pushButton_snap);
+    buttonGroup->addButton(ui->pushButton_url);
     buttonGroup->setExclusive(true);
 
     ui->pushButton_play_form->setChecked(true);
-    toform();
-
 
     m_settingsAlter = qobject_cast<MainSystemSetingsAlter *>(ui->stackedWidget->widget(0));
     m_settingsForm = qobject_cast<MainSystemSetingsForm *>(ui->stackedWidget->widget(1));
-
+    m_settingsSnap = qobject_cast<MainSystemSetingsSnap *>(ui->stackedWidget->widget(2));
+    m_settingsUrl = qobject_cast<MainSystemSetingsUrl *>(ui->stackedWidget->widget(3));
 
     connect(ui->pushButton_play_alternate, SIGNAL(clicked()),this,SLOT(toalter()));
     connect(ui->pushButton_play_form, SIGNAL(clicked()),this,SLOT(toform()));
+    connect(ui->pushButton_snap, SIGNAL(clicked()),this,SLOT(tosnap()));
+    connect(ui->pushButton_url, SIGNAL(clicked()),this,SLOT(tourl()));
 }
 
 MainSystemSetings::~MainSystemSetings()
@@ -53,14 +58,35 @@ void MainSystemSetings::setDataSource(DataSource *datasource)
     m_datasource = datasource;
     m_settingsForm->setDataSource(m_datasource);
     m_settingsAlter->setDataSource(m_datasource);
+    m_settingsUrl->setDataSource(m_datasource);
+}
+
+void MainSystemSetings::refresh()
+{
+    ui->pushButton_play_form->setChecked(true);
+    toform();
 }
 
 void MainSystemSetings::toalter()
 {
     ui->stackedWidget->setCurrentIndex(0);
+    m_settingsAlter->refresh();
 }
 
 void MainSystemSetings::toform()
 {
     ui->stackedWidget->setCurrentIndex(1);
+    m_settingsForm->refresh();
+}
+
+void MainSystemSetings::tosnap()
+{
+    ui->stackedWidget->setCurrentIndex(2);
+    m_settingsSnap->refresh();
+}
+
+void MainSystemSetings::tourl()
+{
+    ui->stackedWidget->setCurrentIndex(3);
+    m_settingsUrl->refresh();
 }

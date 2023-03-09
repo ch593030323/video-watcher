@@ -3,7 +3,7 @@
 
 #include "videocell.h"
 #include "ffmpeg.h"
-#include "datasource.h"
+#include "dataSource.h"
 
 #include <QWidget>
 #include <QStandardItemModel>
@@ -25,7 +25,17 @@ public:
     MainFrame(QWidget *parent = 0);
     ~MainFrame();
 
-    void setDataSource(DataSource *datasource);
+    void setDataSource(DataSource *dataSource);
+
+    void showMessage(const QString &text);
+
+    bool isVisiableStatusBar();
+
+public slots:
+    void setVisiableStatusBar(bool showed);
+
+    void saveLayout();
+    void loadLayout();
 
 protected slots:
     void toexit();
@@ -35,7 +45,7 @@ protected slots:
 protected:
     Ui::MainWidget *ui;
 
-    DataSource *m_datasource;
+    DataSource *m_dataSource;
     MainVideoWidget *m_videoWidget;
     MainSystemSetings *m_systemSettings;
 };

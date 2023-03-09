@@ -7,6 +7,9 @@
 class MainSystemSetingsAlter;
 class MainSystemSetingsForm;
 class DataSource;
+class MainSystemSetingsSnap;
+class MainSystemSetingsUrl;
+
 namespace Ui {
 class MainSystemSetings;
 }
@@ -20,15 +23,20 @@ public:
     ~MainSystemSetings();
 
     void setDataSource(DataSource *datasource);
+    void refresh();
 private slots:
     void toalter();
     void toform();
+    void tosnap();
+    void tourl();
 private:
     Ui::MainSystemSetings *ui;
     DataSource *m_datasource;
 
     MainSystemSetingsAlter *m_settingsAlter;
     MainSystemSetingsForm *m_settingsForm;
+    MainSystemSetingsSnap *m_settingsSnap;
+    MainSystemSetingsUrl *m_settingsUrl;
 };
 
 #endif // MAINSYSTEMSETINGS_H

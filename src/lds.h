@@ -5,6 +5,10 @@
 #include <QWidget>
 #include <QChar>
 #include <QPixmap>
+#include <QFile>
+
+class DataSource;
+class QStatusBar;
 
 #define b40 40
 
@@ -37,17 +41,29 @@ public:
 
     static void init();
 
-//    static QRect AppBoundingRect;
     static QRect moveToCenter(QWidget *widget, QRect rect);
 
-    static QString iconFontFamily;
     static QPixmap getFontPixmap(QChar ch, const QColor &color = QColor("#f6f5fb"), const QSize &size = QSize(40, 40));
+    static QString iconFontFamily;
 
     static QPixmap getLayoutPixmap(int count);
 
     static QString getUniqueFileNamehByDateTime(const QString &dir);
+    static QString getUniqueFilePathhByDateTime(const QString &dir, const QString &suffix);
 
+    static QString configDirectory;
+
+    static void showMessage(const QString &text);
+    static void showMessage(const QString &description, const QString &errstring);
+    static QStatusBar *statusBar;
+
+    //init 调用和获取
     static QString styleSheetString;
+
+    //另外获取
+    static DataSource *dataSource;
+
+
 };
 
 /* 网卡如何追加ip地址

@@ -11,16 +11,20 @@
 #include <QDateTime>
 #include <QFileInfo>
 #include <QDir>
-
-//QRect lds::AppBoundingRect;
-QString lds::iconFontFamily;
-QString lds::styleSheetString;
+#include <QStatusBar>
 
 const int lds::margin = 10;
 const int lds::marginX2 = 2 * lds::margin;
 const int lds::border_width = 2;
 const int lds::videoAreaRight = 280;
 const int lds::videoAreaBottom = 50;
+
+QString lds::iconFontFamily;
+QString lds::styleSheetString;
+QString lds::configDirectory = ".";
+DataSource *lds::dataSource = 0;
+QStatusBar *lds::statusBar = 0;
+
 
 lds::lds(QWidget *parent) : QWidget(parent)
 {
@@ -63,7 +67,7 @@ QString lds::getUniqueFileNamehByDateTime(const QString &dir)
 {
     //自动填充新增的文件名
     int maxIndex = -1;
-    QString prefix = QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm");
+    QString prefix = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh-mm");
     for(const QFileInfo &info : QDir(dir).entryInfoList()) {
         if(info.isFile() && info.baseName().startsWith(prefix)) {
             int begin = info.baseName().lastIndexOf("(");
@@ -75,6 +79,24 @@ QString lds::getUniqueFileNamehByDateTime(const QString &dir)
 
     return (maxIndex == 0 ? prefix : (prefix + "(" + QString::number(maxIndex) + ")"));
 
+}
+
+QString lds::getUniqueFilePathhByDateTime(const QString &dir, const QString &suffix)
+{
+    QString name = getUniqueFileNamehByDateTime(dir);
+    return dir + "/" + name + "." + suffix;
+}
+
+void lds::showMessage(const QString &text)
+{
+    if(!statusBar)
+        return;
+    statusBar->showMessage(QString::fromUtf8(qPrintable(text)));
+}
+
+void lds::showMessage(const QString &description, const QString &errstring)
+{
+    showMessage(description + ":" + errstring);
 }
 
 void lds::init()
@@ -89,11 +111,6 @@ void lds::init()
     //    QTextCodec::setCodecForTr(codec);
     //#endif
 
-    //bounding rect
-    //    lds::AppBoundingRect = qApp->desktop()->availableGeometry()
-    //            .adjusted(0, 30, 0, 0) //substract title height
-    //            .adjusted(30, 30, -30, -30);//substract margin 10 px
-
     //icon font
     int fontId = QFontDatabase::addApplicationFont(":/Awesome.otf");
     iconFontFamily = QFontDatabase::applicationFontFamilies(fontId).value(0);
@@ -101,11 +118,9 @@ void lds::init()
     qDebug() << "iconFontFamily:" << iconFontFamily << QFontDatabase::applicationFontFamilies(fontId) << fontId;
 
     //skin
-//    QFile file(":/skin.qss");
     QFile file(":/skin_light.qss");
-//    QFile file("skin.qss");
     if(!file.open(QFile::ReadOnly)) {
-        qDebug() << "file open error:" << file.errorString();
+        lds::showMessage((file.errorString() + ":" + file.fileName()));
     }
 
     styleSheetString = file.readAll();
@@ -117,6 +132,16 @@ void lds::init()
     //    QFont font = qApp->font();
     //    font.setPixelSize(25);
     //    qApp->setFont(font);
+
+
+    //configDirectory
+#ifdef OMS_DATASOURCE
+    lds::configDirectory =  QProcessEnvironment::systemEnvironment().value("CPS_ENV") + "/data/video-watcher";
+    QDir().mkpath(lds::configDirectory);
+#else
+    lds::configDirectory =  "../data/video-watcher";
+    QDir().mkpath(lds::configDirectory);
+#endif
 }
 
 QList<AlterPlayFrame> AlterPlayFrame::readFrom(const QString &filepath)
@@ -124,7 +149,7 @@ QList<AlterPlayFrame> AlterPlayFrame::readFrom(const QString &filepath)
     QList<AlterPlayFrame> playlist;
     QFile file(filepath);
     if(!file.open(QFile::ReadOnly)) {
-        qDebug() << file.errorString();
+        lds::showMessage((file.errorString() + ":" + file.fileName()));
     }
     //更新listwidget的内容
     while(!file.atEnd()) {

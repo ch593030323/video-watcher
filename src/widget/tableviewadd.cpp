@@ -1,6 +1,7 @@
 #include "tableviewadd.h"
 
 #include <QHeaderView>
+#include <QtDebug>
 
 TableViewAdd::TableViewAdd(QWidget *parent)
     : QTableView(parent)
@@ -10,10 +11,12 @@ TableViewAdd::TableViewAdd(QWidget *parent)
     this->setModel(m_tableModel);
     this->horizontalHeader()->hide();
     this->horizontalHeader()->setStretchLastSection(true);
-    this->setEditTriggers(QTableView::AllEditTriggers);
+    this->setEditTriggers(QTableView::SelectedClicked | QTableView::DoubleClicked);
 
     connect(this->itemDelegate(), SIGNAL(closeEditor(QWidget *, QAbstractItemDelegate::EndEditHint)),
             this, SLOT(toCheckTable(QWidget *, QAbstractItemDelegate::EndEditHint)));
+    connect(this->itemDelegate(), SIGNAL(closeEditor(QWidget *, QAbstractItemDelegate::EndEditHint)),
+            this, SIGNAL(editingFinished()));
 
 
 }
@@ -38,7 +41,8 @@ void TableViewAdd::setStringList(const QStringList &list)
 void TableViewAdd::toCheckTable(QWidget *editor, QAbstractItemDelegate::EndEditHint hint)
 {
     if(editor && editor->property("text").toString().trimmed().isEmpty()) {
-        m_tableModel->removeRow(m_tableModel->rowCount() - 1);
+        QModelIndex index = this->indexAt(editor->geometry().center());
+        m_tableModel->removeRow(index.row());
     }
 }
 

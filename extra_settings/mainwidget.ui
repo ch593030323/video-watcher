@@ -83,7 +83,7 @@
            </size>
           </property>
           <property name="text">
-           <string>摄像机设置</string>
+           <string>默认播放</string>
           </property>
          </widget>
         </item>
@@ -146,7 +146,7 @@
          <string/>
         </property>
         <property name="outer_stylesheet" stdset="0">
-         <string>line</string>
+         <string>horizontal_line</string>
         </property>
        </widget>
       </item>
@@ -168,42 +168,55 @@
      <widget class="QWidget" name="page_2">
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="1" column="1">
-          <widget class="LineEditX" name="lineEdit_default_columncount">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>30</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="LineEditX" name="lineEdit_default_rowcount">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>30</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1,0,1">
+         <item>
           <widget class="QLabel" name="label_4">
            <property name="text">
             <string>默认行数</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
+         <item>
+          <widget class="QSpinBox" name="spinBox_default_rowcount">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="label_5">
            <property name="text">
             <string>默认列数</string>
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QSpinBox" name="spinBox_default_columncount">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+          </widget>
+         </item>
         </layout>
+       </item>
+       <item>
+        <widget class="lds_checkbox_phonestyle" name="pushButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>PushButton</string>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -228,7 +241,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_add_defatult_video_url">
+          <widget class="QPushButton" name="pushButton_add">
            <property name="minimumSize">
             <size>
              <width>40</width>
@@ -236,7 +249,7 @@
             </size>
            </property>
            <property name="text">
-            <string>+</string>
+            <string/>
            </property>
            <property name="flat">
             <bool>true</bool>
@@ -244,7 +257,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_sub_defatult_video_url">
+          <widget class="QPushButton" name="pushButton_sub">
            <property name="minimumSize">
             <size>
              <width>40</width>
@@ -252,7 +265,7 @@
             </size>
            </property>
            <property name="text">
-            <string>-</string>
+            <string/>
            </property>
            <property name="flat">
             <bool>true</bool>
@@ -262,7 +275,7 @@
         </layout>
        </item>
        <item>
-        <widget class="TableViewAdd" name="tableView_defatul_playlist"/>
+        <widget class="TableViewAdd" name="tableView_default_playlist"/>
        </item>
       </layout>
      </widget>
@@ -277,15 +290,15 @@
    <header>tableviewadd.h</header>
   </customwidget>
   <customwidget>
-   <class>LineEditX</class>
-   <extends>QLineEdit</extends>
-   <header>lineeditx.h</header>
-  </customwidget>
-  <customwidget>
    <class>TreeVideoViewSearchSettings</class>
    <extends>QWidget</extends>
    <header>treevideoviewsearchsettings.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>lds_checkbox_phonestyle</class>
+   <extends>QPushButton</extends>
+   <header>lds_checkbox_phonestyle.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

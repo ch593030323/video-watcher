@@ -6,6 +6,8 @@
 #include "videocontrolpanel.h"
 #include "propertycolor.h"
 #include "mainvideowidget.h"
+#include "playalternatenewdialog.h"
+#include "videowidget.h"
 
 #include <QPainter>
 #include <QtDebug>
@@ -50,7 +52,17 @@ VideoCell::~VideoCell()
     removeThread(m_info.url);
 }
 
-void VideoCell::updateVideoScene(const LayoutInfo &info, QWidget *parentWidget, QRect area, QMap<LayoutPos, VideoCell *> &cacheMap)
+VideoCell *VideoCell::createCell(LayoutPos pos, VideoWidget *parentWidget)
+{
+    VideoCell *w = new VideoCell(pos, parentWidget);
+    connect(w, SIGNAL(signalRelease()),         parentWidget, SLOT(toselected()));
+    connect(w, SIGNAL(signalAlterClear()),      parentWidget, SLOT(toclear()));
+    connect(w, SIGNAL(signalAlterMerge()),      parentWidget, SLOT(tomerge()));
+    connect(w, SIGNAL(signalAlterRestore()),    parentWidget, SLOT(torestore()));
+    return w;
+}
+
+void VideoCell::updateVideoScene(const LayoutInfo &info, VideoWidget *parentWidget, QRect area, QMap<LayoutPos, VideoCell *> &cacheMap)
 {
     const int column_count =  info.column_count;
     const int row_count = info.row_count;
@@ -62,11 +74,13 @@ void VideoCell::updateVideoScene(const LayoutInfo &info, QWidget *parentWidget, 
     for(int row = 0; row < row_count; row ++) {
         for(int column = 0; column < column_count; column ++) {
             LayoutPos pos = LayoutPos(column, row);
-            if(!cacheMap.contains(pos)) {
-                cacheMap.insert(pos, new VideoCell(pos, parentWidget));
+
+            VideoCell *w = cacheMap.value(pos, 0);
+            if(!w) {
+                w = createCell(pos, parentWidget);
+                cacheMap.insert(pos, w);
             }
 
-            VideoCell *w = cacheMap.value(pos);
             unused_video_widget_list.removeOne(w);
         }
     }
@@ -74,12 +88,13 @@ void VideoCell::updateVideoScene(const LayoutInfo &info, QWidget *parentWidget, 
     //只更新info里cell的geometry
     for(int k = 0; k < info.cells.count(); k ++) {
         const LayoutCell &cell = info.cells[k];
-        //
         LayoutPos pos = cell.pos;
-        if(!cacheMap.contains(pos)) {
-            cacheMap.insert(pos, new VideoCell(pos, parentWidget));
+
+        VideoCell *w = cacheMap.value(pos, 0);
+        if(!w) {
+            w = createCell(pos, parentWidget);
+            cacheMap.insert(pos, w);
         }
-        VideoCell *w = cacheMap.value(pos);
         w->addPlayer(cell.url);
 
         unused_video_widget_list.removeOne(w);
@@ -98,7 +113,7 @@ void VideoCell::updateVideoScene(const LayoutInfo &info, QWidget *parentWidget, 
         }
     }
 
-    //hide unused video widget
+    //隐藏无用的cell
     QList<VideoCell *>all_video_widget_list = cacheMap.values();
     for(int k = 0; k < all_video_widget_list.count(); k ++) {
         VideoCell *w = all_video_widget_list[k];
@@ -110,6 +125,21 @@ void VideoCell::updateVideoScene(const LayoutInfo &info, QWidget *parentWidget, 
             w->show();
         }
     }
+
+    //移除不在layoutinfo里的播放器
+    for(int row = 0; info.cells.count() > 0 && row < row_count; row ++) {
+        for(int column = 0; column < column_count; column ++) {
+            LayoutPos pos = LayoutPos(column, row);
+            int index = LayoutCell::indexOf(pos, info.cells);
+            if(index < 0) {
+                VideoCell *w = cacheMap.value(pos, 0);
+                if(w)
+                    w->removePlayer();
+            }
+
+        }
+    }
+
 
     updateVideoGeometry(info, area, cacheMap);
 }
@@ -144,7 +174,6 @@ void VideoCell::updateImage(const FFmpegData &d)
 {
     //播放、暂停的控制命令
     if(d.type == FFmpegData::Control) {
-        qDebug() << __LINE__;
         if(FFmpegData::Playing == d.playState) {
             m_controlPanel->updateControlPanelState(VideoControlPanel::Playing);
         }
@@ -176,7 +205,6 @@ void VideoCell::updateImage(const FFmpegData &d)
 
 void VideoCell::toControlPlay()
 {
-    qDebug() << __FUNCTION__;
     PlayThread *thread = PlayThread::PlayThreadMap.value(m_info.url, NULL);
     if(!thread)
         return;
@@ -187,7 +215,6 @@ void VideoCell::toControlPlay()
 
 void VideoCell::toControlPause()
 {
-    qDebug() << __FUNCTION__;
     PlayThread *thread = PlayThread::PlayThreadMap.value(m_info.url, NULL);
     if(!thread)
         return;
@@ -203,13 +230,18 @@ void VideoCell::toControlClose()
 
 void VideoCell::toControlFullScreen()
 {
-    if(this->parentWidget()) {
-        this->setGeometry(0, 0, this->window()->width(), this->window()->height());
-        this->setParent(this->window());
+    //look for window
+    QWidget *pw = this->parentWidget();
+    while(pw && !pw->isWindow())
+        pw = pw->parentWidget();
+
+    if(pw) {
+        this->setGeometry(0, 0, pw->width(), pw->height());
+        this->setParent(pw);
         this->show();
         this->raise();
+        m_controlPanel->setFullSreen(true);
     }
-    m_controlPanel->setFullSreen(true);
 }
 
 void VideoCell::toControlFullScreenExit()
@@ -226,9 +258,17 @@ void VideoCell::toControlFullScreenExit()
 
 void VideoCell::toControlSaveImage()
 {
-    QString path = "snap";
-    QDir().mkpath(path);
-    m_ffmpegData.image.save(path + "/" + lds::getUniqueFileNamehByDateTime(path) + ".png");
+    if(m_ffmpegData.image.isNull()) {
+        lds::showMessage("保存失败:图片为空");
+        return;
+    }
+
+    QString dir = lds::configDirectory + "/snap";
+    QDir().mkpath(dir);
+    QString filepath = lds::getUniqueFilePathhByDateTime(dir, "png");
+    m_ffmpegData.image.save(filepath);
+
+    lds::showMessage(("保存成功:" + filepath));
 }
 
 void VideoCell::updatePlayListDevice()
@@ -240,6 +280,15 @@ void VideoCell::updatePlayListDevice()
     if(m_playListIndex < 0 || m_playListIndex >= m_playList.count())
         return;
 
+    qDebug() << __LINE__;
+    lds::showMessage((QString("正在轮播, 坐标:(%1,%2), 进度:%3/%4, 名称:%5, 时长:%6s")
+                                .arg(m_info.pos.x + 1)
+                                .arg(m_info.pos.y + 1)
+                                .arg(m_playListIndex + 1)
+                                .arg(m_playList.count())
+                                .arg(m_playList[m_playListIndex].url.section("/", -1))
+                                .arg(m_playList[m_playListIndex].length)
+                                ));
     m_playListUrl = m_playList[m_playListIndex].url;
     m_playListTimer->setInterval(m_playList[m_playListIndex].length * 1000);
 }
@@ -247,13 +296,26 @@ void VideoCell::updatePlayListDevice()
 void VideoCell::toAlterStop()
 {
     removePlayer();
+    lds::showMessage("轮播结束");
 }
 
 void VideoCell::toShowDetail()
 {
-    qDebug() << "url:" << m_info.url
-             << "state:" << PlayThread::PlayThreadMap.value(m_info.url)->lastPlayState()
-             << "data:" << PlayThread::PlayThreadMap.value(m_info.url)->lastPlayData().errorString;
+    PlayThread *thread = PlayThread::PlayThreadMap.value(m_info.url);
+    if(!thread)
+        return;
+    qDebug() << "url:"   << m_info.url
+             << "state:" << thread->lastPlayState()
+             << "data:"  << thread->lastPlayData().errorString;
+}
+
+void VideoCell::toAlterNew()
+{
+    PlayAlternateNewDialog d(PlayAlternateNewDialog::TypeNew, this);
+    d.setDataSource(lds::dataSource);
+    if(QDialog::Accepted == d.exec()) {
+
+    }
 }
 
 void VideoCell::toAlterStart()
@@ -264,6 +326,7 @@ void VideoCell::toAlterStart()
     QString filepath = ac->data().toString();
 
     addPlayerList(AlterPlayFrame::readFrom(filepath));
+    lds::showMessage("轮播开始");
     runPlayerList();
 }
 
@@ -451,17 +514,54 @@ void VideoCell::mouseReleaseEvent(QMouseEvent *event)
 
     if(m_isCheckable) {
         setChecked(true);//!m_isChecked;
+        emit signalRelease();
     }
     update();
-    emit signalRelease();
 }
 
 void VideoCell::contextMenuEvent(QContextMenuEvent *event)
 {
-    if(m_contextMenuDataList.isEmpty())
-        return;
+    //actionList
+    QList<VideoCell::ContextMenuData> actionList;
+    //添加组播键菜单
+    if(m_isCheckable) {
+        //添加右键菜单栏
+        actionList << VideoCell::ContextMenuData(QString::fromUtf8("合并所选"), this, SIGNAL(signalAlterMerge()));
+        actionList << VideoCell::ContextMenuData(QString::fromUtf8("清除所有"), this, SIGNAL(signalAlterClear()));
+        actionList << VideoCell::ContextMenuData(QString::fromUtf8("还原初始"), this, SIGNAL(signalAlterRestore()));
+    } else {
+
+        //添加轮播菜单
+
+        VideoCell::ContextMenuData ac_alter_start = VideoCell::ContextMenuData(QString::fromUtf8("开始轮播"),
+                                                                               this,
+                                                                               "",
+                                                                               "alter_start");
+        VideoCell::ContextMenuData ac_alter_stop = VideoCell::ContextMenuData(QString::fromUtf8("停止轮播"),
+                                                                              this,
+                                                                              SLOT(toAlterStop()),
+                                                                              "alter_stop");
+
+        for(const QFileInfo &info : QDir(lds::configDirectory + "/play_alter").entryInfoList()) {
+            if(info.isFile())
+                ac_alter_start.children << VideoCell::ContextMenuData(
+                                               info.baseName(),
+                                               this,
+                                               SLOT(toAlterStart()),
+                                               info.filePath());
+        }
+
+        actionList << ac_alter_start;
+        actionList << ac_alter_stop;
+        if(ac_alter_start.children.isEmpty()) {
+            actionList << VideoCell::ContextMenuData(QString::fromUtf8("新增轮播"),
+                                                     this,
+                                                     SLOT(toAlterNew()));
+        }
+    }
+    //menu
     QMenu m(this);
-    addActionsToMenu(m_contextMenuDataList, &m, 0);
+    addActionsToMenu(actionList, &m, 0);
     m.move(this->mapToGlobal(event->pos()));
     m.exec();
 }
@@ -474,21 +574,14 @@ void VideoCell::addActionsToMenu(const QList<VideoCell::ContextMenuData> &list, 
     for(int k = 0; k < list.count(); k ++) {
         const ContextMenuData &d = list[k];
 
+        //add action
         QAction *ac = 0;
         QMenu *menu = 0;
         if(d.children.count() > 0) {
-            menu = new QMenu;
+            menu = new QMenu(sub_menu);
             ac = menu->menuAction();
         } else {
             ac = new QAction(0);
-        }
-
-
-        if(m_playListTimer->isActive() && d.var.toString() == "alter_start") {
-            ac->setEnabled(false);
-        }
-        if(!m_playListTimer->isActive() && d.var.toString() == "alter_stop") {
-            ac->setEnabled(false);
         }
 
         ac->setText(d.text);
@@ -499,8 +592,21 @@ void VideoCell::addActionsToMenu(const QList<VideoCell::ContextMenuData> &list, 
             connect(ac, SIGNAL(triggered()), d.target, d.slot);
         }
 
+        //action enabled
+        if(m_playListTimer->isActive() && d.var.toString() == "alter_start") {
+            ac->setEnabled(false);
+        }
+        if(!m_playListTimer->isActive() && d.var.toString() == "alter_stop") {
+            ac->setEnabled(false);
+        }
+        if(d.var.toString() == "alter_start" && d.children.isEmpty()) {
+            ac->setEnabled(false);
+        }
+
+        //menu children
         addActionsToMenu(d.children, menu, sub_menu);
 
+        //menu root
         if(0 != parent_menu) {
             QAction *mac = sub_menu->menuAction();
             parent_menu->addAction(mac);
@@ -534,29 +640,28 @@ void VideoCell::removePlayer()
     update();
 }
 
-void VideoCell::removeThread(QString url)
+void VideoCell::removeThread(const QString &url)
 {
     PlayThread *thread = PlayThread::PlayThreadMap.value(url, NULL);
     if(!thread)
         return;
     disconnect(thread, SIGNAL(receiveImage(FFmpegData)), this, SLOT(updateImage(FFmpegData)));
-    qDebug() << __LINE__ << "ffmpeg thread connection count is " << thread->receiverImageConnectionCount();
+    qDebug() << __FUNCTION__ << "ffmpeg thread connection count is " << thread->receiverImageConnectionCount();
     if(thread->receiverImageConnectionCount() == 0) {
         thread->close();
     }
 }
 
-PlayThread *VideoCell::addThread(QString url)
+PlayThread *VideoCell::addThread(const QString &url)
 {
     PlayThread *thread = PlayThread::PlayThreadMap.value(url, NULL);
     if(thread == NULL) {
         thread = PlayThread::createPlayThread(url);
         PlayThread::PlayThreadMap.insert(url, thread);
     }
-
     thread->open();
-
     connect(thread, SIGNAL(receiveImage(FFmpegData)), this, SLOT(updateImage(FFmpegData)), Qt::QueuedConnection);
+    qDebug() << __FUNCTION__ << "ffmpeg thread connection count is " << thread->receiverImageConnectionCount();
 
     return thread;
 }
@@ -575,22 +680,21 @@ void VideoCell::addPlayer(const QString &url)
 void VideoCell::preparePlayer(const QString &url)
 {
     PlayThread *thread = addThread(url);
-    qDebug() << __FILE__ << __LINE__ << "state:" << thread->lastPlayState();
 
     //播放器的定义为：一个播放线程一个播放器，VideoCell是一个播放窗口
     //无状态 正在播放
     if(thread->lastPlayState() == FFmpegData::NoState
             || thread->lastPlayState() == FFmpegData::Playing) {
-//        m_controlPanel->updateControlPanelState(VideoControlPanel::Playing);
+        //        m_controlPanel->updateControlPanelState(VideoControlPanel::Playing);
     }
     //播放暂停
     if(thread->lastPlayState() == FFmpegData::Paused) {
-//        m_controlPanel->updateControlPanelState(VideoControlPanel::Paused);
+        //        m_controlPanel->updateControlPanelState(VideoControlPanel::Paused);
         updateImage(thread->lastPlayData());
     }
     //播放结束
     if(thread->lastPlayState() == FFmpegData::Stopped) {
-//        m_controlPanel->updateControlPanelState(VideoControlPanel::Playing);
+        //        m_controlPanel->updateControlPanelState(VideoControlPanel::Playing);
         thread->play();
     }
 }
@@ -604,7 +708,7 @@ void VideoCell::addPlayerList(const QList<AlterPlayFrame> &playList)
         preparePlayer(playList[k].url);
     }
     //
-//    toControlPlay();
+    //    toControlPlay();
 
     runPlayerList();
 }
@@ -621,11 +725,6 @@ void VideoCell::updateControlPanelGeometry()
     m_controlPanel->setGeometry(lds::margin / 2, lds::margin / 2, this->width() - lds::margin, 40);
 }
 
-void VideoCell::setCheckable(bool enabled)
-{
-    m_isCheckable = enabled;
-}
-
 void VideoCell::setChecked(bool checked)
 {
     m_isChecked = checked;
@@ -637,9 +736,9 @@ bool VideoCell::isChecked()
     return m_isChecked;
 }
 
-void VideoCell::setContextMenuDataList(QList<ContextMenuData> contextMenuDataList)
+void VideoCell::setCheckable(bool isCheckable)
 {
-    m_contextMenuDataList = contextMenuDataList;
+    m_isCheckable = isCheckable;
 }
 
 void VideoCell::setGeometryX(int column_spans, int row_spans, QRect area, int column_count, int row_count)

@@ -28,24 +28,24 @@ void arg_message_handler(QtMsgType type, const char *msg)
 //        break;
 //    }
 
-    QString txt = msg;
-    QString dt = "";//QTime::currentTime().toString("[mm:ss]");
-    QString fi = "";//QString("[%1:$2]").arg(__FILE__).arg(__LINE__);
-    QString tx = dt + fi + txt + "\n";
+//    QString txt = msg;
+//    QString dt = "";//QTime::currentTime().toString("[mm:ss]");
+//    QString fi = "";//QString("[%1:$2]").arg(__FILE__).arg(__LINE__);
+//    QString tx = dt + fi + txt + "\n";
 
-    QString filepath = "/home/cps/cz/log.txt";
-    if(!QFile::exists(filepath)) {
-        QFile file(filepath);
-        file.open(QFile::WriteOnly);
-        file.close();
-    }
-    //
+//    QString filepath = "/home/cps/cz/log.txt";
+//    if(!QFile::exists(filepath)) {
+//        lds_file file(filepath);
+//        file.open(QFile::WriteOnly);
+//        file.close();
+//    }
+//    //
 
-    QFile file(filepath);
-    file.open(QFile::Append);
-    //file.write((QTime::currentTime().toString("[hh:mm:ss]") + txt + "\n").toLocal8Bit());
-    file.write(tx.toLocal8Bit() + "\n");
-    file.close();
+//    lds_file file(filepath);
+//    file.open(QFile::Append);
+//    //file.write((QTime::currentTime().toString("[hh:mm:ss]") + txt + "\n").toLocal8Bit());
+//    file.write(tx.toLocal8Bit() + "\n");
+//    file.close();
 }
 
 class A {

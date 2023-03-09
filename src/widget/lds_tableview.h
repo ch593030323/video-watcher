@@ -13,7 +13,8 @@ public:
     void appHorizontalHeader(const QString &key, const QString &text, int width);
     int fieldIndex(const QString &key);
 
-    QVariant data(int row, const QString &key);
+    QVariant data(int row, const QString &key, int role = Qt::DisplayRole);
+    bool setData(int row, const QString &key, const QVariant &var, int role = Qt::EditRole);
 
     bool removeRows(int begin, int count);
     bool removeRow(int begin);

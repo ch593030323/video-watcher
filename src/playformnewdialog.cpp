@@ -20,7 +20,7 @@ playformnewdialog::playformnewdialog(Type type, QWidget *parent)
     ui->widget_video->setMultilselected(true);
     ui->pushButton_ok->setText(type == TypeNew ? QString::fromUtf8("新增") : QString::fromUtf8("修改"));
     if(type == TypeNew) {
-        ui->lineEdit->setText(lds::getUniqueFileNamehByDateTime("play_form"));
+        ui->lineEdit->setText(lds::getUniqueFileNamehByDateTime(lds::configDirectory + "/play_form"));
     }
     if(type == TypeModify) {
         ui->lineEdit->setEnabled(false);
@@ -91,7 +91,7 @@ void playformnewdialog::readFrom(const QString &filepath)
 {
     QFile file(filepath);
     if(!file.open(QFile::ReadOnly)) {
-        qDebug() << file.errorString();
+        lds::showMessage((file.errorString() + ":" + file.fileName()));
     }
     QByteArray readall = file.readAll();
 
@@ -149,12 +149,10 @@ void playformnewdialog::toVideoLayout5x5()
 
 void playformnewdialog::toaccept()
 {
-    ui->widget_video->updateLayoutInfo();
-
-    QDir().mkpath("play_form");
-    QFile file(QString("play_form/%1.txt").arg(ui->lineEdit->text().trimmed()));
+    QDir().mkpath(lds::configDirectory + "/play_form");
+    QFile file(lds::configDirectory + QString("/play_form/%1.txt").arg(ui->lineEdit->text().trimmed()));
     if(!file.open(QFile::WriteOnly)) {
-        qDebug() << file.errorString();
+        lds::showMessage((file.errorString() + ":" + file.fileName()));
     }
     file.write(ui->widget_video->toJson());
 

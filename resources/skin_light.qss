@@ -24,9 +24,7 @@
     background:#e0e0e0;
 }
 QMenu{
-    border-style:outset; /*边框风格*/
-    border-width:1px;/*边框宽度*/
-    border-color:#a1b0bb; /*边框颜色*/
+    border 1px outset #a1b0bb;
     color:#171718;
     background:#e0e0e0;
 }
@@ -53,6 +51,12 @@ QToolButton{
     background:#4e6ef2;
     color:#fefefe;
 }
+
+QMessageBox QAbstractButton{
+    min-width:60;
+    min-height:40;
+}
+
 QPushButton:hover,
 QToolButton:hover{
     background:#859bff;

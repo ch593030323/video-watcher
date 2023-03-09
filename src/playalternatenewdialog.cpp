@@ -31,7 +31,7 @@ PlayAlternateNewDialog::PlayAlternateNewDialog(PlayAlternateNewDialog::Type type
     if(type == TypeModify) {
         ui->lineEdit->setEnabled(false);
     }
-    ui->lineEdit->setText(lds::getUniqueFileNamehByDateTime("play_alter"));
+    ui->lineEdit->setText(lds::getUniqueFileNamehByDateTime(lds::configDirectory + "/play_alter"));
 
     ui->pushButton_add->setIcon(lds::getFontPixmap(0x203a, PropertyColor::buttonTextColor));
     ui->pushButton_del->setIcon(lds::getFontPixmap(0x203a, PropertyColor::buttonTextColor));
@@ -107,10 +107,10 @@ void PlayAlternateNewDialog::took()
                 .arg(ui->tableView->data(row, "url").toString());
     }
 
-    QDir().mkpath("play_alter");
-    QFile file(QString("play_alter/%1.txt").arg(ui->lineEdit->text().trimmed()));
+    QDir().mkpath(lds::configDirectory + "/play_alter");
+    QFile file(lds::configDirectory + QString("/play_alter/%1.txt").arg(ui->lineEdit->text().trimmed()));
     if(!file.open(QFile::WriteOnly)) {
-        qDebug() << file.errorString();
+        lds::showMessage((file.errorString() + ":" + file.fileName()));
     }
     file.write(content.toLocal8Bit());
     file.close();

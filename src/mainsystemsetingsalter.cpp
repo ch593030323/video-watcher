@@ -2,6 +2,7 @@
 #include "ui_mainsystemsetingsalter.h"
 #include "propertycolor.h"
 #include "playalternatenewdialog.h"
+#include "global.h"
 
 #include <QFileInfo>
 #include <QDateTime>
@@ -15,12 +16,12 @@ MainSystemSetingsAlter::MainSystemSetingsAlter(QWidget *parent) :
     ui->setupUi(this);
 
     ui->pushButton_add->setIcon(PropertyColor::getFontPixmap(0x2b));
-    ui->pushButton_del->setIcon(PropertyColor::getFontPixmap(0x2d));
+    ui->pushButton_del->setIcon(PropertyColor::getFontPixmap(0xf014));
     ui->pushButton_modify->setIcon(PropertyColor::getFontPixmap(0x2700));
 
     ui->tableView->appHorizontalHeader("name", QString::fromUtf8("名称"), 280);
     ui->tableView->appHorizontalHeader("size", QString::fromUtf8("大小"), 110);
-    ui->tableView->appHorizontalHeader("create", QString::fromUtf8("创建日期"), 110);
+    ui->tableView->appHorizontalHeader("create", QString::fromUtf8("创建日期"), 120);
     ui->tableView->appHorizontalHeader("enable", QString::fromUtf8("是否启用"), 110);
     ui->tableView->setEditTriggers(QTableView::NoEditTriggers);
     ui->tableView->setSelectionBehavior(QTableView::SelectRows);
@@ -30,7 +31,7 @@ MainSystemSetingsAlter::MainSystemSetingsAlter(QWidget *parent) :
     connect(ui->pushButton_modify, SIGNAL(clicked()),this,SLOT(tomodify()));
     connect(ui->pushButton_del, SIGNAL(clicked()),this,SLOT(todel()));
 
-    refresh();
+//    refresh();
 }
 
 MainSystemSetingsAlter::~MainSystemSetingsAlter()
@@ -41,12 +42,13 @@ MainSystemSetingsAlter::~MainSystemSetingsAlter()
 void MainSystemSetingsAlter::refresh()
 {
     ui->tableView->removeRows(0, ui->tableView->rowCount());
-    for(const QFileInfo &info : QDir("play_alter").entryInfoList()) {
+    for(const QFileInfo &info : QDir(lds::configDirectory + "/play_alter").entryInfoList()) {
         if(!info.isFile())
             continue;
         ui->tableView->appendRow({info.fileName(),
                                   QString::number(info.size()) + "B",
                                   info.created().toString("yyyy-MM-dd")});
+        ui->tableView->setData(ui->tableView->rowCount() - 1, "name", info.filePath(), FilePathRole);
     }
     ui->tableView->selectRow(0);
 }
@@ -70,7 +72,7 @@ void MainSystemSetingsAlter::todel()
     int row = ui->tableView->currentIndex().row();
     if(row < 0)
         return;
-    QFile::remove("play_alter"  "/" + ui->tableView->data(row, "name").toString());
+    QFile::remove(ui->tableView->data(row, "name", FilePathRole).toString());
     refresh();
     ui->tableView->selectRow(row);
 }
@@ -83,7 +85,7 @@ void MainSystemSetingsAlter::tomodify()
 
     PlayAlternateNewDialog d(PlayAlternateNewDialog::TypeModify, this);
     d.setDataSource(m_datasource);
-    d.readFrom("play_alter"  "/" + ui->tableView->data(row, "name").toString());
+    d.readFrom(ui->tableView->data(row, "name", FilePathRole).toString());
     if(QDialog::Accepted == d.exec()) {
         refresh();
     }

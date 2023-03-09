@@ -1,6 +1,8 @@
 #ifndef MAINWIDGET_H
 #define MAINWIDGET_H
 #include "src/datasource.h"
+#include "jsoncpppath.h"
+#include "editedwidgetmapper.h"
 
 #include <QFrame>
 #include <QStandardItemModel>
@@ -28,9 +30,12 @@ private slots:
     void tosave();
 
 private:
+    bool saveJson();
+private:
     Ui::mainWidget *ui;
     DataSource *m_datasource;
-    QSettings *conf;
+    JsonCppPath *m_config;
+    EditedWidgetMapper *m_mapper;
 };
 
 #endif // MAINWIDGET_H

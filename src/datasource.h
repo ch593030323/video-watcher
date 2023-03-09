@@ -2,6 +2,8 @@
 #define DATASOURCE_H
 
 #include <QObject>
+#include <QMap>
+#include <QVariant>
 
 class DataSource : public QObject{
     Q_OBJECT
@@ -24,7 +26,7 @@ public:
         QString location_obid;
         int type;//摄像头类型:1：直机、2：球机
         int state;//摄像头状态:1：在线、2：离线、3：故障
-        QString url;//视频流地址
+//        QString url;//视频流地址
 
     };
     struct CameraState {
@@ -40,11 +42,16 @@ public:
 
     QString getCameraStateName(int rank);
     QString getCameraTypeName(int rank);
+    QString getCameraUrl(const QString &obid);
     //
     virtual QList<Location> getLocationList();
     virtual QList<Camera> getCameraList(const QString &location_obid);
     virtual QList<CameraState> getCameraStateList();
     virtual QList<CameraType> getCameraTypeList();
+
+    //
+    void clearCache();
+    QMap<QString, QVariant> cameraUrlCache;
 };
 
 

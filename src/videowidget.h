@@ -12,11 +12,24 @@ class VideoWidget : public QWidget
 public:
     explicit VideoWidget(QWidget *parent = 0);
 
+    /**
+     * @brief updateLayout
+     * 仅通过info来更新layout
+     */
     void updateLayout(const LayoutInfo &info);
+    /**
+     * @brief updateLayout
+     * 先VideoCell的info 更新到 layoutInfo里
+     * 再通过info来更新layout
+     */
     void updateLayout();
 
-    void updateLayoutInfo();
+    /**
+     * @brief toJson
+     * 获取实时的VideoCell在内的layout json
+     */
     QByteArray toJson();
+    Json::Value toJsonValue();
 
     inline int columnCount() {return m_layoutInfo.column_count;}
 

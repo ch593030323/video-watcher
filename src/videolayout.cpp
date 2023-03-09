@@ -1,5 +1,4 @@
 #include "videolayout.h"
-#include "json/json.h"
 #include "videocell.h"
 
 #include <QtDebug>
@@ -45,8 +44,13 @@ bool LayoutCell::isNull() const
 
 QByteArray LayoutInfo::toJson()
 {
+    return QByteArray::fromStdString(Json::StyledWriter()
+                                  .write(toJsonValue()));
+}
+
+Json::Value LayoutInfo::toJsonValue()
+{
     Json::Value root;
-    Json::FastWriter writer;
 
     root["column_count"] = column_count;
     root["row_count"] = row_count;
@@ -69,21 +73,27 @@ QByteArray LayoutInfo::toJson()
     }
     root["cells"] = json_cells;
 
-    std::string json_file = writer.write(root);
-
-    return QString::fromStdString(json_file).toLocal8Bit();
+    return root;
 }
 
 LayoutInfo LayoutInfo::readFrom(const QByteArray &json)
 {
-    LayoutInfo info;
     Json::Value value;
     Json::Reader reader;
     if(!reader.parse(json.begin(), json.end(), value)) {
         qDebug() << "json formate is error";
     }
+    return readFrom(value);
+}
+
+LayoutInfo LayoutInfo::readFrom(const Json::Value &value)
+{
+    LayoutInfo info;
     info.column_count = value["column_count"].asInt();
     info.row_count = value["row_count"].asInt();
+
+    info.column_count = qMin(9, info.column_count);
+    info.row_count = qMin(9, info.row_count);
 
     Json::Value cells = value["cells"];
     for(int k = 0; k < cells.size(); k ++) {
