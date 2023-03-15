@@ -10,10 +10,17 @@ AutoCloseLabel::AutoCloseLabel(QWidget *parent)
 
 AutoCloseLabel::~AutoCloseLabel()
 {
-    qDebug() << __FUNCTION__;
+    //qDebug() << __FUNCTION__;
 }
 
-void AutoCloseLabel::mousePressEvent(QMouseEvent *)
+void AutoCloseLabel::mousePressEvent(QMouseEvent *e)
 {
+    QLabel::mousePressEvent(e);
+    this->close();
+}
+
+void AutoCloseLabel::hideEvent(QHideEvent *e)
+{
+    QLabel::hideEvent(e);
     this->close();
 }

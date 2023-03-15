@@ -506,7 +506,7 @@ QList<DataSource::Camera> DataSourceOMS::getCameraList(const QString &location_o
         d.location_obid = location_obid;
         d.type = 1;
         d.state = query.value("FaultState").toInt();
-        d.url = "rtsp://10.137.32.250:554/rtp/34020000001320000067_34020000001310000001";
+        //d.url = "rtsp://10.137.32.250:554/rtp/34020000001320000067_34020000001310000001";
 
         r << d;
     }

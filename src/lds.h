@@ -6,9 +6,11 @@
 #include <QChar>
 #include <QPixmap>
 #include <QFile>
+#include <QStandardItem>
 
 class DataSource;
 class QStatusBar;
+class TreeVideoSignalTransfer;
 
 #define b40 40
 
@@ -39,7 +41,7 @@ public:
 public:
     lds(QWidget *parent = 0);
 
-    static void init();
+    static void init(QObject *parent);
 
     static QRect moveToCenter(QWidget *widget, QRect rect);
 
@@ -63,6 +65,9 @@ public:
     //另外获取
     static DataSource *dataSource;
 
+    static QList<QStandardItem *> treeChildren(QStandardItem *node, int column = 0);
+
+    static TreeVideoSignalTransfer *treeSignalTransfer;
 
 };
 

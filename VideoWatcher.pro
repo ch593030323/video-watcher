@@ -25,12 +25,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 SOURCES += \
-    src/main.cpp \
-    extra_settings/treevideoviewsearchsettings.cpp
+    src/main.cpp
 
-HEADERS += \
-    extra_settings/treevideoviewsearchsettings.h
-
-INCLUDEPATH += extra_settings
 
 

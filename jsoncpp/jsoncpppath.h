@@ -73,4 +73,10 @@ private:
     QString m_jsonpath;
 };
 
+class JsonCppSettings : public JsonCppPath{
+    Q_OBJECT
+public:
+    JsonCppSettings(const QString &jsonpath, QObject *parent = 0);
+};
+
 #endif // JSONCPPPATH_H

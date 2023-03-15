@@ -34,6 +34,8 @@ public:
 
     void hideMenu();
 
+    void updateItemTipText(QStandardItem *item);
+
 public slots:
     void slotInitAll();
     void slotInitTree();

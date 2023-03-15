@@ -1,5 +1,9 @@
 #include "mainsystemsetingsurl.h"
 #include "ui_mainsystemsetingsurl.h"
+#include "jsoncpppath.h"
+#include "datasource.h"
+
+#include <QtDebug>
 
 MainSystemSetingsUrl::MainSystemSetingsUrl(QWidget *parent) :
     QWidget(parent),

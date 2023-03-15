@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QtDebug>
 #include <QQueue>
+#include <QStringList>
 
 JsonCppPath::JsonCppPath(const QString &jsonpath, QObject *parent)
     : QObject(parent)
@@ -99,7 +100,7 @@ bool JsonCppPath::remove(const QString &path)
 
 QByteArray JsonCppPath::toJson()
 {
-    return QByteArray::fromStdString(Json::StyledWriter().write(m_json));
+    return QString::fromStdString(Json::StyledWriter().write(m_json)).toLocal8Bit();
 }
 
 bool JsonCppPath::saveToFile()
@@ -254,4 +255,12 @@ QStringList JsonCppPath::breakPath(const QString &path)
         list << path.mid(from - 1, to - from + 1);
     }
     return list;
+}
+
+JsonCppSettings::JsonCppSettings(const QString &jsonpath, QObject *parent)
+    : JsonCppPath(jsonpath, parent)
+{
+    if(!parse()) {
+        qDebug() << errorString();
+    }
 }

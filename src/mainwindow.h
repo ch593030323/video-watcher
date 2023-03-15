@@ -3,7 +3,7 @@
 
 #include "videocell.h"
 #include "ffmpeg.h"
-#include "dataSource.h"
+#include "datasource.h"
 
 #include <QWidget>
 #include <QStandardItemModel>
@@ -45,7 +45,6 @@ protected slots:
 protected:
     Ui::MainWidget *ui;
 
-    DataSource *m_dataSource;
     MainVideoWidget *m_videoWidget;
     MainSystemSetings *m_systemSettings;
 };

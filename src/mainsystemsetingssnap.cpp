@@ -44,10 +44,14 @@ void MainSystemSetingsSnap::toRefresh()
     model->removeRows(0, model->rowCount());
     for(auto k : QDir(lds::configDirectory + "/snap").entryInfoList()) {
         if(k.isFile()) {
+            QPixmap pixmap(k.filePath());
             QStandardItem *item = new QStandardItem;
-            item->setData(QPixmap(k.filePath()).scaledToHeight(100), Qt::DecorationRole);
+            item->setData(pixmap.scaledToHeight(100), Qt::DecorationRole);
             item->setData(k.filePath(), FilePathRole);
-            item->setText(k.fileName());
+            item->setToolTip(tr("名称：%1\n大小：%2 KB\n分辨率：%3x%4")
+                             .arg(k.fileName())
+                             .arg(k.size() / 1024)
+                             .arg(pixmap.width()).arg(pixmap.height()));
             model->appendRow(item);
         }
     }

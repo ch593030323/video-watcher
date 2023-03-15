@@ -118,6 +118,18 @@ void TreeVideoViewSearch::hideMenu()
     m_treeView->hideMenu();
 }
 
+void TreeVideoViewSearch::updateItemTipText(QStandardItem *item)
+{
+    item->setToolTip(
+                QString::fromUtf8("名称：%1\n编号：%2\n类型：%3\n状态：%4\n地址：%5")
+                .arg(item->data(VideoNameRole).toString())
+                .arg(item->data(VideoObidRole).toString())
+                .arg(item->data(VideoTypeNameRole).toString())
+                .arg(item->data(VideoStateNameRole).toString())
+                .arg(item->data(VideoUrlRole).toString())
+                );
+}
+
 void TreeVideoViewSearch::slotInitAll()
 {
     initTree();
@@ -125,7 +137,6 @@ void TreeVideoViewSearch::slotInitAll()
 
 void TreeVideoViewSearch::slotInitTree()
 {
-    m_datasource->clearCache();
     m_comboBox->clear();
     m_comboBox->addItem(QString::fromUtf8("所有"), "%");
 
@@ -355,7 +366,6 @@ void TreeVideoViewSearch::updateCameraItemList(QStandardItem *item_location)
     item_location->removeRows(0, item_location->rowCount());
     QString location_obid = item_location->data(VideoObidRole).toString();
     for(const DataSource::Camera &d : m_datasource->getCameraList(location_obid)) {
-
         QString url = m_datasource->getCameraUrl(d.obid);//d.url;
 
         QString stateName = m_datasource->getCameraStateName(d.state);
@@ -364,21 +374,18 @@ void TreeVideoViewSearch::updateCameraItemList(QStandardItem *item_location)
         int row = item_location->rowCount();
         QStandardItem *item_device = new QStandardItem;
         item_device->setText(d.name);
-        item_device->setToolTip(QString() +
-                                "state:\t\t" + stateName + "\n" +
-                                "type:\t\t" + typeName + "\n" +
-                                "url:\t\t" + url + "\n" +
-                                "obid:\t\t" + d.obid + "\n" +
-                                "name:\t" + d.name + "\n"
-                                );
-        item_device->setData(VideoNodeDevice,    VideoNodeType);
-        item_device->setData(d.name,              VideoNameRole);
-        item_device->setData(d.type,              VideoTypeRole);
-        item_device->setData(d.obid,              VideoObidRole);
-        item_device->setData(d.state,             VideoStateRole);
+        item_device->setData(VideoNodeDevice,       VideoNodeType);
+        item_device->setData(d.name,                VideoNameRole);
+        item_device->setData(typeName,              VideoTypeNameRole);
+        item_device->setData(d.type,                VideoTypeRole);
+        item_device->setData(d.obid,                VideoObidRole);
+        item_device->setData(d.state,               VideoStateRole);
+        item_device->setData(stateName,             VideoStateNameRole);
         item_device->setData(url,               VideoUrlRole);
         item_device->setData(getCameraStatePixmap(d.state),   Qt::DecorationRole);
         item_device->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
+
+        updateItemTipText(item_device);
 
         item_location->setChild(row, 0, item_device);
         //

@@ -10,8 +10,10 @@ public:
     AutoCloseLabel(QWidget *parent = 0);
     ~AutoCloseLabel();
 
-public:
-    void mousePressEvent(QMouseEvent *);
+protected:
+    void mousePressEvent(QMouseEvent *e);
+    void hideEvent(QHideEvent *e);
+
 };
 
 #endif // AUTOCLOSELABEL_H

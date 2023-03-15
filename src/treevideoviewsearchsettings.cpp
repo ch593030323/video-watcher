@@ -2,16 +2,17 @@
 #include "treevideomodel.h"
 #include "treevideoview.h"
 #include "lds.h"
+#include "lineeditx.h"
+#include "jsoncpppath.h"
 
 #include <QtDebug>
+#include <QLineEdit>
 
 TreeVideoViewSearchSettings::TreeVideoViewSearchSettings(QWidget *parent)
     : TreeVideoViewSearch(parent)
 {
     connect(m_treeView->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
             this, SLOT(slotEditUrl(QItemSelection,QItemSelection)));
-    connect(m_treeView->itemDelegate(), SIGNAL(closeEditor(QWidget *, QAbstractItemDelegate::EndEditHint)),
-            this, SLOT(slotSaveUrl(QWidget *, QAbstractItemDelegate::EndEditHint)));
     connect(m_treeView->itemDelegate(), SIGNAL(closeEditor(QWidget *, QAbstractItemDelegate::EndEditHint)),
             this, SIGNAL(editingFinished()));
 
@@ -26,7 +27,6 @@ void TreeVideoViewSearchSettings::initTree()
 {
     TreeVideoViewSearch::initTree();
     m_treeView->setColumnWidth(0, 200);
-    m_treeView->slotExpandAll();
 }
 
 void TreeVideoViewSearchSettings::appendHeaderHorizontalItem(QStandardItem *itemRoot)
@@ -42,6 +42,11 @@ void TreeVideoViewSearchSettings::appendDeviceHorizontalItem(QStandardItem *item
     item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable);
     item->setData(item_device->data(VideoObidRole), VideoObidRole);
     item_location->setChild(row, 1, item);
+
+    QLineEdit *edit = new QLineEdit;
+    edit->setText(item_device->data(VideoUrlRole).toString());
+    m_treeView->setIndexWidget(item->index(), edit);
+    connect(edit, SIGNAL(editingFinished()), this, SLOT(slotSetModelDataByEdit()));
 }
 
 void TreeVideoViewSearchSettings::slotEditUrl(const QModelIndex &index)
@@ -57,13 +62,16 @@ void TreeVideoViewSearchSettings::slotEditUrl(const QItemSelection &selected, co
     slotEditUrl(selected.indexes().value(0));
 }
 
-void TreeVideoViewSearchSettings::slotSaveUrl(QWidget *editor, QAbstractItemDelegate::EndEditHint hint)
+void TreeVideoViewSearchSettings::slotSetModelDataByEdit()
 {
-    if(editor) {
-        QModelIndex index = m_treeView->indexAt(editor->geometry().center());
-        if(index.isValid()) {
-            m_datasource->cameraUrlCache.insert(index.data(VideoObidRole).toString(),
-                                              editor->property("text").toString().trimmed());
-        }
-    }
+    QLineEdit *edit = qobject_cast<QLineEdit *>(sender());
+    if(!edit)
+        return;
+    QModelIndex index = m_treeView->indexAt(edit->geometry().center());
+    if(!index.isValid())
+        return;
+
+    lds::dataSource->dirtyInsert(index.data(VideoObidRole).toString(),
+                                        edit->text().trimmed());
+    lds::treeSignalTransfer->triggerUpdateUrl();
 }

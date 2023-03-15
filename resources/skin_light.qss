@@ -52,6 +52,12 @@ QToolButton{
     color:#fefefe;
 }
 
+QPushButton:flat {
+    border: none;
+    background:none;
+    color:#171718;
+}
+
 QMessageBox QAbstractButton{
     min-width:60;
     min-height:40;

@@ -2,6 +2,7 @@
 #define MAINSYSTEMSETINGSSNAP_H
 
 #include <QWidget>
+#include <QModelIndex>
 
 namespace Ui {
 class MainSystemSetingsSnap;

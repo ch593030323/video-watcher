@@ -56,3 +56,14 @@ void TreeVideoView::contextMenuEvent(QContextMenuEvent *event)
     m.move(this->mapToGlobal(event->pos()));
     m.exec();
 }
+
+TreeVideoSignalTransfer::TreeVideoSignalTransfer(QObject *parent)
+    : QObject(parent)
+{
+
+}
+
+void TreeVideoSignalTransfer::triggerUpdateUrl()
+{
+    emit signalUpdateUrl();
+}

@@ -40,7 +40,8 @@ HEADERS += \
     $$PWD/src/global.h \
     $$PWD/src/widget/autocloselabel.h \
     $$PWD/src/mainsystemsetingssnaplistview.h\
-    $$PWD/src/mainsystemsetingsurl.h
+    $$PWD/src/mainsystemsetingsurl.h \
+    $$PWD/src/treevideoviewsearchsettings.h
 
 SOURCES += \
     $$PWD/src/mainwindow.cpp \
@@ -77,7 +78,8 @@ SOURCES += \
     $$PWD/src/global.cpp \
     $$PWD/src/widget/autocloselabel.cpp \
     $$PWD/src/mainsystemsetingssnaplistview.cpp \
-    $$PWD/src/mainsystemsetingsurl.cpp
+    $$PWD/src/mainsystemsetingsurl.cpp \
+    $$PWD/src/treevideoviewsearchsettings.cpp
 
 FORMS += \
     $$PWD/src/mainwindow.ui \

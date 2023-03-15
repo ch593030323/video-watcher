@@ -17,6 +17,12 @@
 #include <QDirIterator>
 #include <QButtonGroup>
 
+void MainSystemSetings::setFlat(QPushButton *button, const QPixmap &pixmap)
+{
+    button->setIcon(pixmap);
+    button->setFlat(true);
+}
+
 MainSystemSetings::MainSystemSetings(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainSystemSetings)

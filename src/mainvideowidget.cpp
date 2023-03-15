@@ -98,6 +98,25 @@ void MainVideoWidget::setDataSource(DataSource *datasource)
     ui->treeView->slotInitAll();
 }
 
+void MainVideoWidget::updateTreeVisiableItemUrl()
+{
+    QStandardItemModel *model = qobject_cast<QStandardItemModel *>(ui->treeView->model());
+    if(!model)
+        return;
+    QMap<QString, QVariant> map = lds::dataSource->dirtyUrl();
+    QStandardItem *itemRoot = model->invisibleRootItem();
+    QStandardItem *itemISCS = itemRoot->child(0);
+    for(QStandardItem *itemLocation : lds::treeChildren(itemISCS)) {
+        for(QStandardItem *itemDevice : lds::treeChildren(itemLocation)) {
+            QString obid = itemDevice->data(VideoObidRole).toString();
+            if(!obid.isEmpty() && map.contains(obid)) {
+                itemDevice->setData(map.value(obid), VideoUrlRole);
+                ui->treeView->updateItemTipText(itemDevice);
+            }
+        }
+    }
+}
+
 void MainVideoWidget::toVideoLayout1x1()
 {
     ui->widget_video->updateLayout(LayoutInfo(1));

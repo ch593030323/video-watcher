@@ -1,6 +1,7 @@
 #include "lds.h"
 #include "json/json.h"
 #include "propertycolor.h"
+#include "treevideoview.h"
 
 #include <QFont>
 #include <QApplication>
@@ -12,6 +13,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QStatusBar>
+#include <QProcessEnvironment>
 
 const int lds::margin = 10;
 const int lds::marginX2 = 2 * lds::margin;
@@ -24,6 +26,7 @@ QString lds::styleSheetString;
 QString lds::configDirectory = ".";
 DataSource *lds::dataSource = 0;
 QStatusBar *lds::statusBar = 0;
+TreeVideoSignalTransfer *lds::treeSignalTransfer = 0;
 
 
 lds::lds(QWidget *parent) : QWidget(parent)
@@ -99,7 +102,16 @@ void lds::showMessage(const QString &description, const QString &errstring)
     showMessage(description + ":" + errstring);
 }
 
-void lds::init()
+QList<QStandardItem *> lds::treeChildren(QStandardItem *node, int column)
+{
+    QList<QStandardItem *> itemList;
+    for(int row = 0; row < node->rowCount(); row ++) {
+        itemList << node->child(row, column);
+    }
+    return itemList;
+}
+
+void lds::init(QObject *parent)
 {
     //text code
     //    QTextCodec *codec = QTextCodec::codecForName("UTF-8");//中文可用//包含头文件
@@ -142,6 +154,8 @@ void lds::init()
     lds::configDirectory =  "../data/video-watcher";
     QDir().mkpath(lds::configDirectory);
 #endif
+
+    treeSignalTransfer = new TreeVideoSignalTransfer(parent);
 }
 
 QList<AlterPlayFrame> AlterPlayFrame::readFrom(const QString &filepath)

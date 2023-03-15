@@ -2,6 +2,7 @@
 #define MAINSYSTEMSETINGS_H
 
 #include <QWidget>
+#include <QPushButton>
 
 
 class MainSystemSetingsAlter;
@@ -17,6 +18,9 @@ class MainSystemSetings;
 class MainSystemSetings : public QWidget
 {
     Q_OBJECT
+
+public:
+    static void setFlat(QPushButton *button, const QPixmap &pixmap);
 
 public:
     explicit MainSystemSetings(QWidget *parent = 0);

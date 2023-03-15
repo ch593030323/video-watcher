@@ -35,15 +35,17 @@ QString DataSource::getCameraTypeName(int rank)
 
 QString DataSource::getCameraUrl(const QString &obid)
 {
-    if(cameraUrlCache.isEmpty()) {
-        JsonCppPath p(lds::configDirectory + "/setting.json", this);
-        if(!p.parse()) {
-            qDebug() << p.errorString();
-        }
-        cameraUrlCache = p.value("/device_list").toMap();
+    if(m_urlCache.isEmpty()) {
+        JsonCppSettings p(lds::configDirectory + "/setting.json");
+        m_urlCache = p.value("/device_list").toMap();
     }
+    if(!m_urlDirty.isEmpty()) {
+        cacheInsert(m_urlDirty);
+        dirtyClear();
+    }
+    QString url = m_urlCache.value(obid).toString();
 
-    return cameraUrlCache.value(obid).toString();
+    return url;
 }
 
 QList<DataSource::Location> DataSource::getLocationList()
@@ -99,7 +101,38 @@ QList<DataSource::CameraType> DataSource::getCameraTypeList()
             << CameraType{1, QString::fromUtf8("球机")};
 }
 
-void DataSource::clearCache()
+void DataSource::cacheSave()
 {
-    cameraUrlCache.clear();
+    JsonCppSettings p(lds::configDirectory + "/setting.json");
+    p.setValue("/device_list", m_urlCache);
+    if(!p.saveToFile()) {
+        qDebug() << p.errorString();
+    }
+}
+
+void DataSource::cacheInsert(QMap<QString, QVariant> map)
+{
+    for(QMap<QString, QVariant>::const_iterator k = map.constBegin(); k != map.constEnd(); k ++) {
+        m_urlCache.insert(k.key(), k.value());
+    }
+}
+
+QMap<QString, QVariant> DataSource::urlCache()
+{
+    return m_urlCache;
+}
+
+void DataSource::dirtyInsert(QString key, QVariant value)
+{
+    m_urlDirty.insert(key, value);
+}
+
+void DataSource::dirtyClear()
+{
+    m_urlDirty.clear();
+}
+
+QMap<QString, QVariant> DataSource::dirtyUrl()
+{
+    return m_urlDirty;
 }

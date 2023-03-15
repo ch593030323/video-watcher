@@ -3,6 +3,21 @@
 
 #include <QTreeView>
 
+/**
+ * @brief The TreeVideoTransfer class
+ * 信号转发用
+ */
+class TreeVideoSignalTransfer : public QObject {
+
+    Q_OBJECT
+public:
+    TreeVideoSignalTransfer(QObject *parent = 0);
+
+    void triggerUpdateUrl();
+signals:
+    void signalUpdateUrl();
+};
+
 class TreeVideoView : public QTreeView
 {
     Q_OBJECT

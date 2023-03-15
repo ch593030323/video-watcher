@@ -2,8 +2,7 @@
 #include "ui_mainwindow.h"
 #include "ui_mainvideowidget.h"
 #include "jsoncpppath.h"
-
-
+#include "treevideoview.h"
 
 using namespace std;
 /*
@@ -26,7 +25,7 @@ MainFrame::MainFrame(QWidget *parent)
     , ui(new Ui::MainWidget)
 {
     //
-    lds::init();
+    lds::init(this);
 
     ui->setupUi(this);
 
@@ -60,7 +59,7 @@ MainFrame::MainFrame(QWidget *parent)
     connect(ui->pushButton_system_setting, SIGNAL(clicked()), this, SLOT(tovideo_system_setting()));
     connect(ui->pushButton_system_setting, SIGNAL(clicked()), this, SLOT(tovideo_system_setting()));
     connect(m_videoWidget, SIGNAL(signalStatusbarSetVisiable(bool)), ui->statusBar, SLOT(setVisible(bool)));
-
+    connect(lds::treeSignalTransfer, SIGNAL(signalUpdateUrl()), m_videoWidget, SLOT(updateTreeVisiableItemUrl()));
 
 #ifdef OMS_DATASOURCE
     //由插件程序提供数据源
@@ -137,7 +136,6 @@ void MainFrame::setVisiableStatusBar(bool showed)
 {
     ui->statusBar->setVisible(showed);
 }
-
 
 void MainFrame::toexit()
 {

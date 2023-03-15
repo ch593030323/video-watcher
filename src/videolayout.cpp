@@ -44,8 +44,9 @@ bool LayoutCell::isNull() const
 
 QByteArray LayoutInfo::toJson()
 {
-    return QByteArray::fromStdString(Json::StyledWriter()
-                                  .write(toJsonValue()));
+    //QByteArray::fromStdString is not supported in qt4
+    return QString::fromStdString(Json::StyledWriter()
+                                  .write(toJsonValue())).toLocal8Bit();
 }
 
 Json::Value LayoutInfo::toJsonValue()

@@ -3,6 +3,7 @@
 #include "propertycolor.h"
 #include "playformnewdialog.h"
 #include "global.h"
+#include "mainsystemsetings.h"
 
 #include <QFileInfo>
 #include <QDateTime>
@@ -15,10 +16,9 @@ MainSystemSetingsForm::MainSystemSetingsForm(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->pushButton_add->setIcon(PropertyColor::getFontPixmap(0x2b));
-    ui->pushButton_del->setIcon(PropertyColor::getFontPixmap(0xf014));
-    ui->pushButton_modify->setIcon(PropertyColor::getFontPixmap(0x2700));
-
+    MainSystemSetings::setFlat(ui->pushButton_add, PropertyColor::getFontPixmap(0x2b, PropertyColor::buttonColor));
+    MainSystemSetings::setFlat(ui->pushButton_del, PropertyColor::getFontPixmap(0xf014, PropertyColor::buttonColor));
+    MainSystemSetings::setFlat(ui->pushButton_modify, PropertyColor::getFontPixmap(0x2700, PropertyColor::buttonColor));
 
     ui->tableView->appHorizontalHeader("name", QString::fromUtf8("名称"), 280);
     ui->tableView->appHorizontalHeader("size", QString::fromUtf8("大小"), 110);

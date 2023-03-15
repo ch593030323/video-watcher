@@ -17,9 +17,11 @@ public:
     explicit MainVideoWidget(QWidget *parent = 0);
     ~MainVideoWidget();
 
-
     void updateLayout();
     void setDataSource(DataSource *datasource);
+
+public:
+    void updateTreeVisiableItemUrl();
 
 signals:
     void signalStatusbarSetVisiable(bool showed);

@@ -19,13 +19,13 @@ public slots:
     void slotEditUrl(const QModelIndex &index);
     void slotEditUrl(const QItemSelection &selected, const QItemSelection &deselected);
 
-    void slotSaveUrl(QWidget *editor, QAbstractItemDelegate::EndEditHint hint);
+    void slotSetModelDataByEdit();
+
 protected:
     virtual void addToPlayThread(const QString &url);
     virtual void initTree();
     virtual void appendHeaderHorizontalItem(QStandardItem *itemRoot);
     virtual void appendDeviceHorizontalItem(QStandardItem *item_location, int row, QStandardItem *item_device);
-
 };
 
 #endif // TREEVIDEOVIEWSEARCHSETTINGS_H

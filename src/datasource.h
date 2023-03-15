@@ -42,7 +42,6 @@ public:
 
     QString getCameraStateName(int rank);
     QString getCameraTypeName(int rank);
-    QString getCameraUrl(const QString &obid);
     //
     virtual QList<Location> getLocationList();
     virtual QList<Camera> getCameraList(const QString &location_obid);
@@ -50,8 +49,19 @@ public:
     virtual QList<CameraType> getCameraTypeList();
 
     //
-    void clearCache();
-    QMap<QString, QVariant> cameraUrlCache;
+    QString getCameraUrl(const QString &obid);
+
+    void cacheSave();
+    void cacheInsert(QMap<QString, QVariant> map);
+    QMap<QString, QVariant> urlCache();
+
+
+    void dirtyInsert(QString key, QVariant value);
+    void dirtyClear();
+    QMap<QString, QVariant> dirtyUrl();
+private:
+    QMap<QString, QVariant> m_urlCache;
+    QMap<QString, QVariant> m_urlDirty;
 };
 
 

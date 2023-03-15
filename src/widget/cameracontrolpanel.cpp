@@ -1,6 +1,8 @@
 #include "cameracontrolpanel.h"
 #include "propertycolor.h"
 
+#include "math.h"
+
 //获取正方形的rect
 static QRectF getSquareRect(QPointF center, qreal radius) {
     return QRectF(center.x() - radius, center.y() - radius, radius * 2, radius *2);
