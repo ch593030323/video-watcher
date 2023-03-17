@@ -11,7 +11,6 @@ TreeVideoView::TreeVideoView(QWidget *parent)
     , m_hideMenu(false)
 {
     setFocusPolicy(Qt::NoFocus);
-    connect(this, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(slotEmitUrl(QModelIndex)));
 }
 
 void TreeVideoView::hideMenu()
@@ -34,11 +33,6 @@ void TreeVideoView::slotExpandAll()
             continue;
         this->expand(itemStation->index());
     }
-}
-
-void TreeVideoView::slotEmitUrl(const QModelIndex &index)
-{
-    emit signalPlayRequest(index.data(VideoUrlRole).toString());
 }
 
 void TreeVideoView::contextMenuEvent(QContextMenuEvent *event)

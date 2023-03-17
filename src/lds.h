@@ -50,8 +50,8 @@ public:
 
     static QPixmap getLayoutPixmap(int count);
 
-    static QString getUniqueFileNamehByDateTime(const QString &dir);
-    static QString getUniqueFilePathhByDateTime(const QString &dir, const QString &suffix);
+    static QString getUniqueFileNamehByDateTime(const QString &dir, const QString &prefix = "");
+    static QString getUniqueFilePathhByDateTime(const QString &dir, const QString &prefix, const QString &suffix);
 
     static QString configDirectory;
 

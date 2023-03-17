@@ -59,7 +59,7 @@ MainFrame::MainFrame(QWidget *parent)
     connect(ui->pushButton_system_setting, SIGNAL(clicked()), this, SLOT(tovideo_system_setting()));
     connect(ui->pushButton_system_setting, SIGNAL(clicked()), this, SLOT(tovideo_system_setting()));
     connect(m_videoWidget, SIGNAL(signalStatusbarSetVisiable(bool)), ui->statusBar, SLOT(setVisible(bool)));
-    connect(lds::treeSignalTransfer, SIGNAL(signalUpdateUrl()), m_videoWidget, SLOT(updateTreeVisiableItemUrl()));
+    connect(lds::treeSignalTransfer, SIGNAL(signalUpdateUrl()), m_videoWidget, SLOT(slotUpdateTreeVisiableItemUrl()));
 
 #ifdef OMS_DATASOURCE
     //由插件程序提供数据源

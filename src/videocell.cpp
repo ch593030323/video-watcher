@@ -95,7 +95,7 @@ void VideoCell::updateVideoScene(const LayoutInfo &info, VideoWidget *parentWidg
             w = createCell(pos, parentWidget);
             cacheMap.insert(pos, w);
         }
-        w->addPlayer(cell.url);
+        w->addPlayer(cell.url, cell.obid);
 
         unused_video_widget_list.removeOne(w);
 
@@ -265,10 +265,10 @@ void VideoCell::toControlSaveImage()
 
     QString dir = lds::configDirectory + "/snap";
     QDir().mkpath(dir);
-    QString filepath = lds::getUniqueFilePathhByDateTime(dir, "png");
+    QString filepath = lds::getUniqueFilePathhByDateTime(dir, m_info.obid, "png");
     m_ffmpegData.image.save(filepath);
 
-    lds::showMessage(("保存成功:" + filepath));
+    lds::showMessage(tr("保存成功") + + " " + filepath);
 }
 
 void VideoCell::updatePlayListDevice()
@@ -282,13 +282,13 @@ void VideoCell::updatePlayListDevice()
 
     qDebug() << __LINE__;
     lds::showMessage((QString("正在轮播, 坐标:(%1,%2), 进度:%3/%4, 名称:%5, 时长:%6s")
-                                .arg(m_info.pos.x + 1)
-                                .arg(m_info.pos.y + 1)
-                                .arg(m_playListIndex + 1)
-                                .arg(m_playList.count())
-                                .arg(m_playList[m_playListIndex].url.section("/", -1))
-                                .arg(m_playList[m_playListIndex].length)
-                                ));
+                      .arg(m_info.pos.x + 1)
+                      .arg(m_info.pos.y + 1)
+                      .arg(m_playListIndex + 1)
+                      .arg(m_playList.count())
+                      .arg(m_playList[m_playListIndex].url.section("/", -1))
+                      .arg(m_playList[m_playListIndex].length)
+                      ));
     m_playListUrl = m_playList[m_playListIndex].url;
     m_playListTimer->setInterval(m_playList[m_playListIndex].length * 1000);
 }
@@ -384,11 +384,14 @@ void VideoCell::dragEnterEvent(QDragEnterEvent *event)
 {
     const QMimeData *mimedata = event->mimeData();
     mimedata->formats();//这里起刷新formats的作用
-    if (mimedata->hasFormat("camera/url")) {
+    if (mimedata->hasFormat("camera/url")
+            && mimedata->hasFormat("camera/obid")) {
         event->accept();
         return;
     }
-    if (mimedata->hasFormat("VideoCell/url") && mimedata->data("VideoCell/pos").toInt() != m_info.pos.value()) {
+    if (mimedata->hasFormat("VideoCell/url")
+            && mimedata->hasFormat("VideoCell/obid")
+            && mimedata->data("VideoCell/pos").toInt() != m_info.pos.value()) {
         event->accept();
         return;
     }
@@ -406,11 +409,14 @@ void VideoCell::dragMoveEvent(QDragMoveEvent *event)
 {
     const QMimeData *mimedata = event->mimeData();
     mimedata->formats();//这里起刷新formats的作用
-    if (mimedata->hasFormat("camera/url")) {
+    if (mimedata->hasFormat("camera/url")
+            && mimedata->hasFormat("camera/obid")) {
         event->accept();
         return;
     }
-    if (mimedata->hasFormat("VideoCell/url") && mimedata->data("VideoCell/pos").toInt() != m_info.pos.value()) {
+    if (mimedata->hasFormat("VideoCell/url")
+            && mimedata->hasFormat("VideoCell/obid")
+            && mimedata->data("VideoCell/pos").toInt() != m_info.pos.value()) {
         event->accept();
         return;
     }
@@ -422,18 +428,22 @@ void VideoCell::dropEvent(QDropEvent *event)
 {
     //event->mimeData()->formats()起到刷新的作用，此处不删除
     QStringList formats = event->mimeData()->formats();
-    if (event->mimeData()->hasFormat("camera/url")) {
+    if (event->mimeData()->hasFormat("camera/url")
+            && event->mimeData()->hasFormat("camera/obid")) {
         QString url = event->mimeData()->data("camera/url");
-        addPlayer(url);
+        QString obid = event->mimeData()->data("camera/obid");
+        addPlayer(url, obid);
         event->setDropAction(Qt::CopyAction);
         event->accept();
         return;
     }
 
-    if (event->mimeData()->hasFormat("VideoCell/url")) {
+    if (event->mimeData()->hasFormat("VideoCell/url")
+            && event->mimeData()->hasFormat("VideoCell/obid")) {
         QByteArray url = event->mimeData()->data("VideoCell/url");
+        QByteArray obid = event->mimeData()->data("VideoCell/obid");
         // add new
-        this->addPlayer(url);
+        this->addPlayer(url, obid);
         this->setFocus();
         event->setDropAction(Qt::CopyAction);
         event->accept();
@@ -492,6 +502,7 @@ void VideoCell::mouseMoveEvent(QMouseEvent *event)
         QDrag *drag = new QDrag(this);
         QMimeData *m = new QMimeData;
         m->setData("VideoCell/url", m_info.url.toLocal8Bit());
+        m->setData("VideoCell/obid", m_info.obid.toLocal8Bit());
         m->setData("VideoCell/pos", QByteArray::number(m_info.pos.value()));
 
         QPixmap pix = QPixmap::grabWidget(this, this->rect()).scaled(50, 50);
@@ -666,13 +677,14 @@ PlayThread *VideoCell::addThread(const QString &url)
     return thread;
 }
 
-void VideoCell::addPlayer(const QString &url)
+void VideoCell::addPlayer(const QString &url, const QString &obid)
 {
     if(m_info.url == url)
         return;
 
     removePlayer();
     m_info.url = url;
+    m_info.obid = obid;
 
     preparePlayer(url);
 }
@@ -685,16 +697,16 @@ void VideoCell::preparePlayer(const QString &url)
     //无状态 正在播放
     if(thread->lastPlayState() == FFmpegData::NoState
             || thread->lastPlayState() == FFmpegData::Playing) {
-        //        m_controlPanel->updateControlPanelState(VideoControlPanel::Playing);
+        //m_controlPanel->updateControlPanelState(VideoControlPanel::Playing);
     }
     //播放暂停
     if(thread->lastPlayState() == FFmpegData::Paused) {
-        //        m_controlPanel->updateControlPanelState(VideoControlPanel::Paused);
+        m_controlPanel->updateControlPanelState(VideoControlPanel::Paused);
         updateImage(thread->lastPlayData());
     }
     //播放结束
     if(thread->lastPlayState() == FFmpegData::Stopped) {
-        //        m_controlPanel->updateControlPanelState(VideoControlPanel::Playing);
+        //m_controlPanel->updateControlPanelState(VideoControlPanel::Playing);
         thread->play();
     }
 }

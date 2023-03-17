@@ -20,8 +20,8 @@ public:
     void updateLayout();
     void setDataSource(DataSource *datasource);
 
-public:
-    void updateTreeVisiableItemUrl();
+public slots:
+    void slotUpdateTreeVisiableItemUrl();
 
 signals:
     void signalStatusbarSetVisiable(bool showed);

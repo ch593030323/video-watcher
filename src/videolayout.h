@@ -14,7 +14,7 @@ class VideoCell;
  * @brief The LayoutPos struct
  * 最大支持 100*100的棋盘
  */
-struct LayoutPos{
+struct LayoutPos {
     LayoutPos(){}
     LayoutPos(int x, int y) {
         this->x = x;
@@ -45,17 +45,13 @@ struct LayoutPos{
  * 布局中一个单元格的info
  */
 struct LayoutCell{
-    LayoutCell(){
-        pos.x = 0;
-        pos.y = 0;
-        row_spans = 1;
-        column_spans = 1;
-    }
+    LayoutCell();
 
     LayoutPos pos;
     int row_spans;
     int column_spans;
     QString url;
+    QString obid;//两个作用 1.启动时更新url，2.运行时，url更新，通知播放器更新,3.拖动时记录obid
 
     static int indexOf(QRect rect, const QList<LayoutCell> &list);
     static int indexOf(LayoutPos pos, const QList<LayoutCell> &list);

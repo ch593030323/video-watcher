@@ -47,7 +47,7 @@ public:
     static void updateVideoGeometry(const LayoutInfo &info, QRect area, QMap<LayoutPos, VideoCell *> &cacheMap);
 
     void removePlayer();
-    void addPlayer(const QString &url);
+    void addPlayer(const QString &url, const QString &obid);
     void preparePlayer(const QString &url);
 
     void removeThread(const QString &url);

@@ -37,7 +37,7 @@ public:
 
     /**
      * @brief size
-     * 返回array的size，其他返回0
+     * 返回array的size或object的size
      */
     uint size(const QString &path);
 
@@ -50,6 +50,7 @@ public:
     QString fileName();
 
     bool parse();
+    bool parse(const QByteArray &content);
     QString errorString();
 
     static QVariant jsonValuetoVariant(Json::Value value);
@@ -67,16 +68,27 @@ public:
      */
     QStringList breakPath(const QString &path);
 
-private:
-    Json::Value m_json;
-    QString m_errorString;
-    QString m_jsonpath;
+public:
+    Json::Value     m_json;
+    QString         m_errorString;
+    QString         m_jsonpath;
+    bool            m_hasSetValue;//标志：记录是否json被修改过
 };
 
 class JsonCppSettings : public JsonCppPath{
     Q_OBJECT
 public:
     JsonCppSettings(const QString &jsonpath, QObject *parent = 0);
+    virtual ~JsonCppSettings();
 };
+
+
+class JsonCppReader : public JsonCppPath{
+    Q_OBJECT
+public:
+    JsonCppReader(const Json::Value &json, QObject *parent = 0);
+    virtual ~JsonCppReader();
+};
+
 
 #endif // JSONCPPPATH_H

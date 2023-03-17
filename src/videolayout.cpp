@@ -1,7 +1,16 @@
 #include "videolayout.h"
 #include "videocell.h"
+#include "jsoncpppath.h"
 
 #include <QtDebug>
+
+LayoutCell::LayoutCell()
+{
+    pos.x = 0;
+    pos.y = 0;
+    row_spans = 1;
+    column_spans = 1;
+}
 
 int LayoutCell::indexOf(QRect rect, const QList<LayoutCell> &list)
 {
@@ -28,11 +37,13 @@ QRect LayoutCell::rect() const
 
 QString LayoutCell::toString() const
 {
-    return QString("pos:%1, row_spans: %2, column_spans:%3, url:%4")
+    return QString("pos:%1, row_spans: %2, column_spans:%3, url:%4, obid:%5")
             .arg(pos.value())
             .arg(row_spans)
             .arg(column_spans)
-            .arg(url);
+            .arg(url)
+            .arg(obid)
+            ;
 }
 
 bool LayoutCell::isNull() const
@@ -64,11 +75,12 @@ Json::Value LayoutInfo::toJsonValue()
             continue;
 
         Json::Value json_cell;
-        json_cell["x"] = cell.x();
-        json_cell["y"] = cell.y();
-        json_cell["column_spans"] = cell.column_spans;
-        json_cell["row_spans"] = cell.row_spans;
-        json_cell["url"] = cell.url.toStdString();
+        json_cell["x"]              = cell.x();
+        json_cell["y"]              = cell.y();
+        json_cell["column_spans"]   = cell.column_spans;
+        json_cell["row_spans"]      = cell.row_spans;
+        json_cell["url"]            = cell.url.toStdString();
+        json_cell["obid"]           = cell.obid.toStdString();
 
         json_cells.append(json_cell);
     }
@@ -89,21 +101,23 @@ LayoutInfo LayoutInfo::readFrom(const QByteArray &json)
 
 LayoutInfo LayoutInfo::readFrom(const Json::Value &value)
 {
+    JsonCppReader reader(value);
+
     LayoutInfo info;
-    info.column_count = value["column_count"].asInt();
-    info.row_count = value["row_count"].asInt();
+    info.column_count = reader.value("/column_count").toInt();
+    info.row_count = reader.value("/row_count").toInt();
 
     info.column_count = qMin(9, info.column_count);
     info.row_count = qMin(9, info.row_count);
 
-    Json::Value cells = value["cells"];
-    for(int k = 0; k < cells.size(); k ++) {
+    for(uint k = 0, count = reader.size("/cells"); k < count; k ++) {
         LayoutCell cell;
-        cell.pos.x = cells[k]["x"].asInt();
-        cell.pos.y = cells[k]["y"].asInt();
-        cell.column_spans   = cells[k]["column_spans"].asInt();
-        cell.row_spans      = cells[k]["row_spans"].asInt();
-        cell.url            = cells[k]["url"].asCString();
+        cell.pos.x          = reader.valueArg("/cells[%1/x", k).toInt();
+        cell.pos.y          = reader.valueArg("/cells[%1/y", k).toInt();
+        cell.column_spans   = reader.valueArg("/cells[%1/column_spans", k).toInt();
+        cell.row_spans      = reader.valueArg("/cells[%1/row_spans", k).toInt();
+        cell.url            = reader.valueArg("/cells[%1/url", k).toString();
+        cell.obid           = reader.valueArg("/cells[%1/obid", k).toString();
 
         info.cells.append(cell);
     }
@@ -115,12 +129,13 @@ void LayoutInfo::update(const QMap<LayoutPos, VideoCell *> &map)
     //将videoWidget的摄像头id保存到layoutinfo里
     for(QMap<LayoutPos, VideoCell *>::const_iterator k = map.begin(); k != map.end(); k ++) {
         VideoCell *w = k.value();
-        QString url = w->getInfo().url;
+        const LayoutCell &other = w->getInfo();
         if(w->isVisible()) {
             QList<LayoutCell> &cells = this->cells;
             int index = LayoutCell::indexOf(w->getInfo().pos, cells);
             if(index >= 0) {
-                cells[index].url = url;
+                cells[index].url = other.url;
+                cells[index].obid = other.obid;
             } else if(!w->getInfo().isNull()){
                 cells << w->getInfo();
             }

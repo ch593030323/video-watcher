@@ -69,7 +69,7 @@ MainVideoWidget::MainVideoWidget(QWidget *parent) :
     connect(ui->pushButton_fullscreen, SIGNAL(clicked()), this, SLOT(toVideoShowMax()));
     connect(ui->pushButton_fullscreen_exit, SIGNAL(clicked()), this, SLOT(toVideoShowNormal()));
 
-    connect(ui->treeView->view(), SIGNAL(signalPlayRequest(QString)), ui->widget_video, SLOT(slotAutoAddUrl(QString)));
+    connect(ui->treeView->view(), SIGNAL(doubleClicked(QModelIndex)), ui->widget_video, SLOT(slotAutoAddUrl(QModelIndex)));
     connect(ui->pushButton_control, SIGNAL(clicked(bool)), ui->widget_ins_panel, SLOT(setVisible(bool)));
     connect(ui->pushButton_statusbar, SIGNAL(clicked(bool)), this, SIGNAL(signalStatusbarSetVisiable(bool)));
 
@@ -98,7 +98,7 @@ void MainVideoWidget::setDataSource(DataSource *datasource)
     ui->treeView->slotInitAll();
 }
 
-void MainVideoWidget::updateTreeVisiableItemUrl()
+void MainVideoWidget::slotUpdateTreeVisiableItemUrl()
 {
     QStandardItemModel *model = qobject_cast<QStandardItemModel *>(ui->treeView->model());
     if(!model)

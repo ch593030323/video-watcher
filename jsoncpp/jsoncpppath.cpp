@@ -8,6 +8,7 @@
 JsonCppPath::JsonCppPath(const QString &jsonpath, QObject *parent)
     : QObject(parent)
     , m_jsonpath(jsonpath)
+    , m_hasSetValue(false)
 {
 }
 
@@ -17,18 +18,14 @@ JsonCppPath::~JsonCppPath()
 
 bool JsonCppPath::setValue(const QString &path, const QVariant &var)
 {
-    if(Json::Value *jsonPtr = mkpath(path)) {
-        *jsonPtr = varianttoJsonValue(var);
-        return true;
-    }
-    m_errorString = "path is not existed.";
-    return false;
+    return setJsonValue(path, varianttoJsonValue(var));
 }
 
 bool JsonCppPath::setJsonValue(const QString &path, const Json::Value &var)
 {
     if(Json::Value *jsonPtr = mkpath(path)) {
         *jsonPtr = var;
+        m_hasSetValue = true;
         return true;
     }
     m_errorString = "path is not existed.";
@@ -45,13 +42,24 @@ bool JsonCppPath::parse()
     }
     content = file.readAll();
 
+    return parse(content);
+}
+
+bool JsonCppPath::parse(const QByteArray &content)
+{
     Json::Reader reader;
     if(!reader.parse(content.begin(), content.end(), m_json)) {
         m_errorString = QString::fromStdString(reader.getFormatedErrorMessages());
         return false;
     }
 
+    if(!m_json.isObject() && !m_json.isArray()) {
+        m_errorString = "json is empty.";
+        return false;
+    }
+
     return true;
+
 }
 
 QString JsonCppPath::errorString()
@@ -112,6 +120,10 @@ bool JsonCppPath::saveToFile()
     }
     file.write(toJson());
     file.close();
+
+    //重置标志位，防止析构时保存
+    m_hasSetValue = false;
+
     return true;
 }
 
@@ -261,6 +273,24 @@ JsonCppSettings::JsonCppSettings(const QString &jsonpath, QObject *parent)
     : JsonCppPath(jsonpath, parent)
 {
     if(!parse()) {
-        qDebug() << errorString();
+        qDebug() << __FUNCTION__ << "error:" << errorString();
     }
+}
+
+JsonCppSettings::~JsonCppSettings()
+{
+    if(m_hasSetValue) {
+        saveToFile();
+    }
+}
+
+JsonCppReader::JsonCppReader(const Json::Value &json, QObject *parent)
+    : JsonCppPath("", parent)
+{
+    m_json = json;
+}
+
+JsonCppReader::~JsonCppReader()
+{
+
 }

@@ -28,13 +28,11 @@ public:
 
 public slots:
     void slotExpandAll();
-    void slotEmitUrl(const QModelIndex &index);
 signals:
     void signalRefresh();
     void signalSettings();
     void signalExportJson();
     void signalImportJson();
-    void signalPlayRequest(const QString &url);
 
 protected:
     void contextMenuEvent(QContextMenuEvent * event);

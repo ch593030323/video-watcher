@@ -34,7 +34,7 @@ public:
     inline int columnCount() {return m_layoutInfo.column_count;}
 
 public slots:
-    void slotAutoAddUrl(const QString &url);
+    void slotAutoAddUrl(const QModelIndex &index);
 
 protected:
     virtual void resizeEvent(QResizeEvent *event);

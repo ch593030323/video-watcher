@@ -10,7 +10,12 @@
 DataSource::DataSource(QObject *parent)
     : QObject(parent)
 {
+    m_config = new JsonCppSettings(lds::configDirectory + "/setting.json", this);
+}
 
+DataSource::~DataSource()
+{
+    dirtySync();
 }
 
 QString DataSource::getCameraStateName(int rank)
@@ -35,17 +40,8 @@ QString DataSource::getCameraTypeName(int rank)
 
 QString DataSource::getCameraUrl(const QString &obid)
 {
-    if(m_urlCache.isEmpty()) {
-        JsonCppSettings p(lds::configDirectory + "/setting.json");
-        m_urlCache = p.value("/device_list").toMap();
-    }
-    if(!m_urlDirty.isEmpty()) {
-        cacheInsert(m_urlDirty);
-        dirtyClear();
-    }
-    QString url = m_urlCache.value(obid).toString();
-
-    return url;
+    dirtySync();
+    return m_config->value("/device_list/" + obid).toString();
 }
 
 QList<DataSource::Location> DataSource::getLocationList()
@@ -101,27 +97,6 @@ QList<DataSource::CameraType> DataSource::getCameraTypeList()
             << CameraType{1, QString::fromUtf8("球机")};
 }
 
-void DataSource::cacheSave()
-{
-    JsonCppSettings p(lds::configDirectory + "/setting.json");
-    p.setValue("/device_list", m_urlCache);
-    if(!p.saveToFile()) {
-        qDebug() << p.errorString();
-    }
-}
-
-void DataSource::cacheInsert(QMap<QString, QVariant> map)
-{
-    for(QMap<QString, QVariant>::const_iterator k = map.constBegin(); k != map.constEnd(); k ++) {
-        m_urlCache.insert(k.key(), k.value());
-    }
-}
-
-QMap<QString, QVariant> DataSource::urlCache()
-{
-    return m_urlCache;
-}
-
 void DataSource::dirtyInsert(QString key, QVariant value)
 {
     m_urlDirty.insert(key, value);
@@ -129,6 +104,16 @@ void DataSource::dirtyInsert(QString key, QVariant value)
 
 void DataSource::dirtyClear()
 {
+    m_urlDirty.clear();
+}
+
+void DataSource::dirtySync()
+{
+    for(QMap<QString, QVariant>::const_iterator k = m_urlDirty.constBegin(); k != m_urlDirty.constEnd(); k ++) {
+        if(m_config->value("/device_list/" + k.key()) != k.value()) {
+            m_config->setValue("/device_list/" + k.key(), k.value());
+        }
+    }
     m_urlDirty.clear();
 }
 

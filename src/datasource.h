@@ -1,6 +1,8 @@
 #ifndef DATASOURCE_H
 #define DATASOURCE_H
 
+#include "jsoncpppath.h"
+
 #include <QObject>
 #include <QMap>
 #include <QVariant>
@@ -39,6 +41,7 @@ public:
         QString name;
     };
     DataSource(QObject *parent = 0);
+    ~DataSource();
 
     QString getCameraStateName(int rank);
     QString getCameraTypeName(int rank);
@@ -51,17 +54,17 @@ public:
     //
     QString getCameraUrl(const QString &obid);
 
-    void cacheSave();
-    void cacheInsert(QMap<QString, QVariant> map);
-    QMap<QString, QVariant> urlCache();
-
-
     void dirtyInsert(QString key, QVariant value);
     void dirtyClear();
+    void dirtySync();
     QMap<QString, QVariant> dirtyUrl();
+
+    void syncConfig();
 private:
-    QMap<QString, QVariant> m_urlCache;
     QMap<QString, QVariant> m_urlDirty;
+
+    //m_config析构时，自动保存相关内容到配置文件里
+    JsonCppSettings *m_config;
 };
 
 

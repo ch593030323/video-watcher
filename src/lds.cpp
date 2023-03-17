@@ -66,13 +66,16 @@ QPixmap lds::getLayoutPixmap(int count)
     return pixmap;
 }
 
-QString lds::getUniqueFileNamehByDateTime(const QString &dir)
+QString lds::getUniqueFileNamehByDateTime(const QString &dir, const QString &prefix)
 {
     //自动填充新增的文件名
     int maxIndex = -1;
-    QString prefix = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh-mm");
+    QString fileName = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh-mm");
+    if(!prefix.isEmpty())
+        fileName = prefix + "_" + fileName;
+
     for(const QFileInfo &info : QDir(dir).entryInfoList()) {
-        if(info.isFile() && info.baseName().startsWith(prefix)) {
+        if(info.isFile() && info.baseName().startsWith(fileName)) {
             int begin = info.baseName().lastIndexOf("(");
             int end = info.baseName().lastIndexOf(")");
             maxIndex = qMax(maxIndex, info.baseName().mid(begin + 1, end - begin - 1).toInt());
@@ -80,13 +83,13 @@ QString lds::getUniqueFileNamehByDateTime(const QString &dir)
     }
     maxIndex++;
 
-    return (maxIndex == 0 ? prefix : (prefix + "(" + QString::number(maxIndex) + ")"));
+    return (maxIndex == 0 ? fileName : (fileName + "(" + QString::number(maxIndex) + ")"));
 
 }
 
-QString lds::getUniqueFilePathhByDateTime(const QString &dir, const QString &suffix)
+QString lds::getUniqueFilePathhByDateTime(const QString &dir, const QString &prefix, const QString &suffix)
 {
-    QString name = getUniqueFileNamehByDateTime(dir);
+    QString name = getUniqueFileNamehByDateTime(dir, prefix);
     return dir + "/" + name + "." + suffix;
 }
 

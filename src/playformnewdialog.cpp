@@ -65,7 +65,7 @@ playformnewdialog::playformnewdialog(Type type, QWidget *parent)
 
     connect(ui->pushButton_ok, SIGNAL(clicked()), this, SLOT(toaccept()));
     connect(ui->pushButton_exit, SIGNAL(clicked()), this, SLOT(toexit()));
-    connect(ui->treeView->view(), SIGNAL(signalPlayRequest(QString)), ui->widget_video, SLOT(slotAutoAddUrl(QString)));
+    connect(ui->treeView->view(), SIGNAL(doubleClicked(QModelIndex)), ui->widget_video, SLOT(slotAutoAddUrl(QModelIndex)));
 
     toVideoLayout3x3();
     ui->pushButton_3x3->setChecked(true);

@@ -1,5 +1,6 @@
 #include "videowidget.h"
 #include "lds.h"
+#include "global.h"
 
 #include <QPainter>
 
@@ -43,7 +44,7 @@ Json::Value VideoWidget::toJsonValue()
     return m_layoutInfo.toJsonValue();
 }
 
-void VideoWidget::slotAutoAddUrl(const QString &url)
+void VideoWidget::slotAutoAddUrl(const QModelIndex &index)
 {
     //search
     VideoCell *cell = qobject_cast<VideoCell *>(qApp->focusWidget());
@@ -58,7 +59,7 @@ void VideoWidget::slotAutoAddUrl(const QString &url)
     if(!cell)
         return;
     //add
-    cell->addPlayer(url);
+    cell->addPlayer(index.data(VideoUrlRole).toString(), index.data(VideoObidRole).toString());
 }
 
 void VideoWidget::resizeEvent(QResizeEvent *event)
