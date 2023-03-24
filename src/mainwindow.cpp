@@ -27,7 +27,7 @@ MainFrame::MainFrame(QWidget *parent)
     //
     lds::init(this);
 
-    ui->setupUi(this);
+    ui->setupUi(this);this->setWindowTitle(lds::windowName);
 
     lds::statusBar = ui->statusBar;
 
@@ -57,9 +57,10 @@ MainFrame::MainFrame(QWidget *parent)
     connect(ui->pushButton_video_widget, SIGNAL(clicked()), this, SLOT(tovideo_widget()));
     connect(ui->pushButton_video_playback, SIGNAL(clicked()), this, SLOT(tovideo_playback()));
     connect(ui->pushButton_system_setting, SIGNAL(clicked()), this, SLOT(tovideo_system_setting()));
-    connect(ui->pushButton_system_setting, SIGNAL(clicked()), this, SLOT(tovideo_system_setting()));
+    connect(m_videoWidget, SIGNAL(signalShowSettings()), this, SLOT(tovideo_system_setting()));
     connect(m_videoWidget, SIGNAL(signalStatusbarSetVisiable(bool)), ui->statusBar, SLOT(setVisible(bool)));
     connect(lds::treeSignalTransfer, SIGNAL(signalUpdateUrl()), m_videoWidget, SLOT(slotUpdateTreeVisiableItemUrl()));
+    connect(m_systemSettings, SIGNAL(signalBack()), this, SLOT(tovideo_widget()));
 
 #ifdef OMS_DATASOURCE
     //由插件程序提供数据源
@@ -68,6 +69,7 @@ MainFrame::MainFrame(QWidget *parent)
 #endif
 
     QTimer::singleShot(0, this, SLOT(loadLayout()));
+    ui->frame_title->hide();
 }
 
 MainFrame::~MainFrame()

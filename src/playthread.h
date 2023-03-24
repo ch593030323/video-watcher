@@ -16,6 +16,7 @@ public:
     static QObject *threadParent;
     static PlayThread *createPlayThread(const QString &url);
 
+    void snap();
 private:
     explicit PlayThread(const QString &url, QObject *parent = 0);
     virtual ~PlayThread();

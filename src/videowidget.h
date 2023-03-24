@@ -24,6 +24,8 @@ public:
      */
     void updateLayout();
 
+    void updateCheckState();
+
     /**
      * @brief toJson
      * 获取实时的VideoCell在内的layout json

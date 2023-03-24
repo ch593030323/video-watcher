@@ -19,17 +19,22 @@ void VideoWidget::updateLayout(const LayoutInfo &info)
                                 this,
                                 this->rect().adjusted(-lds::margin/2, -lds::margin/2, lds::margin/2, lds::margin/2),
                                 m_videoMap);
-    if(m_isMultilselected) {
-        for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
-            k.value()->setCheckable(true);
-        }
-    }
+    updateCheckState();
 }
 
 void VideoWidget::updateLayout()
 {
     m_layoutInfo.update(m_videoMap);
     updateLayout(m_layoutInfo);
+}
+
+void VideoWidget::updateCheckState()
+{
+    for(QMap<LayoutPos, VideoCell *>::iterator k = m_videoMap.begin(); k != m_videoMap.end(); k ++) {
+        k.value()->setCheckable(m_isMultilselected);
+        k.value()->setChecked(false);
+        k.value()->clearFocus();
+    }
 }
 
 QByteArray VideoWidget::toJson()
@@ -59,7 +64,7 @@ void VideoWidget::slotAutoAddUrl(const QModelIndex &index)
     if(!cell)
         return;
     //add
-    cell->addPlayer(index.data(VideoUrlRole).toString(), index.data(VideoObidRole).toString());
+    cell->addPlayer(index.data(VideoUrlRole).toString());
 }
 
 void VideoWidget::resizeEvent(QResizeEvent *event)

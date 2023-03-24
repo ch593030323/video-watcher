@@ -52,6 +52,8 @@ public:
 
     static QString getUniqueFileNamehByDateTime(const QString &dir, const QString &prefix = "");
     static QString getUniqueFilePathhByDateTime(const QString &dir, const QString &prefix, const QString &suffix);
+    static QString getUniqueFileName(const QString &dir, const QString &name);
+    static QString getuniqueFilePath(const QString &dir, const QString &baseName, const QString &suffix);
 
     static QString configDirectory;
 
@@ -68,6 +70,8 @@ public:
     static QList<QStandardItem *> treeChildren(QStandardItem *node, int column = 0);
 
     static TreeVideoSignalTransfer *treeSignalTransfer;
+
+    static QString windowName;
 
 };
 

@@ -10,7 +10,6 @@ AutoCloseLabel::AutoCloseLabel(QWidget *parent)
 
 AutoCloseLabel::~AutoCloseLabel()
 {
-    //qDebug() << __FUNCTION__;
 }
 
 void AutoCloseLabel::mousePressEvent(QMouseEvent *e)

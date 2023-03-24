@@ -14,7 +14,7 @@ PlayAlternateNewDialog::PlayAlternateNewDialog(PlayAlternateNewDialog::Type type
     , ui(new Ui::PlayAlternateNewDialog)
     , m_type(type)
 {
-    ui->setupUi(this);
+    ui->setupUi(this);this->setWindowTitle(lds::windowName);
     setObjectName("Window");
     ui->spinBox->setMinimum(1);
 
@@ -84,7 +84,7 @@ void PlayAlternateNewDialog::toadd()
     QModelIndex index = ui->treeView->currentIndex();
     if(!index.isValid())
         return;
-    if(index.data(VideoNodeType).toInt() != VideoNodeDevice)
+    if(index.data(VideoNodeTypeRole).toInt() != NodeTypeDevice)
         return;
     ui->tableView->appendRow({index.data(VideoUrlRole).toString(),
                              QString::number(ui->spinBox->value())});

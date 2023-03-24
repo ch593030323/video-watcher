@@ -14,6 +14,7 @@
 #include <QDir>
 #include <QStatusBar>
 #include <QProcessEnvironment>
+#include <QMetaMethod>
 
 const int lds::margin = 10;
 const int lds::marginX2 = 2 * lds::margin;
@@ -27,6 +28,7 @@ QString lds::configDirectory = ".";
 DataSource *lds::dataSource = 0;
 QStatusBar *lds::statusBar = 0;
 TreeVideoSignalTransfer *lds::treeSignalTransfer = 0;
+QString lds::windowName = "video-watcher";
 
 
 lds::lds(QWidget *parent) : QWidget(parent)
@@ -93,11 +95,37 @@ QString lds::getUniqueFilePathhByDateTime(const QString &dir, const QString &pre
     return dir + "/" + name + "." + suffix;
 }
 
+QString lds::getUniqueFileName(const QString &dir, const QString &name)
+{
+    //自动填充新增的文件名
+    int maxIndex = -1;
+    for(const QFileInfo &info : QDir(dir).entryInfoList()) {
+        const QString baseName = info.completeBaseName();
+        if(info.isFile() && baseName.startsWith(name)) {
+            int begin = baseName.lastIndexOf("(");
+            int end = baseName.lastIndexOf(")");
+            //避免，baseName:11.png, name: 1的情况
+            if(begin != -1 && name.size() != begin)
+                continue;
+            maxIndex = qMax(maxIndex, baseName.mid(begin + 1, end - begin - 1).toInt());
+        }
+    }
+    maxIndex++;
+
+    return (maxIndex == 0 ? name : (name + "(" + QString::number(maxIndex) + ")"));
+}
+
+QString lds::getuniqueFilePath(const QString &dir, const QString &baseName, const QString &suffix)
+{
+    QString name = getUniqueFileName(dir, baseName);
+    return dir + "/" + name + "." + suffix;
+}
+
 void lds::showMessage(const QString &text)
 {
     if(!statusBar)
         return;
-    statusBar->showMessage(QString::fromUtf8(qPrintable(text)));
+    QMetaObject::invokeMethod(statusBar, "showMessage", Q_ARG(QString, QString::fromUtf8(qPrintable(text))));
 }
 
 void lds::showMessage(const QString &description, const QString &errstring)

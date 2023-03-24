@@ -95,7 +95,7 @@ void VideoCell::updateVideoScene(const LayoutInfo &info, VideoWidget *parentWidg
             w = createCell(pos, parentWidget);
             cacheMap.insert(pos, w);
         }
-        w->addPlayer(cell.url, cell.obid);
+        w->addPlayer(cell.url);
 
         unused_video_widget_list.removeOne(w);
 
@@ -251,6 +251,7 @@ void VideoCell::toControlFullScreenExit()
         return;
     this->setParent(pw);
     this->setFocus();
+    this->show();//widget will hide after changed parent
 
     m_controlPanel->setFullSreen(false);
     pw->updateLayout();
@@ -258,17 +259,16 @@ void VideoCell::toControlFullScreenExit()
 
 void VideoCell::toControlSaveImage()
 {
-    if(m_ffmpegData.image.isNull()) {
-        lds::showMessage("保存失败:图片为空");
+    QString url = m_info.url;
+    if(m_playListTimer->isActive())
+        url = m_playListUrl;
+
+    PlayThread *thread = PlayThread::PlayThreadMap.value(url);
+    if(!thread)
         return;
-    }
 
-    QString dir = lds::configDirectory + "/snap";
-    QDir().mkpath(dir);
-    QString filepath = lds::getUniqueFilePathhByDateTime(dir, m_info.obid, "png");
-    m_ffmpegData.image.save(filepath);
+    thread->snap();
 
-    lds::showMessage(tr("保存成功") + + " " + filepath);
 }
 
 void VideoCell::updatePlayListDevice()
@@ -280,7 +280,6 @@ void VideoCell::updatePlayListDevice()
     if(m_playListIndex < 0 || m_playListIndex >= m_playList.count())
         return;
 
-    qDebug() << __LINE__;
     lds::showMessage((QString("正在轮播, 坐标:(%1,%2), 进度:%3/%4, 名称:%5, 时长:%6s")
                       .arg(m_info.pos.x + 1)
                       .arg(m_info.pos.y + 1)
@@ -336,10 +335,10 @@ void VideoCell::paintEvent(QPaintEvent *)
     QRect paint_rect = this->rect().adjusted(lds::margin / 2, lds::margin / 2, -lds::margin / 2, -lds::margin / 2);
     painter.fillRect(paint_rect, PropertyColor::viewColor);
     if(FFmpegData::NoError == m_ffmpegData.errorCode) {
-        //后台播放，直接removePlayer会有残留图片，故增加obidIsValid参数
+        //后台播放，直接removePlayer会有残留图片，故增加isValid参数
         const QImage &image = m_ffmpegData.image;
-        bool obidIsValid = (m_info.url != "" || m_playListUrl != "");
-        if(!image.isNull() && obidIsValid) {
+        bool isValid = (m_info.url != "" || m_playListUrl != "");
+        if(!image.isNull() && isValid) {
             int r1 = image.width() * 10 / image.height();
             int r2 = paint_rect.width() * 10 / paint_rect.height();
             QSize target_size;
@@ -384,13 +383,11 @@ void VideoCell::dragEnterEvent(QDragEnterEvent *event)
 {
     const QMimeData *mimedata = event->mimeData();
     mimedata->formats();//这里起刷新formats的作用
-    if (mimedata->hasFormat("camera/url")
-            && mimedata->hasFormat("camera/obid")) {
+    if (mimedata->hasFormat("camera/url")) {
         event->accept();
         return;
     }
     if (mimedata->hasFormat("VideoCell/url")
-            && mimedata->hasFormat("VideoCell/obid")
             && mimedata->data("VideoCell/pos").toInt() != m_info.pos.value()) {
         event->accept();
         return;
@@ -409,13 +406,11 @@ void VideoCell::dragMoveEvent(QDragMoveEvent *event)
 {
     const QMimeData *mimedata = event->mimeData();
     mimedata->formats();//这里起刷新formats的作用
-    if (mimedata->hasFormat("camera/url")
-            && mimedata->hasFormat("camera/obid")) {
+    if (mimedata->hasFormat("camera/url")) {
         event->accept();
         return;
     }
     if (mimedata->hasFormat("VideoCell/url")
-            && mimedata->hasFormat("VideoCell/obid")
             && mimedata->data("VideoCell/pos").toInt() != m_info.pos.value()) {
         event->accept();
         return;
@@ -428,22 +423,18 @@ void VideoCell::dropEvent(QDropEvent *event)
 {
     //event->mimeData()->formats()起到刷新的作用，此处不删除
     QStringList formats = event->mimeData()->formats();
-    if (event->mimeData()->hasFormat("camera/url")
-            && event->mimeData()->hasFormat("camera/obid")) {
+    if (event->mimeData()->hasFormat("camera/url")) {
         QString url = event->mimeData()->data("camera/url");
-        QString obid = event->mimeData()->data("camera/obid");
-        addPlayer(url, obid);
+        addPlayer(url);
         event->setDropAction(Qt::CopyAction);
         event->accept();
         return;
     }
 
-    if (event->mimeData()->hasFormat("VideoCell/url")
-            && event->mimeData()->hasFormat("VideoCell/obid")) {
+    if (event->mimeData()->hasFormat("VideoCell/url")) {
         QByteArray url = event->mimeData()->data("VideoCell/url");
-        QByteArray obid = event->mimeData()->data("VideoCell/obid");
         // add new
-        this->addPlayer(url, obid);
+        this->addPlayer(url);
         this->setFocus();
         event->setDropAction(Qt::CopyAction);
         event->accept();
@@ -502,7 +493,6 @@ void VideoCell::mouseMoveEvent(QMouseEvent *event)
         QDrag *drag = new QDrag(this);
         QMimeData *m = new QMimeData;
         m->setData("VideoCell/url", m_info.url.toLocal8Bit());
-        m->setData("VideoCell/obid", m_info.obid.toLocal8Bit());
         m->setData("VideoCell/pos", QByteArray::number(m_info.pos.value()));
 
         QPixmap pix = QPixmap::grabWidget(this, this->rect()).scaled(50, 50);
@@ -575,6 +565,13 @@ void VideoCell::contextMenuEvent(QContextMenuEvent *event)
     addActionsToMenu(actionList, &m, 0);
     m.move(this->mapToGlobal(event->pos()));
     m.exec();
+
+    //右键菜单后，还原为单选状态
+    VideoWidget *pw = qobject_cast<VideoWidget *>(this->parent());
+    if(pw) {
+        pw->setMultilselected(false);
+        pw->updateCheckState();
+    }
 }
 
 void VideoCell::addActionsToMenu(const QList<VideoCell::ContextMenuData> &list, QMenu *sub_menu, QMenu *parent_menu)
@@ -677,14 +674,13 @@ PlayThread *VideoCell::addThread(const QString &url)
     return thread;
 }
 
-void VideoCell::addPlayer(const QString &url, const QString &obid)
+void VideoCell::addPlayer(const QString &url)
 {
     if(m_info.url == url)
         return;
 
     removePlayer();
     m_info.url = url;
-    m_info.obid = obid;
 
     preparePlayer(url);
 }
@@ -808,4 +804,29 @@ void VideoCell::leaveEvent(QEvent *event)
 {
     m_controlPanel->hide();
     QWidget::leaveEvent(event);
+}
+
+
+void VideoCell::keyPressEvent(QKeyEvent *e)
+{
+    if(Qt::Key_Shift == e->key()) {
+        VideoWidget *pw = qobject_cast<VideoWidget *>(this->parent());
+        if(pw) {
+            pw->setMultilselected(true);
+            pw->updateCheckState();
+        }
+    }
+    QWidget::keyPressEvent(e);
+}
+
+void VideoCell::keyReleaseEvent(QKeyEvent *e)
+{
+    if(Qt::Key_Shift == e->key()) {
+        VideoWidget *pw = qobject_cast<VideoWidget *>(this->parent());
+        if(pw) {
+            pw->setMultilselected(false);
+            pw->updateCheckState();
+        }
+    }
+    QWidget::keyPressEvent(e);
 }

@@ -51,7 +51,6 @@ struct LayoutCell{
     int row_spans;
     int column_spans;
     QString url;
-    QString obid;//两个作用 1.启动时更新url，2.运行时，url更新，通知播放器更新,3.拖动时记录obid
 
     static int indexOf(QRect rect, const QList<LayoutCell> &list);
     static int indexOf(LayoutPos pos, const QList<LayoutCell> &list);

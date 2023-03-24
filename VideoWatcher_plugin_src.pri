@@ -12,6 +12,7 @@ HEADERS += \
     $$PWD/src/videocell.h \
     $$PWD/src/videowidget.h \
     $$PWD/src/widget/cameracontrolpanel.h \
+    $$PWD/src/widget/lds_rolepushbutton.h \
     $$PWD/src/widget/lineeditfind.h \
     $$PWD/src/widget/lineeditx.h \
     $$PWD/src/widget/propertycolor.h \
@@ -50,6 +51,7 @@ SOURCES += \
     $$PWD/src/videocell.cpp \
     $$PWD/src/videowidget.cpp \
     $$PWD/src/widget/cameracontrolpanel.cpp \
+    $$PWD/src/widget/lds_rolepushbutton.cpp \
     $$PWD/src/widget/lineeditfind.cpp \
     $$PWD/src/widget/lineeditx.cpp \
     $$PWD/src/widget/propertycolor.cpp \

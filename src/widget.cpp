@@ -4,7 +4,7 @@
 
 Widget::Widget(QString url,QWidget *parent) : QWidget(parent), ui(new Ui::Widget)
 {
-    ui->setupUi(this);
+    ui->setupUi(this);this->setWindowTitle(lds::windowName);
     setWindowFlags(Qt::Window);
 
     QStringList urls;

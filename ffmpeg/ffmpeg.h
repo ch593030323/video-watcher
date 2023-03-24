@@ -193,10 +193,10 @@ public slots:
     void pause();
     void stop();
 
-private slots:
+protected slots:
     void slotReceiveImage(FFmpegData d);
 
-private:
+protected:
     QString m_url;           //视频流地址 set only if thread start
     FFmpegControl m_mutex;
 

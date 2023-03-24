@@ -47,7 +47,7 @@ public:
     static void updateVideoGeometry(const LayoutInfo &info, QRect area, QMap<LayoutPos, VideoCell *> &cacheMap);
 
     void removePlayer();
-    void addPlayer(const QString &url, const QString &obid);
+    void addPlayer(const QString &url);
     void preparePlayer(const QString &url);
 
     void removeThread(const QString &url);
@@ -124,6 +124,9 @@ protected:
 
     void enterEvent(QEvent *event);
     void leaveEvent(QEvent *event);
+
+    void keyPressEvent(QKeyEvent *e);
+    void keyReleaseEvent(QKeyEvent *e);
 
 private:
     FFmpegData                  m_ffmpegData;//播放数据

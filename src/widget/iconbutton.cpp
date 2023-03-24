@@ -25,7 +25,8 @@ void IconButton::setType(IconButton::Type type)
 void IconButton::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
-    QPixmap pixmap = PropertyColor::getFontPixmap(ch, color, this->size());
+    int width = qMin(this->width(), this->height());
+    QPixmap pixmap = PropertyColor::getFontPixmap(ch, color, QSize(width, width));
     painter.drawPixmap(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, pixmap.size(), this->rect()), pixmap);
 }
 

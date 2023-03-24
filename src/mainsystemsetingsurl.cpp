@@ -2,6 +2,7 @@
 #include "ui_mainsystemsetingsurl.h"
 #include "jsoncpppath.h"
 #include "datasource.h"
+#include "lds.h"
 
 #include <QtDebug>
 
@@ -9,7 +10,7 @@ MainSystemSetingsUrl::MainSystemSetingsUrl(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainSystemSetingsUrl)
 {
-    ui->setupUi(this);
+    ui->setupUi(this);this->setWindowTitle(lds::windowName);
 }
 
 MainSystemSetingsUrl::~MainSystemSetingsUrl()

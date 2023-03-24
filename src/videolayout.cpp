@@ -37,12 +37,11 @@ QRect LayoutCell::rect() const
 
 QString LayoutCell::toString() const
 {
-    return QString("pos:%1, row_spans: %2, column_spans:%3, url:%4, obid:%5")
+    return QString("pos:%1, row_spans: %2, column_spans:%3, url:%4")
             .arg(pos.value())
             .arg(row_spans)
             .arg(column_spans)
             .arg(url)
-            .arg(obid)
             ;
 }
 
@@ -80,7 +79,6 @@ Json::Value LayoutInfo::toJsonValue()
         json_cell["column_spans"]   = cell.column_spans;
         json_cell["row_spans"]      = cell.row_spans;
         json_cell["url"]            = cell.url.toStdString();
-        json_cell["obid"]           = cell.obid.toStdString();
 
         json_cells.append(json_cell);
     }
@@ -117,7 +115,6 @@ LayoutInfo LayoutInfo::readFrom(const Json::Value &value)
         cell.column_spans   = reader.valueArg("/cells[%1/column_spans", k).toInt();
         cell.row_spans      = reader.valueArg("/cells[%1/row_spans", k).toInt();
         cell.url            = reader.valueArg("/cells[%1/url", k).toString();
-        cell.obid           = reader.valueArg("/cells[%1/obid", k).toString();
 
         info.cells.append(cell);
     }
@@ -130,12 +127,13 @@ void LayoutInfo::update(const QMap<LayoutPos, VideoCell *> &map)
     for(QMap<LayoutPos, VideoCell *>::const_iterator k = map.begin(); k != map.end(); k ++) {
         VideoCell *w = k.value();
         const LayoutCell &other = w->getInfo();
+        qDebug() << __FUNCTION__ << __LINE__ << other.pos.value() << other.url << w->isVisible();
         if(w->isVisible()) {
+            qDebug() << __FUNCTION__ << __LINE__ << other.pos.value() << other.url;
             QList<LayoutCell> &cells = this->cells;
             int index = LayoutCell::indexOf(w->getInfo().pos, cells);
             if(index >= 0) {
                 cells[index].url = other.url;
-                cells[index].obid = other.obid;
             } else if(!w->getInfo().isNull()){
                 cells << w->getInfo();
             }

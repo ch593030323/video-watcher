@@ -13,7 +13,7 @@ playformnewdialog::playformnewdialog(Type type, QWidget *parent)
     , ui(new Ui::playformnewdialog)
     , m_type(type)
 {
-    ui->setupUi(this);
+    ui->setupUi(this);this->setWindowTitle(lds::windowName);
     setObjectName("Window");
     resize(832, 557);
 

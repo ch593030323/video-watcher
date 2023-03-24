@@ -23,6 +23,15 @@ class TreeVideoViewSearch : public QWidget
 {
     Q_OBJECT
 public:
+    enum MateType{
+        StartsWith,
+        EndsWidth,
+        Contains,
+        Equal
+    };
+    bool mateString(const QString &lvalue, const QString &rvalue, MateType type);
+
+public:
     TreeVideoViewSearch(QWidget *parent = 0);
 
     void setDataSource(DataSource *datasource);
@@ -32,9 +41,9 @@ public:
     TreeVideoView *view();
     QModelIndex currentIndex();
 
-    void hideMenu();
-
     void updateItemTipText(QStandardItem *item);
+
+    QModelIndex findItem(const QString &text, int role, MateType type);
 
 public slots:
     void slotInitAll();

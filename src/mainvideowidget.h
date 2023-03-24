@@ -25,6 +25,7 @@ public slots:
 
 signals:
     void signalStatusbarSetVisiable(bool showed);
+    void signalShowSettings();
 
 private slots:
 

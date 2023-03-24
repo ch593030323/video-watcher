@@ -19,7 +19,7 @@ MainVideoWidget::MainVideoWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui_MainVideoWidget)
 {
-    ui->setupUi(this);
+    ui->setupUi(this);this->setWindowTitle(lds::windowName);
 
     ui->widget_ins_panel->setStepValue(30);
 
@@ -59,6 +59,7 @@ MainVideoWidget::MainVideoWidget(QWidget *parent) :
     ui->pushButton_fullscreen->setIcon(lds::getFontPixmap(0xf424, PropertyColor::buttonTextColor, QSize(15, 15)));
     ui->pushButton_fullscreen_exit->setIcon(lds::getFontPixmap(0xf422, PropertyColor::buttonTextColor, QSize(15, 15)));
     ui->pushButton_fullscreen_exit->hide();
+    ui->pushButton_settings->setIcon(lds::getFontPixmap(0xf5fd, PropertyColor::buttonTextColor, QSize(15, 15)));
 
     //connect
     connect(ui->pushButton_1x1, SIGNAL(clicked()), this, SLOT(toVideoLayout1x1()));
@@ -72,6 +73,7 @@ MainVideoWidget::MainVideoWidget(QWidget *parent) :
     connect(ui->treeView->view(), SIGNAL(doubleClicked(QModelIndex)), ui->widget_video, SLOT(slotAutoAddUrl(QModelIndex)));
     connect(ui->pushButton_control, SIGNAL(clicked(bool)), ui->widget_ins_panel, SLOT(setVisible(bool)));
     connect(ui->pushButton_statusbar, SIGNAL(clicked(bool)), this, SIGNAL(signalStatusbarSetVisiable(bool)));
+    connect(ui->pushButton_settings, SIGNAL(clicked()), this, SIGNAL(signalShowSettings()));
 
     ui->widget_ins_panel->hide();
 }

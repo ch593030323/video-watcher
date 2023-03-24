@@ -28,6 +28,8 @@ public:
 
     void setDataSource(DataSource *datasource);
     void refresh();
+signals:
+    void signalBack();
 private slots:
     void toalter();
     void toform();

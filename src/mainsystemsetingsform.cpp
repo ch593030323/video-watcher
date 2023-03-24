@@ -14,7 +14,7 @@ MainSystemSetingsForm::MainSystemSetingsForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainSystemSetingsForm)
 {
-    ui->setupUi(this);
+    ui->setupUi(this);this->setWindowTitle(lds::windowName);
 
     MainSystemSetings::setFlat(ui->pushButton_add, PropertyColor::getFontPixmap(0x2b, PropertyColor::buttonColor));
     MainSystemSetings::setFlat(ui->pushButton_del, PropertyColor::getFontPixmap(0xf014, PropertyColor::buttonColor));

@@ -27,7 +27,7 @@ MainSystemSetings::MainSystemSetings(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainSystemSetings)
 {
-    ui->setupUi(this);
+    ui->setupUi(this);this->setWindowTitle(lds::windowName);
 
     //buttongroup
     ui->pushButton_play_alternate->setCheckable(true);
@@ -52,6 +52,7 @@ MainSystemSetings::MainSystemSetings(QWidget *parent) :
     connect(ui->pushButton_play_form, SIGNAL(clicked()),this,SLOT(toform()));
     connect(ui->pushButton_snap, SIGNAL(clicked()),this,SLOT(tosnap()));
     connect(ui->pushButton_url, SIGNAL(clicked()),this,SLOT(tourl()));
+    connect(ui->pushButton_back, SIGNAL(clicked()),this,SIGNAL(signalBack()));
 }
 
 MainSystemSetings::~MainSystemSetings()

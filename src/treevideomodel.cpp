@@ -17,7 +17,6 @@ QMimeData *TreeVideoModel::mimeData(const QModelIndexList &indexes) const
         QByteArray url = index.data(VideoUrlRole).toByteArray();
         if(url != "") {
             mimeD->setData("camera/url", index.data(VideoUrlRole).toByteArray());
-            mimeD->setData("camera/obid", index.data(VideoObidRole).toByteArray());
         }
     }
 

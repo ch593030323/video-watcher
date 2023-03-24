@@ -18,7 +18,7 @@ mainWidget::mainWidget(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::mainWidget)
 {
-    ui->setupUi(this);
+    ui->setupUi(this);this->setWindowTitle(lds::windowName);
     this->setObjectName("Window");
 
     m_config = new JsonCppPath(lds::configDirectory + "/setting.json", this);

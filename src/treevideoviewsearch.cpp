@@ -37,6 +37,17 @@ QPixmap getCameraStatePixmap(int state) {
     return QPixmap();
 }
 
+bool TreeVideoViewSearch::mateString(const QString &lvalue, const QString &rvalue, TreeVideoViewSearch::MateType type)
+{
+    switch(type) {
+    case StartsWith:   return lvalue.startsWith(rvalue);
+    case EndsWidth:    return lvalue.endsWith(rvalue);
+    case Contains:     return lvalue.contains(rvalue);
+    case Equal:        return lvalue == rvalue;
+    }
+    return false;
+}
+
 TreeVideoViewSearch::TreeVideoViewSearch(QWidget *parent)
     : QWidget(parent)
 {
@@ -82,10 +93,6 @@ TreeVideoViewSearch::TreeVideoViewSearch(QWidget *parent)
     connect(m_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSelectStation(int)));
     connect(m_lineEdit->lineEdit(), SIGNAL(textChanged(QString)), this, SLOT(slotSearchCamera(QString)));
     connect(m_treeView, SIGNAL(expanded(QModelIndex)), this, SLOT(slotUpdateAndExpandNode(QModelIndex)));
-    connect(m_treeView, SIGNAL(signalRefresh()), this, SLOT(slotInitAll()));
-    connect(m_treeView, SIGNAL(signalSettings()), this, SLOT(slotSettings()));
-    connect(m_treeView, SIGNAL(signalExportJson()), this, SLOT(slotExportJson()));
-    connect(m_treeView, SIGNAL(signalImportJson()), this, SLOT(slotImportJson()));
 }
 
 void TreeVideoViewSearch::setDataSource(DataSource *datasource)
@@ -113,11 +120,6 @@ QModelIndex TreeVideoViewSearch::currentIndex()
     return m_treeView->currentIndex();
 }
 
-void TreeVideoViewSearch::hideMenu()
-{
-    m_treeView->hideMenu();
-}
-
 void TreeVideoViewSearch::updateItemTipText(QStandardItem *item)
 {
     item->setToolTip(
@@ -128,6 +130,30 @@ void TreeVideoViewSearch::updateItemTipText(QStandardItem *item)
                 .arg(item->data(VideoStateNameRole).toString())
                 .arg(item->data(VideoUrlRole).toString())
                 );
+}
+
+QModelIndex TreeVideoViewSearch::findItem(const QString &text, int role, MateType type)
+{
+    QStandardItem *itemRoot = m_treeModel->invisibleRootItem();
+    QStandardItem *itemISCS = itemRoot->child(0);
+    for(int location_row = 0; location_row < itemISCS->rowCount(); location_row ++) {
+        QStandardItem *item_location = itemISCS->child(location_row);
+        for(int camera_row = 0; camera_row < item_location->rowCount(); camera_row ++) {
+            QStandardItem *item_camera = item_location->child(camera_row);
+            //未展开的节点
+            if(item_camera->data(VideoObidRole).toString() == "") {
+                camera_row --;
+                updateCameraItemList(item_location);
+                continue;
+            }
+
+            if(mateString(item_camera->data(role).toString(), text, type)) {
+                m_treeView->setCurrentIndex(item_camera->index());
+                return item_camera->index();
+            }
+        }
+    }
+    return QModelIndex();
 }
 
 void TreeVideoViewSearch::slotInitAll()
@@ -142,7 +168,7 @@ void TreeVideoViewSearch::slotInitTree()
 
     m_treeModel->clear();
     QStandardItem *itemRoot =  m_treeModel->invisibleRootItem();
-    QStandardItem *itemISCS = createItem(QString::fromUtf8("摄像头"), Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+    QStandardItem *itemISCS = createItem(QString::fromUtf8("设备"), Qt::ItemIsEnabled | Qt::ItemIsSelectable);
     itemRoot->setChild(0, 0, itemISCS);
     appendHeaderHorizontalItem(itemRoot);
 
@@ -151,7 +177,7 @@ void TreeVideoViewSearch::slotInitTree()
 
         QStandardItem *item_location = new QStandardItem;
         item_location->setText(d.name);
-        item_location->setData(VideoNodeStation, VideoNodeType);
+        item_location->setData(NodeTypeStation, VideoNodeTypeRole);
         item_location->setData(d.obid,    VideoObidRole);
         item_location->setData(d.name,    VideoNameRole);
         item_location->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
@@ -302,25 +328,10 @@ void TreeVideoViewSearch::slotSelectStation(int index)
 
 void TreeVideoViewSearch::slotSearchCamera(const QString &text)
 {
-    QStandardItem *itemRoot     = m_treeModel->invisibleRootItem();
-    QStandardItem *itemISCS     = itemRoot->child(0);
-    for(int location_row = 0; location_row < itemISCS->rowCount(); location_row ++) {
-        QStandardItem *item_location = itemISCS->child(location_row);
-        for(int camera_row = 0; camera_row < item_location->rowCount(); camera_row ++) {
-            QStandardItem *item_camera = item_location->child(camera_row);
-            //未展开的节点
-            if(item_camera->data(VideoObidRole).toString() == "") {
-                camera_row --;
-                updateCameraItemList(item_location);
-                continue;
-            }
-
-            if(item_camera->data(VideoNameRole).toString().contains(text)) {
-                m_treeView->setCurrentIndex(item_camera->index());
-                return;
-            }
-        }
-    }
+    QModelIndex index = findItem(text, VideoNameRole, MateType::Contains);
+    if(!index.isValid())
+        return;
+    m_treeView->setCurrentIndex(index);
 }
 
 void TreeVideoViewSearch::updateCameraItemListOnce(const QString &location_obid)
@@ -374,14 +385,14 @@ void TreeVideoViewSearch::updateCameraItemList(QStandardItem *item_location)
         int row = item_location->rowCount();
         QStandardItem *item_device = new QStandardItem;
         item_device->setText(d.name);
-        item_device->setData(VideoNodeDevice,       VideoNodeType);
+        item_device->setData(NodeTypeDevice,        VideoNodeTypeRole);
         item_device->setData(d.name,                VideoNameRole);
         item_device->setData(typeName,              VideoTypeNameRole);
         item_device->setData(d.type,                VideoTypeRole);
         item_device->setData(d.obid,                VideoObidRole);
         item_device->setData(d.state,               VideoStateRole);
         item_device->setData(stateName,             VideoStateNameRole);
-        item_device->setData(url,               VideoUrlRole);
+        item_device->setData(url,                   VideoUrlRole);
         item_device->setData(getCameraStatePixmap(d.state),   Qt::DecorationRole);
         item_device->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
 
@@ -396,7 +407,7 @@ void TreeVideoViewSearch::updateCameraItemList(QStandardItem *item_location)
 
 void TreeVideoViewSearch::slotUpdateAndExpandNode(const QModelIndex &index)
 {
-    if(index.data(VideoNodeType).toInt() == VideoNodeStation) {
+    if(index.data(VideoNodeTypeRole).toInt() == NodeTypeStation) {
         QString obid = index.data(VideoObidRole).toString();
         updateCameraItemListOnce(obid);
     }
